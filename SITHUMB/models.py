@@ -1,3 +1,4 @@
+import django
 from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
@@ -16,14 +17,14 @@ class Section(models.Model):
     name = models.CharField(max_length=100, default="")
     from_date = models.DateField(default=None)
     to_date = models.DateField(default=None)
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='sections')
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='sections', null=True)
     transcript_format = models.TextField(default="")
 
 
 class Examiner(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='extension')
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='examiners')
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='examiners')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='extension', null=True)
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='examiners', null=True)
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='examiners', null=True)
 
 
 @receiver(post_save, sender=User)
@@ -35,18 +36,18 @@ def handler_user_extension(sender, instance, created, **kwargs):
 
 
 class Candidate(models.Model):
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='candidates')
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='candidates', null=True)
     examiners = models.ManyToManyField(Examiner)
-    stage = models.IntegerField()
+    stage = models.IntegerField(default=0)
 
 
 class Application(models.Model):
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='applications')
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='application')
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='applications', null=True)
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='application', null=True)
     form = models.TextField(default="")
 
 
 class Transcript(models.Model):
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='transcripts')
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='transcript')
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='transcripts', null=True)
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='transcript', null=True)
     form = models.TextField(default="")
