@@ -6,17 +6,17 @@ from django.db.models.signals import post_save
 
 
 class Activity(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True, unique=True)
     section_cnt = models.IntegerField(default=0)
     name = models.CharField(max_length=100, default="")
+    from_date = models.DateField(default=None)
+    to_date = models.DateField(default=None)
     application_format = models.TextField()
 
 
 class Section(models.Model):
     s_id = models.IntegerField()
     name = models.CharField(max_length=100, default="")
-    from_date = models.DateField(default=None)
-    to_date = models.DateField(default=None)
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='sections', null=True)
     transcript_format = models.TextField(default="")
 

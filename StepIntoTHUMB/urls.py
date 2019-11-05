@@ -14,8 +14,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf.urls import url
 from django.urls import path
+from SITHUMB import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^admin/home/create-activity$', views.create_activity_view),
+    url(r'^admin/activity/(?P<id>[0-9]+)/create-registration-form$', views.create_registration_form_view),
+    url(r'^admin/activity/(?P<id>[0-9]+)/create-examiner$', views.create_examiner_view),
+    url(r'^admin/activity/(?P<id>[0-9]+)/create-section$', views.create_section_view),
+    url(r'^admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/add-examiner$', views.add_examiner_view),
+    url(r'^admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/create-form$', views.create_form_view),
 ]
