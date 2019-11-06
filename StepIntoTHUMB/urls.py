@@ -20,6 +20,8 @@ from SITHUMB import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^Step-Into-THUMB/admin/login$', views.AuthAdminLogin.as_view()),
+    url(r'^Step-Into-THUMB/admin/logintest$', views.LoginTest.as_view()),
     url(r'^admin/home/create-activity$', views.create_activity_view),
     url(r'^admin/activity/(?P<id>[0-9]+)/create-registration-form$', views.create_registration_form_view),
     url(r'^admin/activity/(?P<id>[0-9]+)/create-examiner$', views.create_examiner_view),

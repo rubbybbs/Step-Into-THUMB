@@ -7,7 +7,7 @@ from SITHUMB.token_module import get_token, out_token
 class TokenAuth2(BaseAuthentication):
     def authenticate(self, request):
         token = request.GET.get("token")
-        name = request.GET.get("name")
+        name = request.GET.get("username")
         token_obj = out_token(name, token)
         if token_obj:
             return
