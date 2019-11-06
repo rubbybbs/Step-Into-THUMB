@@ -4,12 +4,34 @@ from django.shortcuts import render
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from rest_framework.response import Response
 from django.shortcuts import render
 from django.utils.dateparse import parse_date
 from django.contrib.auth.models import *
+from SITHUMB import models
 from .models import *
+from SITHUMB.token_module import get_token, out_token
+
 import json
+from django.core.cache import cache
+
+
+def login_view(request):
+    response = {"status": 100, "msg": None}
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    user = authenticate(username=username, password=password)
+    if user:
+        token = get_token(username, 600)
+        cache.set(username, token, 600)
+        response["msg"] = "登录成功"
+        response["token"] = token
+        response["username"] = username
+    else:
+        response["msg"] = "用户名或密码错误"
+    return Response(response)
+
 
 
 def create_activity_view(request):
