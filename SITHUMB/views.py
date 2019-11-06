@@ -27,7 +27,7 @@ class AuthAdminLogin(APIView):
         password = request.GET.get('password')
         user = authenticate(username=username, password=password)
         if user:
-            token = get_token(username, 10)
+            token = get_token(username, 600)
             # cache.set(username, token, 600)
             response["msg"] = "登录成功"
             response["token"] = token
