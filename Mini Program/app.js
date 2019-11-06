@@ -33,7 +33,7 @@ App({
       }
     })
   },
-  globalData: {
+  globalData: { //用户信息
     userInfo: null
   }
 })

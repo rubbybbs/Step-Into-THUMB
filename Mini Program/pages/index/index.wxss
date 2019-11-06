@@ -1,4 +1,6 @@
 /**index.wxss**/
+@import '../../style/weui.wxss';
+
 .userinfo {
   display: flex;
   flex-direction: column;
@@ -18,4 +20,14 @@
 
 .usermotto {
   margin-top: 200px;
+}
+
+.buttonBox {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  position: fixed;
+  bottom: 40rpx;
 }
