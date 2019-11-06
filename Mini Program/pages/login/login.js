@@ -87,8 +87,11 @@ Page({
   getUserInfo: function (e) {
     console.log(e)
     app.globalData.userInfo = e.detail.userInfo
-    wx.reLaunch({
-      url: '../index/index',
-    })
+    if (app.globalData.userInfo) {
+      wx.navigateBack({
+        url: '../index/index',
+      })
+    }
+    
   }
 })

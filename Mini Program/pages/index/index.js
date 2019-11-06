@@ -26,10 +26,26 @@ Page({
     })
   },
   onLoad: function () {
-      this.setData({
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
+    if (app.globalData.userInfo==null) {
+      wx.navigateTo({
+        url: '../login/login',
       })
+    }
+    this.setData({
+      userInfo: app.globalData.userInfo,
+      hasUserInfo: true
+    })
+  },
+  onShow: function () {
+    if (app.globalData.userInfo == null) {
+      wx.navigateTo({
+        url: '../login/login',
+      })
+    }
+    this.setData({
+      userInfo: app.globalData.userInfo,
+      hasUserInfo: true
+    })
   },
   getUserInfo: function(e) {
     console.log(e)
