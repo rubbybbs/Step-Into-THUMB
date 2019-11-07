@@ -141,7 +141,7 @@
         alert(JSON.stringify(data));
         
         $.ajax({
-                url:'http://127.8.0.0:8000/Step-Into-THUMB/admin/login?username='+data.account+'&password='+data.password,  
+                url:'http://127.0.0.1:8000/Step-Into-THUMB/admin/login?username='+data.account+'&password='+data.password,
                 type:'post',
                 contentType: "application/x-www-form-urlencoded",
                 dataType:'json',               
