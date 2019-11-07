@@ -139,11 +139,12 @@
       form.on('submit(rootLogIn)', function (data) {
         var data = form.val('loginf'); 
         alert(JSON.stringify(data));
+        
         $.ajax({
-                url:'/Step-Into-THUMB/admin/login',  
+                url:'http://127.8.0.0:8000/Step-Into-THUMB/admin/login?username='+data.account+'&password='+data.password,  
                 type:'post',
                 contentType: "application/x-www-form-urlencoded",
-                dataType:'text',               
+                dataType:'json',               
                 data:{
                   username: data.account,
                   password: data.password
@@ -163,6 +164,7 @@
                     }
                 }
             });
+        return false;
       });
 
       form.on('submit(userLogIn)', function (data) {
