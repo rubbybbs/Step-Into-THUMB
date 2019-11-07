@@ -74,9 +74,15 @@
                         </div>
                       </div>
                       <div class="layui-form-item">
-                        <label class="layui-form-label">活动日期</label>
+                        <label class="layui-form-label">开始日期</label>
                         <div class="layui-input-block">
-                          <input type="text" name="activitydate" id="activitydate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                          <input type="text" name="activitystartdate" id="activitystartdate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                        </div>
+                      </div>
+                      <div class="layui-form-item">
+                        <label class="layui-form-label">结束日期</label>
+                        <div class="layui-input-block">
+                          <input type="text" name="activityenddate" id="activityenddate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
                         </div>
                       </div>
 
@@ -123,8 +129,20 @@
                                       </div>
                                 </div>
                                 <div class="layui-form-item">
+                                  <label class="layui-form-label">开始日期</label>
                                   <div class="layui-input-block">
-                                    <button type="button" class="layui-btn" id="NewSegment">以该名称增加新环节</button>                              
+                                    <input type="text" name="segmentstartdate" id="segmentstartdate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                                  </div>
+                                </div>
+                                <div class="layui-form-item">
+                                  <label class="layui-form-label">结束日期</label>
+                                  <div class="layui-input-block">
+                                    <input type="text" name="segmentenddate" id="segmentenddate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                                  </div>
+                                </div>
+                                <div class="layui-form-item">
+                                  <div class="layui-input-block">
+                                    <button type="button" class="layui-btn" id="NewSegment">以该名称及时间增加新环节</button>                              
                                     <button type="button" class="layui-btn" id="ClearAllSegment">删除所有环节</button>
                                   </div>
                                 </div>
@@ -196,6 +214,8 @@
   <script src="./layui/layui.js"></script>
   <script>
     var currentSegmentNum = 0;
+    var Quz = new Object();
+    var Segments = new Array();
     layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer'], function () {
       var form = layui.form,
         layer = layui.layer,
@@ -203,40 +223,92 @@
         layedit = layui.layedit,
         laydate = layui.laydate;
 
-      laydate.render({
-        elem: '#activitydate'
-      });
+      laydate.render({elem:"#activitystartdate"});
+      laydate.render({elem:"#activityenddate"});
 
       //监听提交
       form.on('submit(submitForm)', function (data) {
-        //表单取值
-        var data;
+        var formId=-1;
+        alert(JSON.stringify(Quz)); 
 
         $.ajax({
-                url:'.py',  
-                type:'post',
-                dataType:'text',
-                data:{
-                    
+                headers: {
+                  'token': layui.data('locstore').token,
                 },
+                url:'/Step-Into-THUMB/admin/home/create-activity',  
+                type:'post',
+                contentType:'application/x-www-form-urlencoded',
+                dataType:'json',
+                data:{name:Quz.name, date:Quz.date},
                 success:function(data){
-                    if (data == 1) {
+                    alert(data);
+                    if (data != -1) {
                         layer.msg('表单保存成功');
+                        formId = data;
                     }else {
                         layer.msg('表单保存失败，请重试！');
                     }
                 }
             });
+        $.ajax({
+                headers: {
+                  'token': layui.data('locstore').token,
+                },
+                url:'/Step-Into-THUMB/admin/activity/'+formId+'/create-registration-form',  
+                type:'post',
+                contentType:'application/json',
+                dataType:'json',
+                data:JSON.stringify(Quz),
+                data:{},
+                success:function(data){
+                    alert(data);
+                    if (data != -1) {
+                        layer.msg('表单保存成功');
+                        formId = data;
+                    }else {
+                        layer.msg('表单保存失败，请重试！');
+                    }
+                }
+            });
+        if (formId!=-1) {
+          Segments.map(function(value, index){
+            $.ajax({
+                headers: {
+                  'token': layui.data('locstore').token,
+                },
+                url:'/Step-Into-THUMB/admin/activity/'+formId+'/create-part',  
+                type:'post',
+                dataType:'json',
+                data:JSON.stringify(value),
+                success:function(data){
+                    alert(data);
+                    if (data != -1) {
+                        layer.msg('表单保存成功');
+                        formId = data;
+                    }else {
+                        layer.msg('表单保存失败，请重试！');
+                    }
+                }
+            });
+          });
+        }    
 
         return false;
       });
 
       $("#NewActivity").click(function() {      
-        var data = form.val('FormDesign'); 
+        var data = form.val('FormDesign');
+        var startdate = data.activitystartdate.replace(/-/g, '/');
+        var enddate = data.activityenddate.replace(/-/g, '/');
+        Quz = {
+          name:data.activityname,
+          date:startdate + '-' + enddate,
+          question:new Array()
+        };
         //alert(JSON.stringify(data)); 
         $("#toAdd").append(
           '<div class="layui-card"> \
-              <div class="layui-card-header">' + data.activityname + '    ' + data.activitydate +  '</div> \
+              <div class="layui-card-header">' + data.activityname + '    ' + startdate + '-' + enddate + '</div> \
               <div class="layui-card-body" id="FormPreViewBody"> \
                 <div class="layui-card"> \
                   <div class="layui-card-header"> 个人信息 </div> \
@@ -259,6 +331,10 @@
       $("#InfoNewDataLine").click(function() {     
         var data = form.val('FormDesign'); 
         //alert(JSON.stringify(data)); 
+        Quz["question"].push({
+          name: data.InfoNewLine,
+          type: "Blank"
+        });
         $("#FormPreViewInfoBody").append(
           '<div class="layui-form-item"> \
               <label class="layui-form-label">' + data.InfoNewLine + '</label> \
@@ -274,6 +350,17 @@
         var data = form.val('FormDesign'); 
         var strs = new Array(); 
         strs = data.AppendInfoNewLine.split(","); 
+
+        var ChoiceArr=new Array();
+        strs.map(function(value,index,arr){
+          ChoiceArr.push({Choice:value});
+        });
+        Quz["question"].push({
+          name: data.InfoNewLine,
+          type: "Choice",
+          Choices: ChoiceArr
+        });
+        
         var modestr = '<div class="layui-form-item"> \
             <label class="layui-form-label">' + data.InfoNewLine + '</label> \
             <div class="layui-input-block"> \
@@ -290,7 +377,8 @@
         form.render();
       });
 
-      $("#InfoAllDelete").click(function() {     
+      $("#InfoAllDelete").click(function() {
+        Quz["question"].splice(0);
         $("#FormPreViewInfoBody").empty();
         form.render();
       });
@@ -298,9 +386,16 @@
       $("#NewSegment").click(function() {     
         currentSegmentNum++;
         var data = form.val('FormDesign'); 
+        var startdate = data.segmentstartdate.replace(/-/g, '/');
+        var enddate = data.segmentenddate.replace(/-/g, '/');
+        Segments.push({
+          name:data.segmentname,
+          date:startdate + '-' + enddate,
+          question:new Array()
+        });
         $("#FormPreViewSegmentBody").append(' \
                 <div class="layui-card"> \
-                  <div class="layui-card-header"> ' + data.segmentname + ' </div> \
+                  <div class="layui-card-header"> ' + data.segmentname + '  ' + startdate + '-' + enddate + ' </div> \
                     <div class="layui-card-body" id="FormPreViewSegmentBody' + currentSegmentNum.toString() + '"> \
                       \
                     </div> \
@@ -308,7 +403,8 @@
         form.render();
       });
 
-      $("#ClearAllSegment").click(function() {     
+      $("#ClearAllSegment").click(function() {  
+        Segments.splice(0);   
         currentSegmentNum = 0;
         var data = form.val('FormDesign'); 
         $("#FormPreViewSegmentBody").empty();
@@ -317,6 +413,10 @@
 
       $("#SegmentNewDataLine").click(function() {     
         var data = form.val('FormDesign'); 
+        Segments[currentSegmentNum-1]["question"].push({
+          name: data.SegmentNewLine,
+          type: "Blank"
+        });
         $("#FormPreViewSegmentBody" + currentSegmentNum.toString()).append(
           '<div class="layui-form-item"> \
               <label class="layui-form-label">' + data.SegmentNewLine + '</label> \
@@ -332,6 +432,17 @@
         var data = form.val('FormDesign'); 
         var strs = new Array(); 
         strs = data.AppendSegmentNewLine.split(","); 
+
+        var ChoiceArr=new Array();
+        strs.map(function(value,index,arr){
+          ChoiceArr.push({Choice:value});
+        });
+        Segments[currentSegmentNum-1]["question"].push({
+          name: data.SegmentNewLine,
+          type: "Choice",
+          Choices: ChoiceArr
+        });
+
         var modestr = '<div class="layui-form-item"> \
             <label class="layui-form-label">' + data.SegmentNewLine + '</label> \
             <div class="layui-input-block"> \
@@ -347,7 +458,8 @@
         form.render();
       });
 
-      $("#SegmentAllDelete").click(function() {     
+      $("#SegmentAllDelete").click(function() {   
+        Segments[currentSegmentNum-1]["question"].splice(0);  
         $("#FormPreViewSegmentBody" + currentSegmentNum.toString()).empty();
         form.render();
       });

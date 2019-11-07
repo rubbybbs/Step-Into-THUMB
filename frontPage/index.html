@@ -80,7 +80,7 @@
 
 <body>
 
-  <form class="layui-form" action="" method="post">
+  <form class="layui-form" action="" method="post" lay-filter="loginf">
     <div class="container">
       <button class="close" title="关闭">X</button>
       <div class="layui-form-mid layui-word-aux">
@@ -137,21 +137,28 @@
 
       //监听提交
       form.on('submit(rootLogIn)', function (data) {
+        var data = form.val('loginF'); 
+        alert(JSON.stringify(data));
         $.ajax({
-                url:'.py',  
+                url:'/Step-Into-THUMB/admin/login',  
                 type:'post',
-                dataType:'text',
+                contentType: "application/x-www-form-urlencoded",
+                dataType:'text',               
                 data:{
-                    user:$('#account').val(),
-                    pwd:$('#password').val(),
-                    Logtype:'root',
+                  username: data.password,
+                  password: data.account
                 },
                 success:function(data){
-                    if (data == 1) {
+                    if (data.code == 200) {
                         layer.msg('登录成功');
+                        layui.data('locstore', {
+                          key: 'token',
+                          value: data.token
+                        });
                         location.assign("system_activityList.html");
                     }else {
                         layer.msg('登录失败');
+                        layui.data('locstore', null); 
                         return false;
                     }
                 }
@@ -159,14 +166,15 @@
       });
 
       form.on('submit(userLogIn)', function (data) {
+        var data = form.val('loginF'); 
+        alert(JSON.stringify(data));
         $.ajax({
                 url:'.py',  
                 type:'post',
                 dataType:'text',
                 data:{
-                    user:$('#account').val(),
-                    pwd:$('#password').val(),
-                    Logtype:'user',
+                    username:data.username,
+                    password:data.password,
                 },
                 success:function(data){
                     if (data == 1) {
