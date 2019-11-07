@@ -46,58 +46,78 @@ class LoginTest(APIView):
         return Response(response)
 
 
-def create_activity_view(request):
-    name = request.POST.get('name')
-    from_date = parse_date(request.POST.get('from'))
-    to_date = parse_date(request.POST.get('to'))
-    Activity.objects.create(name=name, from_date=from_date, to_date=to_date)
-    # return
+class CreateActivity(APIView):
+    def post(self, request):
+        name = request.GET.get('name')
+        from_date = parse_date(request.GET.get('from'))
+        to_date = parse_date(request.GET.get('to'))
+
+        Activity.objects.create(name=name, from_date=from_date, to_date=to_date)
+        response = {"status": 100, "msg": None}
+        return Response(response)
 
 
-def create_registration_form_view(request):
-    activity_id = request.GET.get('id')
-    application_format = json.dumps(request.body)
-    activity = Activity.objects.get(id=activity_id)
-    activity.application_format = application_format
-    activity.save()
+class CreateRegisterForm(APIView):
+    def post(self, request):
+        activity_id = request.GET.get('id')
+        application_format = json.dumps(request.body)
+        activity = Activity.objects.get(id=activity_id)
+        activity.application_format = application_format
+        activity.save()
 
 
-def create_examiner_view(request):
-    activity_id = request.GET.get('id')
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    examiner = User(username=username, password=make_password(password))
-    examiner.extension.activity = Activity.objects.get(id=activity_id)
-    examiner.extension.save()
-    examiner.save()
-    # return
+class CreateExaminer(APIView):
+    def post(self, request, id):
+        activity_id = id
+        username = request.GET.get('username')
+        password = request.GET.get('password')
+        print(activity_id, username, password)
+        examiner = User(username=username, password=make_password(password))
+        examiner.save()
+        examiner.extension.activity = Activity.objects.get(id=activity_id)
+        examiner.extension.save()
+        examiner.save()
+        response = {"status": 100, "msg": None}
+        return Response(response)
 
 
-def create_section_view(request):
-    activity_id = request.GET.get('id')
-    name = request.POST.get('name')
-    ac = Activity.objects.get(id=activity_id)
-    section = Section(s_id=ac.section_cnt, name=name)
-    ac.section_cnt += 1
-    ac.save()
-    section.save()
+class CreateSection(APIView):
+    def post(self, request, id):
+        activity_id = id
+        name = request.GET.get('name')
+        ac = Activity.objects.get(id=activity_id)
+        section = Section(s_id=ac.section_cnt, name=name)
+        section.save()
+        ac.section_cnt += 1
+        ac.save()
+        section.activity = ac
+        section.save()
+        response = {"status": 100, "msg": None}
+        return Response(response)
 
 
-def add_examiner_view(request):
-    activity_id = request.GET.get('id')
-    section_id = request.GET.get('sectionID')
-    username = request.POST.get('username')
-    examiner = User.objects.get(username=username).extension
-    activity = Activity.objects.get(id=activity_id)
-    examiner.section = Section.objects.get(s_id=section_id, activity=activity)
-    examiner.save()
+class AddExaminer(APIView):
+    def post(self, request, id, sectionID):
+        activity_id = id
+        section_id = sectionID
+        username = request.GET.get('username')
+        print(activity_id, section_id, username)
+        examiner = User.objects.get(username=username).extension
+        activity = Activity.objects.get(id=activity_id)
+        examiner.section = Section.objects.get(s_id=section_id, activity=activity)
+        examiner.save()
+        response = {"status": 100, "msg": None}
+        return Response(response)
 
 
-def create_form_view(request):
-    activity_id = request.GET.get('id')
-    section_id = request.GET.get('sectionID')
-    transcript_format = json.dumps(request.body)
-    activity = Activity.objects.get(id=activity_id)
-    section = Section.objects.get(s_id=section_id, activity=activity)
-    section.transcript_format = transcript_format
-    section.save()
+class CreateForm(APIView):
+    def post(self, request, id, sectionID):
+        activity_id = id
+        section_id = sectionID
+        transcript_format = json.dumps(request.body)
+        activity = Activity.objects.get(id=activity_id)
+        section = Section.objects.get(s_id=section_id, activity=activity)
+        section.transcript_format = transcript_format
+        section.save()
+        response = {"status": 100, "msg": None}
+        return Response(response)
