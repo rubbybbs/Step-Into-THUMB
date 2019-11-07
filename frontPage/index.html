@@ -80,7 +80,7 @@
 
 <body>
 
-  <form class="layui-form" action="" method="post" lay-filter="loginf">
+  <form class="layui-form" action="" lay-filter="loginf">
     <div class="container">
       <button class="close" title="关闭">X</button>
       <div class="layui-form-mid layui-word-aux">
@@ -96,7 +96,7 @@
       <div class="layui-form-item">
         <label class="layui-form-label">密&nbsp;&nbsp;码</label>
         <div class="layui-input-inline">
-          <input type="password" id="account" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off"
+          <input type="password" id="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off"
             class="layui-input">
         </div>
 
@@ -137,7 +137,7 @@
 
       //监听提交
       form.on('submit(rootLogIn)', function (data) {
-        var data = form.val('loginF'); 
+        var data = form.val('loginf'); 
         alert(JSON.stringify(data));
         $.ajax({
                 url:'/Step-Into-THUMB/admin/login',  
@@ -145,8 +145,8 @@
                 contentType: "application/x-www-form-urlencoded",
                 dataType:'text',               
                 data:{
-                  username: data.password,
-                  password: data.account
+                  username: data.account,
+                  password: data.password
                 },
                 success:function(data){
                     if (data.code == 200) {
