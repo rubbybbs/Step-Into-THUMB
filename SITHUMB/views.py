@@ -86,7 +86,7 @@ class CreateSection(APIView):
         activity_id = id
         name = request.GET.get('name')
         ac = Activity.objects.get(id=activity_id)
-        section = Section(s_id=ac.section_cnt, name=name)
+        section = Section(a_id=activity_id, s_id=ac.section_cnt, name=name)
         section.save()
         ac.section_cnt += 1
         ac.save()
@@ -103,8 +103,7 @@ class AddExaminer(APIView):
         username = request.GET.get('username')
         print(activity_id, section_id, username)
         examiner = User.objects.get(username=username).extension
-        activity = Activity.objects.get(id=activity_id)
-        examiner.section = Section.objects.get(s_id=section_id, activity=activity)
+        examiner.section = Section.objects.get(s_id=section_id, a_id=activity_id)
         examiner.save()
         response = {"status": 100, "msg": None}
         return Response(response)
@@ -114,7 +113,7 @@ class CreateForm(APIView):
     def post(self, request, id, sectionID):
         activity_id = id
         section_id = sectionID
-        transcript_format = json.dumps(request.body)
+        transcript_format = json.dumps(request.body.decode())
         activity = Activity.objects.get(id=activity_id)
         section = Section.objects.get(s_id=section_id, activity=activity)
         section.transcript_format = transcript_format
