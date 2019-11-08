@@ -36,7 +36,6 @@ class AuthAdminLogin(APIView):
     def post(self, request):
         response = {"status": 100, "msg": None}
         username = request.GET.get('username')
-        print(username)
         password = request.GET.get('password')
         user = authenticate(username=username, password=password)
         if user:
@@ -61,6 +60,7 @@ class LoginTest(APIView):
 
 class CreateActivity(APIView):
     def post(self, request):
+
         name = request.GET.get('name')
         from_date = parse_date(request.GET.get('from'))
         to_date = parse_date(request.GET.get('to'))
@@ -71,13 +71,15 @@ class CreateActivity(APIView):
 
 
 class CreateRegisterForm(APIView):
-    def post(self, request):
-        activity_id = request.GET.get('id')
-        application_format = json.dumps(request.body)
+    def post(self, request, id):
+        activity_id = id
+        application_format = json.dumps(request.data)
+        print(application_format)
         activity = Activity.objects.get(id=activity_id)
         activity.application_format = application_format
         activity.save()
-
+        response = {"status": 100, "msg": None}
+        return Response(response)
 
 class CreateExaminer(APIView):
     def post(self, request, id):
@@ -126,7 +128,7 @@ class CreateForm(APIView):
     def post(self, request, id, sectionID):
         activity_id = id
         section_id = sectionID
-        transcript_format = json.dumps(request.body.decode())
+        transcript_format = json.dumps(request.data)
         activity = Activity.objects.get(id=activity_id)
         section = Section.objects.get(s_id=section_id, activity=activity)
         section.transcript_format = transcript_format

@@ -146,9 +146,9 @@
                 url:'/Step-Into-THUMB/admin/login?username='+data.account+'&password='+data.password,
                 type:'post',
                 contentType: "application/x-www-form-urlencoded",
-                dataType:'json',               
+                dataType:'json',
+                headers: {'X-CSRFToken': data.csrfmiddlewaretoken},
                 data:{
-                  csrfmiddlewaretoken: data.csrfmiddlewaretoken,
                   username: data.account,
                   password: data.password
                 },

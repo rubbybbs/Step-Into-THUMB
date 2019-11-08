@@ -17,7 +17,7 @@
 
       <ul class="layui-nav layui-layout-right">
         <li class="layui-nav-item" lay-unselect="">
-          <a href="javascript:;"><img src="./illust_72066950_20181219_203453.jpg" class="layui-nav-img">管理员</a>
+          <a href="javascript:;"><img src="../static/illust_72066950_20181219_203453.jpg" class="layui-nav-img">管理员</a>
           <dl class="layui-nav-child">
             <dd><a href="javascript:;">修改信息</a></dd>
             <dd><a href="javascript:;">安全管理</a></dd>
@@ -63,7 +63,7 @@
             <div class="layui-card">
               <div class="layui-card-header">活动添加</div>
               <div class="layui-card-body">
-                <form class="layui-form" action="" lay-filter="FormDesign">
+                <form class="layui-form" action="" lay-filter="FormDesign"> {%  csrf_token %}
                   <div class="layui-card">
                     <div class="layui-card-body">
                       <div class="layui-form-item">
@@ -128,18 +128,18 @@
                                         <input type="text" name="segmentname" lay-verify="title" autocomplete="off" placeholder="请输入行名称" class="layui-input">
                                       </div>
                                 </div>
-                                <div class="layui-form-item">
-                                  <label class="layui-form-label">开始日期</label>
-                                  <div class="layui-input-block">
-                                    <input type="text" name="segmentstartdate" id="segmentstartdate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
-                                  </div>
-                                </div>
-                                <div class="layui-form-item">
-                                  <label class="layui-form-label">结束日期</label>
-                                  <div class="layui-input-block">
-                                    <input type="text" name="segmentenddate" id="segmentenddate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
-                                  </div>
-                                </div>
+{#                                <div class="layui-form-item">#}
+{#                                  <label class="layui-form-label">开始日期</label>#}
+{#                                  <div class="layui-input-block">#}
+{#                                    <input type="text" name="segmentstartdate" id="segmentstartdate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">#}
+{#                                  </div>#}
+{#                                </div>#}
+{#                                <div class="layui-form-item">#}
+{#                                  <label class="layui-form-label">结束日期</label>#}
+{#                                  <div class="layui-input-block">#}
+{#                                    <input type="text" name="segmentenddate" id="segmentenddate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">#}
+{#                                  </div>#}
+{#                                </div>#}
                                 <div class="layui-form-item">
                                   <div class="layui-input-block">
                                     <button type="button" class="layui-btn" id="NewSegment">以该名称及时间增加新环节</button>                              
@@ -230,70 +230,62 @@
 
       //监听提交
       form.on('submit(submitForm)', function (data) {
+        var Fdata = form.val('FormDesign');
         var formId=-1;
-        alert(JSON.stringify(Quz)); 
-
+        alert(JSON.stringify(Quz));
+        var date=Quz.date.split('-');
         $.ajax({
-                headers: {
-                  'token': layui.data('locstore').token,
-                },
-                url:'/Step-Into-THUMB/admin/home/create-activity',  
+                url:'/Step-Into-THUMB/admin/home/create-activity?name='+Quz.name+'&from='+Fdata.activitystartdate+'&to='+Fdata.activityenddate,
                 type:'post',
                 contentType:'application/x-www-form-urlencoded',
                 dataType:'json',
-                data:{name:Quz.name, date:Quz.date},
+                headers: {'X-CSRFToken': Fdata.csrfmiddlewaretoken},
+                data:{name:Quz.name, from:Fdata.activitystartdate, to:Fdata.activityenddate},
                 success:function(data){
-                    alert(data);
-                    if (data != -1) {
+                    if (data.status == 100) {
                         layer.msg('表单保存成功');
-                        formId = data;
+                       // formId = data.id;
+                        formId = 1;
+                        $.ajax({
+                            url:'/Step-Into-THUMB/admin/activity/'+formId+'/create-registration-form',
+                            type:'post',
+                            contentType:'application/x-www-form-urlencoded',
+                            dataType:'json',
+                            headers: {'X-CSRFToken': Fdata.csrfmiddlewaretoken},
+                            data:Quz,
+                            success:function(data){
+                                if (data != -1) {
+                                    layer.msg('表单保存成功');
+                                }else {
+                                    layer.msg('表单保存失败，请重试！');
+                                }
+                            }
+                        });
+                        if (formId!=-1) {
+                          Segments.map(function(value, index){
+                            $.ajax({
+                                url:'/Step-Into-THUMB/admin/activity/'+formId+'/create-part',
+                                type:'post',
+                                dataType:'json',
+                                headers: {'X-CSRFToken': Fdata.csrfmiddlewaretoken},
+                                data:JSON.stringify(value),
+                                success:function(data){
+                                    if (data != -1) {
+                                        layer.msg('表单保存成功');
+                                    }else {
+                                        layer.msg('表单保存失败，请重试！');
+                                    }
+                                }
+                            });
+                          });
+                        }
                     }else {
                         layer.msg('表单保存失败，请重试！');
                     }
                 }
             });
-        $.ajax({
-                headers: {
-                  'token': layui.data('locstore').token,
-                },
-                url:'/Step-Into-THUMB/admin/activity/'+formId+'/create-registration-form',  
-                type:'post',
-                contentType:'application/json',
-                dataType:'json',
-                data:JSON.stringify(Quz),
-                data:{},
-                success:function(data){
-                    alert(data);
-                    if (data != -1) {
-                        layer.msg('表单保存成功');
-                        formId = data;
-                    }else {
-                        layer.msg('表单保存失败，请重试！');
-                    }
-                }
-            });
-        if (formId!=-1) {
-          Segments.map(function(value, index){
-            $.ajax({
-                headers: {
-                  'token': layui.data('locstore').token,
-                },
-                url:'/Step-Into-THUMB/admin/activity/'+formId+'/create-part',  
-                type:'post',
-                dataType:'json',
-                data:JSON.stringify(value),
-                success:function(data){
-                    alert(data);
-                    if (data != -1) {
-                        layer.msg('表单保存成功');
-                        formId = data;
-                    }else {
-                        layer.msg('表单保存失败，请重试！');
-                    }
-                }
-            });
-          });
-        }    
+
+
 
         return false;
       });
@@ -305,7 +297,7 @@
         Quz = {
           name:data.activityname,
           date:startdate + '-' + enddate,
-          question:new Array()
+          question:new Array(),
         };
         //alert(JSON.stringify(data)); 
         $("#toAdd").append(
