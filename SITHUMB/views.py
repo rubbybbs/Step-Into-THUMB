@@ -64,9 +64,9 @@ class CreateActivity(APIView):
         name = request.GET.get('name')
         from_date = parse_date(request.GET.get('from'))
         to_date = parse_date(request.GET.get('to'))
-
-        Activity.objects.create(name=name, from_date=from_date, to_date=to_date)
-        response = {"status": 100, "msg": None}
+        activity = Activity(name=name, from_date=from_date, to_date=to_date)
+        activity.save()
+        response = {"status": 100, "a_id": activity.id}
         return Response(response)
 
 
