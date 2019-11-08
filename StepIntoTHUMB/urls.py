@@ -21,6 +21,7 @@ from SITHUMB import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index),
+    path('system_activityAdd.html', views.activityAdd),
     url(r'^Step-Into-THUMB/admin/login$', views.AuthAdminLogin.as_view()),
     url(r'^Step-Into-THUMB/admin/logintest$', views.LoginTest.as_view()),
     url(r'^Step-Into-THUMB/admin/home/create-activity$', views.CreateActivity.as_view()),

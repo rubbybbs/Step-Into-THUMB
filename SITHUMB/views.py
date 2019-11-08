@@ -18,15 +18,25 @@ from SITHUMB.authentication_module import TokenAuth2
 import redis
 import json
 from django.core.cache import cache
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 
 
 def index(request):
     return render(request, "index.html")
 
+
+def activityAdd(request):
+    return render(request, "system_activityAdd.html")
+
+
 class AuthAdminLogin(APIView):
+    @csrf_exempt
     def post(self, request):
         response = {"status": 100, "msg": None}
         username = request.GET.get('username')
+        print(username)
         password = request.GET.get('password')
         user = authenticate(username=username, password=password)
         if user:

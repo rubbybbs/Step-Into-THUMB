@@ -82,7 +82,7 @@
 
 <body>
 
-  <form class="layui-form" action="" lay-filter="loginf">
+  <form class="layui-form" action="" lay-filter="loginf"> {%  csrf_token %}
     <div class="container">
       <button class="close" title="关闭">X</button>
       <div class="layui-form-mid layui-word-aux">
@@ -148,17 +148,19 @@
                 contentType: "application/x-www-form-urlencoded",
                 dataType:'json',               
                 data:{
+                  csrfmiddlewaretoken: data.csrfmiddlewaretoken,
                   username: data.account,
                   password: data.password
                 },
                 success:function(data){
-                    if (data.code == 200) {
+                    alert(JSON.stringify(data));
+                    if (data.msg == "登录成功") {
                         layer.msg('登录成功');
                         layui.data('locstore', {
                           key: 'token',
                           value: data.token
                         });
-                        location.assign("system_activityList.html");
+                        location.assign("/system_activityAdd.html");
                     }else {
                         layer.msg('登录失败');
                         layui.data('locstore', null); 
