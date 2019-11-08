@@ -1,10 +1,12 @@
+{% load staticfiles %}
+
 <!DOCTYPE html>
 <html>
 
 <head>
   <meta charset="utf-8">
   <title>登陆器</title>
-  <link rel="stylesheet" href="./layui/css/layui.css" media="all">
+  <link rel="stylesheet" href="{% static "layui/css/layui.css" %}" media="all">
   <style type="text/css">
     .container {
       width: 420px;
@@ -117,7 +119,7 @@
 
   </form>
 
-  <script src="./layui/layui.js"></script>
+  <script src="{% static "layui/layui.js" %}"></script>
   <script>
     layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer'], function () {
       var form = layui.form,
@@ -141,7 +143,7 @@
         alert(JSON.stringify(data));
         
         $.ajax({
-                url:'http://127.0.0.1:8000/Step-Into-THUMB/admin/login?username='+data.account+'&password='+data.password,
+                url:'/Step-Into-THUMB/admin/login?username='+data.account+'&password='+data.password,
                 type:'post',
                 contentType: "application/x-www-form-urlencoded",
                 dataType:'json',               

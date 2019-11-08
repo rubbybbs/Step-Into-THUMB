@@ -20,6 +20,9 @@ import json
 from django.core.cache import cache
 
 
+def index(request):
+    return render(request, "index.html")
+
 class AuthAdminLogin(APIView):
     def post(self, request):
         response = {"status": 100, "msg": None}

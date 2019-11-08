@@ -6,7 +6,7 @@
   <meta name="viewport"
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <title>管理员</title>
-  <link rel="stylesheet" href="./layui/css/layui.css" media="all">
+  <link rel="stylesheet" href="../static/layui/css/layui.css" media="all">
 </head>
 
 <body class="layui-layout-body">
@@ -17,7 +17,7 @@
 
       <ul class="layui-nav layui-layout-right">
         <li class="layui-nav-item" lay-unselect="">
-          <a href="javascript:;"><img src="./illust_72066950_20181219_203453.jpg" class="layui-nav-img">管理员</a>
+          <a href="javascript:;"><img src="./illust_72066950_20181219_203453.jpg" class="layui-nav-img">考官</a>
           <dl class="layui-nav-child">
             <dd><a href="javascript:;">修改信息</a></dd>
             <dd><a href="javascript:;">安全管理</a></dd>
@@ -60,48 +60,38 @@
       <div style="padding: 20px; background-color: #F2F2F2;">
         <div class="layui-row layui-col-space15">
           <div class="layui-col-md12">
-                <div class="layui-card">
-                  <div class="layui-card-header">添加考官</div>
+              <div class="layui-card">
+                  <div class="layui-card-header">考官管理</div>
                   <div class="layui-card-body">
-                    <form class="layui-form" action="">
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">选择活动</label>
-                            <div class="layui-input-inline">
-                                <select name="quiz1">
-                                  <option value="">请选择活动</option>
-                                  <option value="0" selected="">活动1</option>
-                                  <option value="1">活动2</option>
-                                </select>
-                              </div>
-                              <div class="layui-input-inline">
-                                <select name="quiz2">
-                                  <option value="">请选择环节</option>
-                                  <option value="0">环节1</option>
-                                  <option value="1">环节2</option>
-                                </select>
-                              </div>
-                          </div>
-                      <div class="layui-form-item">
-                        <label class="layui-form-label">用户名</label>
-                        <div class="layui-input-block">
-                          <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入用户名" class="layui-input">
-                        </div>
-                      </div>
-                      <div class="layui-form-item">
-                        <label class="layui-form-label">密码</label>
-                        <div class="layui-input-block">
-                          <input type="password" name="password" placeholder="请输入密码" autocomplete="off" class="layui-input">
-                        </div>
-                      </div>
-                      <div class="layui-form-item">
-                        <div class="layui-input-block">
-                          <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">提交</button>
-                          <button type="reset" class="layui-btn layui-btn-primary">重置</button>
-                        </div>
-                      </div>
-                    </form>
+                    <table lay-filter="parse-table-demo">
+                      <thead>
+                        <tr>
+                          <th lay-data="{field:'userName', width:200}">用户名</th>
+                          <th lay-data="{field:'userNumber', width:450}">密码</th>
+                          <th lay-data="{field:'userExtraData', width:450}">环节</th>
+                          <th lay-data="{fixed: 'right', width:300, align:'center', toolbar: '#barDemo'}"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>xxx</td>
+                          <td>2016111111</td>
+                          <td>活动一环节一</td>
+                        </tr>
+                        <tr>
+                          <td>xxx</td>
+                          <td>2017000000</td>
+                          <td>活动一环节二</td>
+                        </tr>
+                        <tr>
+                          <td>xx</td>
+                          <td>2016000000</td>
+                          <td>活动一环节三</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
-                </div>
+              </div>
           </div>
         </div>
       </div>
@@ -117,7 +107,7 @@
   </div>
 
 
-  <script src="./layui/layui.js"></script>
+  <script src="../static/layui/layui.js"></script>
 
 
   <script type="text/html" id="barDemo">
@@ -126,7 +116,7 @@
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
   </script>
 
-  <script src="./layui/layui.js"></script>
+  <script src="../static/layui/layui.js"></script>
   <script>
     layui.use('table', function () {
       var table = layui.table;
