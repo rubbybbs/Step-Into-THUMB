@@ -181,6 +181,7 @@ class GetActivityList(APIView):
                 response["activities"].append(json_obj)
             return Response(response)
 
+
 class GetActivityDetail(APIView):
     def get(self, request):
         response = {"status": 100, "msg": None, "form": None, "sections": []}
@@ -200,3 +201,49 @@ class GetActivityDetail(APIView):
                 }
                 response["sections"].append(json_obj)
         return Response(response)
+
+
+class GetSection(APIView):
+    def get(self, request):
+        # response = {"status": 100, "msg": None, "form": None, "sections": []}
+        activity_id = request.GET.get('activityID')
+        section_id = request.GET.get('sectionID')
+        section = Section.objects.get(a_id=activity_id, s_id=section_id)
+
+        if section is None:
+            res = Response()
+            res.status_code = 404
+            return res
+        else:
+            name = section.name
+            transcript_format = json.loads(section.transcript_format)
+            return Response({"name": name, "form": transcript_format})
+
+        # return Response(response)
+
+
+class GetExaminers(APIView):
+    def get(self, request):
+        # response = {"status": 100, "msg": None, "form": None, "sections": []}
+        activity_id = request.GET.get('activityID')
+
+        activity = Activity.objects.get(id=activity_id)
+
+        if activity is None:
+            res = Response()
+            res.status_code = 404
+            return res
+        else:
+            examiners = activity.examiners.all()
+            examiners_info = []
+            for e in examiners:
+                sections = e.sections.all()
+
+                sections_info = []
+                for s in sections:
+                    sections_info.append({"name": s.name})
+                examiners_info.append({"username": e.user.username,
+                                       "sections": sections_info})
+            return Response({"examiners": examiners_info})
+
+        # return Response(response)

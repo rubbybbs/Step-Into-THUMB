@@ -50,5 +50,6 @@ class Application(models.Model):
 
 class Transcript(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='transcripts', null=True)
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='transcript', null=True)
+    section = models.ForeignKey(Section,  on_delete=models.CASCADE, related_name='transcripts', null=True)
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='transcripts', null=True)
     form = models.TextField(default="")
