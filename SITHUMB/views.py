@@ -58,9 +58,32 @@ class LoginTest(APIView):
         return Response(response)
 
 
+class GetFormTest(APIView):
+    def get(self, request):
+        response = {"status": 100, "form": None}
+        response["form"] = {
+            "name": "清华军乐2019-2020春季学期招新报名表",
+            "date": "2020/03/03-2020/03/05",
+            "questions": [
+                {
+                    "name": "姓名",
+                    "type": "Blank"
+                },
+                {
+                    "name": "性别",
+                    "type": "Choice",
+                    "Choices": [
+                        {"choice": "男"},
+                        {"choice": "女"}
+                    ]
+                }
+            ]
+        }
+        return Response(response)
+
+
 class CreateActivity(APIView):
     def post(self, request):
-
         name = request.GET.get('name')
         from_date = parse_date(request.GET.get('from'))
         to_date = parse_date(request.GET.get('to'))
@@ -80,6 +103,7 @@ class CreateRegisterForm(APIView):
         activity.save()
         response = {"status": 100, "msg": None}
         return Response(response)
+
 
 class CreateExaminer(APIView):
     def post(self, request, id):
@@ -134,4 +158,45 @@ class CreateForm(APIView):
         section.transcript_format = transcript_format
         section.save()
         response = {"status": 100, "msg": None}
+        return Response(response)
+
+
+class GetActivityList(APIView):
+    def get(self, request):
+        response = {"status": 100, "msg": None, "activities": []}
+        num = Activity.objects.count()
+        if num == 0:
+            res = Response()
+            res.status_code = 404
+            return res
+        else:
+            data = Activity.objects.all()
+            for obj in data:
+                json_obj = {
+                    "id": obj.id,
+                    "name": obj.name,
+                    "from": obj.from_date,
+                    "to": obj.to_date
+                }
+                response["activities"].append(json_obj)
+            return Response(response)
+
+class GetActivityDetail(APIView):
+    def get(self, request):
+        response = {"status": 100, "msg": None, "form": None, "sections": []}
+        activity_id = request.GET.get('id')
+        activity = Activity.objects.get(id=activity_id)
+        if activity is None:
+            res = Response()
+            res.status_code = 404
+            return res
+        response["form"] = activity.application_format
+        section_list = Section.objects.filter(a_id=activity_id)
+        if len(section_list) > 0:
+            for obj in section_list:
+                json_obj = {
+                    "id": obj.s_id,
+                    "name": obj.name,
+                }
+                response["sections"].append(json_obj)
         return Response(response)
