@@ -25,7 +25,7 @@ class Section(models.Model):
 class Examiner(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='extension', null=True)
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='examiners', null=True)
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='examiners', null=True)
+    sections = models.ManyToManyField(Section)
 
 
 @receiver(post_save, sender=User)

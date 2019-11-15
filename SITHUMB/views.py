@@ -142,8 +142,8 @@ class AddExaminer(APIView):
         username = request.GET.get('username')
         print(activity_id, section_id, username)
         examiner = User.objects.get(username=username).extension
-        examiner.section = Section.objects.get(s_id=section_id, a_id=activity_id)
         examiner.save()
+        examiner.sections.add(Section.objects.get(s_id=section_id, a_id=activity_id))
         response = {"status": 100, "msg": None}
         return Response(response)
 
