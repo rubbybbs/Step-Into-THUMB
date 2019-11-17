@@ -85,10 +85,10 @@
                                       <i class="layui-icon">&#xe640;</i>
                                   </button>    
                                   <button type="button" id="FinalCheckActivity_1" name="FinalCheckActivity" class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">
-                                      <i class="layui-icon">&#xe640;</i>
+                                      <i class="layui-icon">&#xe63c;</i>
                                   </button>
                                   <button type="button" id="LockActivity_1" name="LockActivity" class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">
-                                      <i class="layui-icon">&#xe640;</i>
+                                      <i class="layui-icon">&#xe679;</i>
                                   </button>                                 
                               </div> 
                           </legend>
@@ -139,24 +139,63 @@
 
       });
 
-      $("#addActivity").click(function() {
-        layer.msg('新的活动');
-
-
-        // #TODO:正确的弹出层
+      $("#addActivity").click(function() {        
+        // 创建活动的弹出层
         layer.open({
           id:"NewActivitySet",
-          type: 2,
           title: '活动基本设置',
           shadeClose: true,
           shade: 0.8,
-          area: ['380px', '90%'],
-          content: './son.html',
-          success:function(dom){
-            let $iframeDom=$(dom[0]).find("iframe").eq(0).contents();
-            $iframeDom.find("#test").html("我是从父级传来的值哟……")
+          area: ['450px', '300px'],
+          content: '   \
+            <form class="layui-form" action="" lay-filter="FormActivity">{%  csrf_token %}\
+              <div class="layui-form-item">\
+                <label class="layui-form-label">活动名称</label>\
+                <div class="layui-input-block">\
+                  <input type="text" name="name" lay-verify="title" autocomplete="off" placeholder="请输入名称" class="layui-input">\
+                </div>\
+              </div>\
+              <div class="layui-form-item">\
+                <label class="layui-form-label">开始日期</label>\
+                  <div class="layui-input-block">\
+                    <input type="text" name="from" id="StartDate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">\
+                  </div>\
+              </div>\
+              <div class="layui-form-item">\
+                <label class="layui-form-label">结束日期</label>\
+                  <div class="layui-input-block">\
+                    <input type="text" name="to" id="EndDate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">\
+                  </div>\
+              </div>\
+            </form>  ',
+          success: function(layero, index){
+            laydate.render({elem:"#StartDate"});
+            laydate.render({elem:"#EndDate"});
+          },
+          btn: ['确认', '取消']
+          ,yes: function(index, layero){
+            var Fdata = form.val('FormActivity');      
+            alert(JSON.stringify(Fdata)); 
+            $.ajax({
+                url:'/Step-Into-THUMB/admin/home/create-activity?name='+Fdata.name+'&from='+Fdata.from+'&to='+Fdata.to,
+                type:'post',
+                contentType:'application/x-www-form-urlencoded',
+                dataType:'json',
+                headers: {'X-CSRFToken': Fdata.csrfmiddlewaretoken},
+                success:function(data){
+                    if (data.status == 100) {
+                        layer.msg('表单保存成功');                        
+                    }else {
+                        layer.msg('表单保存失败，请重试！');
+                    }
+                }
+            });            
+            layer.close(index);
+            location.reload();
           }
+          ,btn2: function(index, layero){}
         });
+
       });
 
       $("[name='ModifyActivity']").click(function() {
@@ -189,7 +228,6 @@
 
     layui.use('element', function () {
       var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
-
     });
   </script>
 </body>
