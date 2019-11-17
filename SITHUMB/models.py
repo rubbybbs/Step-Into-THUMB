@@ -37,19 +37,9 @@ def handler_user_extension(sender, instance, created, **kwargs):
 
 
 class Candidate(models.Model):
+    wx_id = models.CharField(max_length=100, default="")
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='candidates', null=True)
     examiners = models.ManyToManyField(Examiner)
     stage = models.IntegerField(default=0)
-
-
-class Application(models.Model):
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='applications', null=True)
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='application', null=True)
-    form = models.TextField(default="")
-
-
-class Transcript(models.Model):
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='transcripts', null=True)
-    section = models.ForeignKey(Section,  on_delete=models.CASCADE, related_name='transcripts', null=True)
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='transcripts', null=True)
-    form = models.TextField(default="")
+    application_form = models.TextField(default="")
+    transcript = models.TextField(default="")
