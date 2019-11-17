@@ -19,6 +19,7 @@ class Section(models.Model):
     s_id = models.IntegerField(default=0)
     name = models.CharField(max_length=100, default="")
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='sections', null=True)
+    address = models.CharField(max_length=100, default="")
     transcript_format = models.TextField(default="")
 
 
@@ -38,7 +39,12 @@ def handler_user_extension(sender, instance, created, **kwargs):
 
 class Candidate(models.Model):
     wx_id = models.CharField(max_length=100, default="")
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='candidates', null=True)
+
+
+class Application(models.Model):
+    a_id = models.IntegerField(default=0)
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='applications', null=True)
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='applications', null=True)
     examiners = models.ManyToManyField(Examiner)
     stage = models.IntegerField(default=0)
     application_form = models.TextField(default="")

@@ -32,8 +32,11 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/create-form$', views.CreateForm.as_view()),
     url(r'^Step-Into-THUMB/admin/get-activity-list$', views.GetActivityList.as_view()),
     url(r'^Step-Into-THUMB/admin/get-activity$', views.GetActivityDetail.as_view()),
-    url(r'^Step-Into-THUMB/student/get-form-test$', views.GetFormTest.as_view()),
     url(r'^Step-Into-THUMB/admin/get-examiner-list$', views.GetExaminers.as_view()),
     url(r'^Step-Into-THUMB/admin/get-section$', views.GetSection.as_view()),
+
+    url(r'^Step-Into-THUMB/candidate/register$', views.Register.as_view()),
+    url(r'^Step-Into-THUMB/candidate/application$', views.ApplicationForm.as_view()),
+    url(r'^Step-Into-THUMB/candidate/get-status$', views.Status.as_view()),
 
 ]

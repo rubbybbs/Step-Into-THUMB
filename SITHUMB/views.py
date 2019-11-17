@@ -22,6 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
+cur_activity_id = 1
 
 def index(request):
     return render(request, "index.html")
@@ -247,3 +248,62 @@ class GetExaminers(APIView):
             return Response({"examiners": examiners_info})
 
         # return Response(response)
+
+
+class Register(APIView):
+    def post(self, request):
+        wx_id = request.GET.get('wxID')
+        candidates = Candidate.objects.filter(wx_id=wx_id)
+
+        if len(candidates) == 0:
+            Candidate.objects.create(wx_id=wx_id)
+            response = {"status": 100, "msg": None}
+        else:
+            response = {"status": 400, "msg": "Already exist"}
+
+        return Response(response)
+
+
+class ApplicationForm(APIView):
+    def post(self, request):
+        wx_id = request.GET.get('wxID')
+        candidate = Candidate.objects.get(wx_id=wx_id)
+        application_form = json.dumps(request.data)
+        activity = Activity.objects.get(id=cur_activity_id)
+        try:
+            application = candidate.applications.get(a_id=cur_activity_id)
+        except:
+            application = Application(a_id = cur_activity_id, candidate=candidate,
+                                  application_form=application_form, activity=activity)
+            application.save()
+        else:
+            application.application_form = application_form
+            application.save()
+        response = {"status": 100, "msg": None}
+        return Response(response)
+
+
+    def get(self, request):
+        wx_id = request.GET.get('wxID')
+        a_id = request.GET.get('activityID')
+        candidate = Candidate.objects.get(wx_id=wx_id)
+        response = json.loads(candidate.applications.get(a_id=cur_activity_id).application_form)
+        return Response(response)
+
+
+class Status(APIView):
+    def get(self, request):
+        wx_id = request.GET.get('wxID')
+        candidate = Candidate.objects.get(wx_id=wx_id)
+        stage = candidate.applications.get(a_id=cur_activity_id).stage
+        section = Section.objects.get(a_id=cur_activity_id, s_id=stage)
+
+        response = { "status":"您的下一步是" + section.name + "请在" + section.address + "等待"}
+        return Response(response)
+
+
+
+
+
+
+
