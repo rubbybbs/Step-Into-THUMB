@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>管理员</title>
+  <link rel="stylesheet" href="../static/layui/css/layui.css" media="all">
+</head>
+
+<body class="layui-layout-body">
+  <div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+      <div class="layui-logo">军乐团活动管理</div>
+      <!-- 头部区域（可配合layui已有的水平导航） -->
+
+      <ul class="layui-nav layui-layout-right">
+        <li class="layui-nav-item" lay-unselect="">
+          <a href="javascript:;"><img src="../static/illust_72066950_20181219_203453.jpg" class="layui-nav-img">管理员</a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;">修改信息</a></dd>
+            <dd><a href="javascript:;">安全管理</a></dd>
+            <dd><a href="index.html">退出</a></dd>
+          </dl>
+        </li>
+      </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+          <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+          <ul class="layui-nav layui-nav-tree" lay-filter="test">
+            <li class="layui-nav-item layui-nav-itemed">
+              <a class="" href="javascript:;">发布活动</a>
+              <dl class="layui-nav-child">
+                <dd><a href="system_activityAdd.html">创建表单</a></dd>
+                <dd><a href="system_accountAdd.html">添加考官</a></dd>
+              </dl>
+            </li>
+            <li class="layui-nav-item">
+              <a href="javascript:;">管理活动</a>
+              <dl class="layui-nav-child">
+                <dd><a href="system_activityList.html">活动列表</a></dd>
+              </dl>
+            </li>
+            <li class="layui-nav-item layui-nav-itemed">
+              <a href="javascript:;">账号管理</a>
+             <dl class="layui-nav-child">
+              <dd><a href="system_accountManage.html">考官账号信息管理</a></dd>
+              <dd><a href="system_accountAdd.html">考官账号添加</a></dd>
+            </dl>
+            </li>
+           
+          </ul>
+        </div>
+      </div>
+
+    <div class="layui-body" , lay-filter="graph">
+      <form class="layui-form" action="" lay-filter="ActivityList"> {%  csrf_token %}
+        <div style="padding: 20px; background-color: #F2F2F2;">
+          <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12" id="ActivityContent" name="ActivityContent">
+              <div class="layui-card">
+                <div class="layui-card-header"  style="margin-bottom: 15px;">
+                  <div class="layui-input-inline  layui-form-items" style="margin-top: 7px;">
+                      <label style="margin-right: 20px;font-size: 24px;">活动列表</label>
+                      <button type="button" id="addActivity" name="addActivity" class="layui-btn layui-btn-primary layui-btn-sm" style="margin-bottom: 10px;">
+                            <i class="layui-icon">&#xe654;</i>
+                      </button>                   
+                  </div>
+                </div>
+                <div class="layui-card-body">
+
+
+                  <blockquote class="layui-elem-quote layui-quote-nm" id="activity_1">      
+                      <fieldset class="layui-elem-field layui-field-title"  style="margin-bottom: 5px; margin-top: 5px;">
+                          <legend>
+                              <div class="layui-input-inline  layui-form-item">
+                                  <label style="margin-right: 20px;">活动1</label>
+                                  <button type="button" id="ModifyActivity_1" name="ModifyActivity" class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">
+                                        <i class="layui-icon">&#xe642;</i>
+                                  </button>   
+                                  <button type="button" id="DeleteActivity_1" name="DeleteActivity" class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">
+                                      <i class="layui-icon">&#xe640;</i>
+                                  </button>    
+                                  <button type="button" id="FinalCheckActivity_1" name="FinalCheckActivity" class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">
+                                      <i class="layui-icon">&#xe640;</i>
+                                  </button>
+                                  <button type="button" id="LockActivity_1" name="LockActivity" class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">
+                                      <i class="layui-icon">&#xe640;</i>
+                                  </button>                                 
+                              </div> 
+                          </legend>
+                      </fieldset>        
+                      <div class="layui-collapse" lay-filter="test"  style="margin-bottom: 5px;">
+                          <div class="layui-colla-item">
+                            <h2 class="layui-colla-title"  style="background-color:white;">活动时间</h2>
+                            <div class="layui-colla-content layui-show">
+                              <p>5019.9.10-2019.10.1</p>
+                            </div>
+                          </div>
+                          <div class="layui-colla-item">
+                              <h2 class="layui-colla-title" style="background-color:white;">报名表状态</h2>
+                              <div class="layui-colla-content layui-show">
+                                <p>开放修改</p>
+                              </div>
+                          </div>
+                      </div>                                         
+                  </blockquote>  
+                  
+                  
+                </div>  
+              </div>           
+            </div>
+          </div>
+        </div>    
+      </form>
+    </div>
+
+    <div class="layui-footer">
+      <!-- 底部固定区域 -->
+      © 小组：基于layui以及django
+    </div>
+  </div>
+
+  <script src="../static/layui/layui.js"></script>
+  <script>
+    layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer'], function () {
+      var form = layui.form,
+        layer = layui.layer,
+        $ = layui.jquery,
+        layedit = layui.layedit,
+        laydate = layui.laydate;
+
+      layer.ready(function(){
+        layer.msg('初始化列表');
+
+
+      });
+
+      $("#addActivity").click(function() {
+        layer.msg('新的活动');
+
+
+        // #TODO:正确的弹出层
+        layer.open({
+          id:"NewActivitySet",
+          type: 2,
+          title: '活动基本设置',
+          shadeClose: true,
+          shade: 0.8,
+          area: ['380px', '90%'],
+          content: './son.html',
+          success:function(dom){
+            let $iframeDom=$(dom[0]).find("iframe").eq(0).contents();
+            $iframeDom.find("#test").html("我是从父级传来的值哟……")
+          }
+        });
+      });
+
+      $("[name='ModifyActivity']").click(function() {
+        var id=$(this).attr("id");
+        layer.msg('更改活动'+id);
+
+        // #TODO:本地储存id
+        location.assign("modify.html");
+      });
+
+      $("[name='DeleteActivity']").click(function() {
+        layer.msg('删除活动');
+
+
+      });
+
+      $("[name='FinalCheckActivity']").click(function() {
+        layer.msg('活动终评');
+
+
+      });
+
+      $("[name='LockActivity']").click(function() {
+        layer.msg('锁定活动内容');
+
+
+      });
+
+    });
+
+    layui.use('element', function () {
+      var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+
+    });
+  </script>
+</body>
+
+</html>
