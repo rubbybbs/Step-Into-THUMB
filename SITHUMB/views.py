@@ -283,6 +283,8 @@ class Apply(APIView):
         wx_id = request.GET.get('wxID')
         candidate = Candidate.objects.get(wx_id=wx_id)
         application_form = json.dumps(request.data)
+        candidate.name = request.data["姓名"]
+        candidate.student_id = request.data["学号"]
         activity = Activity.objects.get(id=cur_activity_id)
         try:
             application = candidate.applications.get(a_id=cur_activity_id)
