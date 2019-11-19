@@ -24,16 +24,43 @@ urlpatterns = [
     path('system_activityAdd.html', views.activityAdd),
     url(r'^Step-Into-THUMB/admin/login$', views.AuthAdminLogin.as_view()),
     url(r'^Step-Into-THUMB/admin/logintest$', views.LoginTest.as_view()),
-    url(r'^Step-Into-THUMB/admin/home/create-activity$', views.CreateActivity.as_view()),
-    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/create-registration-form$', views.CreateRegisterForm.as_view()),
-    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/create-examiner$', views.CreateExaminer.as_view()),
-    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/create-section$', views.CreateSection.as_view()),
-    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/add-examiner$', views.AddExaminer.as_view()),
-    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/create-form$', views.CreateForm.as_view()),
-    url(r'^Step-Into-THUMB/admin/get-activity-list$', views.GetActivityList.as_view()),
-    url(r'^Step-Into-THUMB/admin/get-activity$', views.GetActivityDetail.as_view()),
-    url(r'^Step-Into-THUMB/admin/get-examiner-list$', views.GetExaminers.as_view()),
-    url(r'^Step-Into-THUMB/admin/get-section$', views.GetSection.as_view()),
+
+
+    url(r'^Step-Into-THUMB/admin/activity-list$', views.ActivityList.as_view()),
+    # 类型 GET
+    url(r'^Step-Into-THUMB/admin/create-activity$', views.Activity.as_view()),
+    # 类型 POST 正文 含有活动名称、开始日期、结束日期的json
+    url(r'^Step-Into-THUMB/admin/delete-activity$', views.Activity.as_view()),
+    # 类型 DELETE 参数 activityID
+
+
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/save-registration-form$', views.RegistrationForm.as_view()),
+    # 类型 POST 正文 报名表的json
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/get-registration-form$', views.RegistrationForm.as_view()),
+    # 类型 GET 返回 报名表的json
+
+
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/examiner-list$', views.ExaminerList.as_view()),
+    # 类型 GET  返回值 {"examiners": [考官信息列表（每个考官的信息包括username、password、sections:[]）]}
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/create-examiner$', views.Examiner.as_view()),
+    # 类型 POST 参数 "username": , "password": 正文: {"sections" : [sectionID的list]}
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/delete-examiner$', views.Examiner.as_view()),
+    # 类型 DELETE 参数 "username":
+
+
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section-list$', views.SectionList.as_view()),
+    # 类型 GET 返回 环节列表 {"sections": ["sectionID":, "name":]}
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/create-section$', views.Section.as_view()),
+    # 类型 POST 参数 name
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/delete-section$', views.Section.as_view()),
+    # 类型 DELETE
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/get-transcript-form$', views.TranscriptForm.as_view()),
+    # 类型 GET
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/save-transcript-form$', views.TranscriptForm.as_view()),
+    # 类型 POST 正文...
+
+
+    # url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/application$', views.GetActivityDetail.as_view()),
 
     # activityID 使用 cur_activity_ID
     url(r'^Step-Into-THUMB/examiner/login$', views.AuthExaminerLogin.as_view()),
@@ -42,7 +69,9 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/examiner/transcript$', views.Transcript.as_view()),
 
     url(r'^Step-Into-THUMB/candidate/register$', views.Register.as_view()),
-    url(r'^Step-Into-THUMB/candidate/application$', views.ApplicationForm.as_view()),
+    url(r'^Step-Into-THUMB/candidate/submit-application$', views.Apply.as_view()),
+    # POST 正文：。。。
     url(r'^Step-Into-THUMB/candidate/get-status$', views.Status.as_view()),
+    # GET
 
 ]
