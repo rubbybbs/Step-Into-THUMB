@@ -35,6 +35,12 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/admin/get-examiner-list$', views.GetExaminers.as_view()),
     url(r'^Step-Into-THUMB/admin/get-section$', views.GetSection.as_view()),
 
+    # activityID 使用 cur_activity_ID
+    url(r'^Step-Into-THUMB/examiner/login$', views.AuthExaminerLogin.as_view()),
+    url(r'^Step-Into-THUMB/examiner/get-section$', views.AuthExaminerLogin.as_view()),
+    url(r'^Step-Into-THUMB/examiner/get-candidate-list$', views.GetCandidateList_Examiner.as_view()),
+    url(r'^Step-Into-THUMB/examiner/transcript$', views.Transcript.as_view()),
+
     url(r'^Step-Into-THUMB/candidate/register$', views.Register.as_view()),
     url(r'^Step-Into-THUMB/candidate/application$', views.ApplicationForm.as_view()),
     url(r'^Step-Into-THUMB/candidate/get-status$', views.Status.as_view()),
