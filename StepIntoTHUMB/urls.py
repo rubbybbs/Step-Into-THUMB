@@ -64,8 +64,8 @@ urlpatterns = [
 
     # activityID 使用 cur_activity_ID
     url(r'^Step-Into-THUMB/examiner/login$', views.AuthExaminerLogin.as_view()),
-    url(r'^Step-Into-THUMB/examiner/get-section$', views.Section_Examiner.as_view()),
-    url(r'^Step-Into-THUMB/examiner/get-candidate-list$', views.CandidateList_Examiner.as_view()),
+    url(r'^Step-Into-THUMB/examiner/get-section$', views.SectionExaminer.as_view()),
+    url(r'^Step-Into-THUMB/examiner/get-candidate-list$', views.CandidateListExaminer.as_view()),
     url(r'^Step-Into-THUMB/examiner/transcript$', views.Transcript.as_view()),
 
     url(r'^Step-Into-THUMB/candidate/register$', views.Register.as_view()),

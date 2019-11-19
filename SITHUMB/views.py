@@ -24,6 +24,7 @@ from django.template import RequestContext
 
 cur_activity_id = 1
 
+
 def index(request):
     return render(request, "index.html")
 
@@ -135,6 +136,7 @@ class RegistrationForm(APIView):
         activity = Activity.objects.get(id=id)
         return Response(json.loads(activity.application_format))
 
+
 class ExaminerList(APIView):
     def get(self, request, id):
         activity = Activity.objects.get(id=id)
@@ -188,6 +190,7 @@ class SectionList(APIView):
         for s in sections:
             sections_info.append({"sectionID": s.s_id, "name": s.name})
         return Response({"sections": sections_info})
+
 
 class Section(APIView):
     def post(self, request, id):
@@ -285,15 +288,14 @@ class Apply(APIView):
         try:
             application = candidate.applications.get(a_id=cur_activity_id)
         except:
-            application = Application(a_id = cur_activity_id, candidate=candidate,
-                                  application_form=application_form, activity=activity)
+            application = Application(a_id=cur_activity_id, candidate=candidate,
+                                      application_form=application_form, activity=activity)
             application.save()
         else:
             application.application_form = application_form
             application.save()
         response = {"status": 100, "msg": None}
         return Response(response)
-
 
     def get(self, request):
         wx_id = request.GET.get('wxID')
@@ -309,7 +311,7 @@ class Status(APIView):
         candidate = Candidate.objects.get(wx_id=wx_id)
         stage = candidate.applications.get(a_id=cur_activity_id).stage
         section = Section.objects.get(a_id=cur_activity_id, s_id=stage)
-        response = { "status":"您的下一步是" + section.name + "请在113教室内等待"}
+        response = {"status": "您的下一步是" + section.name + "请在113教室内等待"}
         return Response(response)
 
 
@@ -331,7 +333,7 @@ class AuthExaminerLogin(APIView):
         return Response(response)
 
 
-class Section_Examiner(APIView):
+class SectionExaminer(APIView):
     def get(self, request):
         response = {"status": 100, "msg": None, "sections": []}
         username = request.GET.get('username')
@@ -345,7 +347,8 @@ class Section_Examiner(APIView):
             response["sections"].append(jsonobj)
         return Response(response)
 
-class CandidateList_Examiner(APIView):
+
+class CandidateListExaminer(APIView):
     def get(self, request):
         response = {"status": 100, "msg": None, "candidates": []}
         s_id = request.GET.get('s_ID')
@@ -358,6 +361,7 @@ class CandidateList_Examiner(APIView):
             }
             response["candidates"].append(jsonobj)
         return Response(response)
+
 
 class Transcript(APIView):
     def get(self, request):
