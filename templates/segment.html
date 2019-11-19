@@ -57,12 +57,21 @@
         <div class="layui-row layui-col-space15">
           <div class="layui-col-md12">
             <div class="layui-card">
-              <div class="layui-card-header">报名表</div>
+              <div class="layui-card-header">环节定制</div>
               <div class="layui-card-body">
                 <form class="layui-form" action="" lay-filter="FormDesign"> {%  csrf_token %}
                   <div class="layui-card">
                     <div class="layui-card-body" id="toAdd">
-                      <!--  展示区  -->
+                        <div class="layui-tab" lay-filter="activitySegment">
+                            <ul class="layui-tab-title" id="titleToAdd">
+                              <li class="layui-this" lay-id="0">初试</li>
+                              <li lay-id="1">复试</li>
+                            </ul>
+                            <div class="layui-tab-content" id="contentToAdd">
+                              <div class="layui-tab-item layui-show">内容1</div>
+                              <div class="layui-tab-item">内容2</div>
+                            </div>
+                        </div>
                     </div>  
                   </div>                                
 
@@ -70,8 +79,10 @@
                       <div class="layui-card-body">
                           <div class="layui-form-item">
                               <div class="layui-input-block">
-                                <button type="button" class="layui-btn" id="NewDataLine">添加新行</button>
-                                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存当前表单</button>
+                                <button type="button" class="layui-btn" id="NewDataLine">为当前环节添加新行</button>
+                                <button type="button" class="layui-btn" id="NewSegment">添加新环节</button>
+                                <button type="button" class="layui-btn" id="DeleteSegment">删除当前环节</button>
+                                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存当前环节</button>
                               </div>
                           </div>
                       </div>
@@ -100,22 +111,32 @@
   <script src="../static/layui/layui.js"></script>
   <script>
     var currentSegmentNum = 0;
-    var Quz = {
-          id:layui.data('LocalData').ActID,
-          question:new Array(),
-        };
+    var Quz = new Array();
     var Segments = new Array();
-    layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer'], function () {
+
+    //此处需删除
+    Quz.push({id:layui.data('LocalData').ActID,
+      question:new Array()});
+
+    layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer', 'element'], function () {
       var form = layui.form,
         layer = layui.layer,
         $ = layui.jquery,
         layedit = layui.layedit,
-        laydate = layui.laydate;
+        laydate = layui.laydate,
+        element = layui.element;;
 
       layer.ready(function(){
         var LocalData=layui.data('LocalData');
         layer.msg('初始化列表'+LocalData.ActID.toString());
 
+
+        // #TODO:接入接口
+        element.tabAdd('activitySegment', {
+              title: '新选项'+ (Math.random()*1000|0) //用于演示
+              ,content: '内容'+ (Math.random()*1000|0)
+              ,id: currentSegmentNum
+        });
         //#TODO 通过ajax获取数据并解析
       });
 
@@ -128,7 +149,8 @@
       });
 
       $("#NewDataLine").click(function() {  
-        // 创建活动的弹出层
+        currentSegmentNum = parseInt($(".layui-this").attr("lay-id"));
+        // 创建数据行的弹出层
         layer.open({
           id: "NewLineSet",
           title: '新数据行设置',
@@ -167,11 +189,11 @@
             var Fdata = form.val('FormNewLine');
 
             if (Fdata.LineType == "0") {
-              Quz["question"].push({
+              Quz[currentSegmentNum]["question"].push({
                 name: Fdata.Info,
                 type: "Blank"
               });
-              $("#toAdd").append(
+              $(".layui-show").append(
                 '<div class="layui-form-item"> \
                     <label class="layui-form-label">' + Fdata.Info + '</label> \
                     <div class="layui-input-block"> \
@@ -188,7 +210,7 @@
               strs.map(function(value,index,arr){
                 ChoiceArr.push({Choice:value});
               });
-              Quz["question"].push({
+              Quz[currentSegmentNum]["question"].push({
                 name: Fdata.Info,
                 type: "Choice",
                 Choices: ChoiceArr
@@ -205,7 +227,7 @@
               modestr += '</select> \
                   </div> \
                 </div>';
-              $("#toAdd").append(modestr);
+              $(".layui-show").append(modestr);
               //alert(modestr);
               form.render();
             }
@@ -219,26 +241,66 @@
         var mParent = this.parentNode.parentNode;
         var topic = mParent.firstElementChild.innerText;
         var deleteIndex=-1;
-        Quz['question'].map(function(value, index){
+        currentSegmentNum = parseInt($(".layui-this").attr("lay-id"));
+        Quz[currentSegmentNum]['question'].map(function(value, index){
           alert(topic);
           if (value.name == topic) {
             deleteIndex=index;    
           }
         });
         if (deleteIndex!=-1){
-          Quz['question'].splice(deleteIndex, 1);
+          Quz[currentSegmentNum]['question'].splice(deleteIndex, 1);
         }
         
         mParent.remove();
         form.render();
       });
 
+      $("#NewSegment").click(function(){
+        // 创建活动的弹出层
+        layer.open({
+          id: "NewSegmentSet",
+          title: '环节基本设置',
+          shadeClose: true,
+          shade: 0.8,
+          area: ['450px', '200px'],
+          content: '   \
+            <form class="layui-form" action="" lay-filter="FormSegment">{%  csrf_token %}\
+              <div class="layui-form-item">\
+                <label class="layui-form-label">环节名称</label>\
+                <div class="layui-input-block">\
+                  <input type="text" name="name" lay-verify="title" autocomplete="off" placeholder="请输入名称" class="layui-input">\
+                </div>\
+              </div>\
+            </form>  ',
+          success: function (layero, index) {
+            form.render();
+          },
+          btn: ['确认', '取消'],
+          yes: function (index, layero) {
+            var Fdata = form.val('FormSegment');
+            alert(JSON.stringify(Fdata));
+            
+            // #TODO 接入接口
+            layer.close(index);
+            location.reload();
+          },
+          btn2: function (index, layero) {}
+        });
+
+      });
+      
+      $("#DeleteSegment").click(function(){
+        var uid = $(".layui-this").attr("lay-id");
+
+        //#TODO 接入接口
+        Quz.splice(parseInt(uid),1);
+        element.tabDelete('activitySegment', uid);
+      });
+
 
     });
 
-    layui.use('element', function () {
-      var element = layui.element; //导航的hover效果、二级菜单等功能
-    });
   </script>
 </body>
 
