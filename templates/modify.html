@@ -12,7 +12,7 @@
 <body class="layui-layout-body">
   <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-      <div class="layui-logo">军乐团活动管理</div>
+        <div  class="layui-logo"> <a href="activity.html">军乐队活动管理 </a></div>
 
       <ul class="layui-nav layui-layout-right">
         <li class="layui-nav-item" lay-unselect="">
@@ -30,23 +30,17 @@
       <div class="layui-side-scroll">
         <ul class="layui-nav layui-nav-tree" lay-filter="test">
           <li class="layui-nav-item layui-nav-itemed">
-            <a class="" href="javascript:;">活动表单</a>
+
             <dl class="layui-nav-child">
               <dd><a href="modify.html">定制报名表</a></dd>
               <dd><a href="segment.html">定制环节</a></dd>
             </dl>
           </li>
           <li class="layui-nav-item layui-nav-itemed">
-            <a href="javascript:;">账号管理</a>
+
             <dl class="layui-nav-child">
-              <dd><a href="accountManage.html">考官账号信息管理</a></dd>
+              <dd><a href="accountManage.html">考官账号管理</a></dd>
             </dl>
-          </li>
-          <li class="layui-nav-item layui-nav-itemed">
-              <a href="javascript:;">跳转操作</a>
-              <dl class="layui-nav-child">
-                <dd><a href="activity.html">返回首页</a></dd>
-              </dl>
           </li>
         </ul>
       </div>
@@ -70,8 +64,8 @@
                       <div class="layui-card-body">
                           <div class="layui-form-item">
                               <div class="layui-input-block">
-                                <button type="button" class="layui-btn" id="NewDataLine">添加新行</button>
-                                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存当前表单</button>
+                                <button type="button" class="layui-btn" id="NewDataLine">添加新数据项</button>
+                                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存</button>
                               </div>
                           </div>
                       </div>
@@ -131,22 +125,22 @@
         // 创建活动的弹出层
         layer.open({
           id: "NewLineSet",
-          title: '新数据行设置',
+          title: '添加数据项',
           shadeClose: true,
           shade: 0.8,
-          area: ['450px', '400px'],
+          area: ['500px', '400px'],
           content: '\
             <form class="layui-form" action="" lay-filter="FormNewLine">{%  csrf_token %}\
                 <div class="layui-form-item">\
-                  <label class="layui-form-label">新行名称</label>\
+                  <label class="layui-form-label">数据项</label>\
                   <div class="layui-input-block">\
-                    <input type="text" name="Info" lay-verify="title" autocomplete="off" placeholder="请输入行名称" class="layui-input">\
+                    <input type="text" name="Info" lay-verify="title" autocomplete="off" placeholder="请输入数据项名称" class="layui-input">\
                   </div>\
                 </div>\
                 <div class="layui-form-item">\
                   <label class="layui-form-label">附加信息</label>\
                   <div class="layui-input-block">\
-                    <input type="text" name="AppendInfo" lay-verify="title" autocomplete="off" placeholder="若插入选择框，请输入选项，各选项间以英文逗号隔开" class="layui-input">\
+                    <input type="text" name="AppendInfo" lay-verify="title" autocomplete="off" placeholder="若插入选择框，请输入各选项（以|隔开）" class="layui-input">\
                   </div>\
                 </div>\
                 <div class="layui-form-item"> \
@@ -183,7 +177,7 @@
               form.render();
             } else if (Fdata.LineType == "1"){
               var strs = new Array(); 
-              strs = Fdata.AppendInfo.split(","); 
+              strs = Fdata.AppendInfo.split("|");
               var ChoiceArr=new Array();
               strs.map(function(value,index,arr){
                 ChoiceArr.push({Choice:value});
@@ -196,13 +190,14 @@
               
               var modestr = '<div class="layui-form-item"> \
                   <label class="layui-form-label">' + Fdata.Info + '</label> \
-                  <div class="layui-input-block"> \
-                    <select name="example" lay-filter="show"> \
+                  <div class="layui-input-block" > \
+                    <select name="example" lay-filter="show" > \
                       <option value=""></option> ';
               strs.map(function(value,index,arr){
                 modestr += '<option value="' + index.toString() + '">' + value + '</option>';
               });               
               modestr += '</select> \
+                      <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
                   </div> \
                 </div>';
               $("#toAdd").append(modestr);

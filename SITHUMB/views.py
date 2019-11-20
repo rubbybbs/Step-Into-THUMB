@@ -29,8 +29,12 @@ def index(request):
     return render(request, "index.html")
 
 
-def activityAdd(request):
-    return render(request, "system_activityAdd.html")
+def activity(request):
+    return render(request, "activity.html")
+
+
+def application_form(request):
+    return render(request, "modify.html")
 
 
 class AuthAdminLogin(APIView):
