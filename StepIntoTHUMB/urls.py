@@ -21,9 +21,10 @@ from SITHUMB import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index),
-    path('activity', views.activity),
+    path('activity.html', views.activity),
     path('modify.html', views.application_form),
-
+    path('segment.html', views.application_segment),
+    path('accountManage.html', views.application_account),
     
     url(r'^Step-Into-THUMB/admin/login$', views.AuthAdminLogin.as_view()),
     url(r'^Step-Into-THUMB/admin/logintest$', views.LoginTest.as_view()),
@@ -31,9 +32,9 @@ urlpatterns = [
 
     url(r'^Step-Into-THUMB/admin/activity-list$', views.ActivityList.as_view()),
     # 类型 GET
-    url(r'^Step-Into-THUMB/admin/create-activity$', views.Activity.as_view()),
+    url(r'^Step-Into-THUMB/admin/create-activity$', views.ActivityResponse.as_view()),
     # 类型 POST 正文 含有活动名称、开始日期、结束日期的json
-    url(r'^Step-Into-THUMB/admin/delete-activity$', views.Activity.as_view()),
+    url(r'^Step-Into-THUMB/admin/delete-activity$', views.ActivityResponse.as_view()),
     # 类型 DELETE 参数 activityID
 
 

@@ -1,3 +1,5 @@
+{% load staticfiles %}
+
 <!DOCTYPE html>
 <html>
 
@@ -6,7 +8,7 @@
   <meta name="viewport"
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <title>管理员</title>
-  <link rel="stylesheet" href="../static/layui/css/layui.css" media="all">
+  <link rel="stylesheet" href="{% static "layui/css/layui.css" %}" media="all">
 </head>
 
 <body class="layui-layout-body">
@@ -134,7 +136,7 @@
 
   </div>
 
-  <script src="../static/layui/layui.js"></script>
+  <script src="{% static "layui/layui.js" %}"></script>
   <script>
     layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer'], function () {
       var form = layui.form,
@@ -145,8 +147,26 @@
 
       layer.ready(function () {
         layer.msg('初始化列表');
-
-
+        var Fdata = form.val('FormActivity');
+        $.ajax({
+              url: '/Step-Into-THUMB/admin/activity-list',
+              type: 'get',
+              contentType: 'application/x-www-form-urlencoded',
+              dataType: 'json',
+              headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+              },
+              success: function (data) {
+                if (data.status == 100) {
+                  layer.msg('获取成功');
+                  alert(JSON.stringify(data));
+                } else if (data.status == 404) {
+                  layer.msg('无表单');
+                } else {
+                  layer.msg('表单保存失败，请重试！');
+                }
+              }
+            });
       });
 
       $("#addActivity").click(function () {
@@ -188,10 +208,11 @@
           },
           btn: ['确认', '取消'],
           yes: function (index, layero) {
+            layer.close(index);
             var Fdata = form.val('FormActivity');
             alert(JSON.stringify(Fdata));
             $.ajax({
-              url: '/Step-Into-THUMB/admin/home/create-activity?name=' + Fdata.name + '&from=' + Fdata
+              url: '/Step-Into-THUMB/admin/create-activity?name=' + Fdata.name + '&from=' + Fdata
                 .from + '&to=' + Fdata.to,
               type: 'post',
               contentType: 'application/x-www-form-urlencoded',
@@ -202,13 +223,13 @@
               success: function (data) {
                 if (data.status == 100) {
                   layer.msg('表单保存成功');
+                  location.reload();
                 } else {
                   layer.msg('表单保存失败，请重试！');
                 }
               }
             });
-            layer.close(index);
-            location.reload();
+
           },
           btn2: function (index, layero) {}
         });

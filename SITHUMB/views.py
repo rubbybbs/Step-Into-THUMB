@@ -37,6 +37,14 @@ def application_form(request):
     return render(request, "modify.html")
 
 
+def application_segment(request):
+    return render(request, "segment.html")
+
+
+def application_account(request):
+    return render(request, "accountManage.html")
+
+
 class AuthAdminLogin(APIView):
     @csrf_exempt
     def post(self, request):
@@ -109,7 +117,7 @@ class ActivityList(APIView):
             return Response(response)
 
 
-class Activity(APIView):
+class ActivityResponse(APIView):
     def post(self, request):
         name = request.GET.get('name')
         from_date = parse_date(request.GET.get('from'))
