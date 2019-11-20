@@ -45,7 +45,7 @@ def application_account(request):
     return render(request, "accountManage.html")
 
 
-class AuthAdminLogin(APIView):
+class AuthAdminLoginView(APIView):
     @csrf_exempt
     def post(self, request):
         response = {"status": 100, "msg": None}
@@ -63,7 +63,7 @@ class AuthAdminLogin(APIView):
         return Response(response)
 
 
-class LoginTest(APIView):
+class LoginTestView(APIView):
     authentication_classes = [TokenAuth2]
 
     def get(self, request):
@@ -72,7 +72,7 @@ class LoginTest(APIView):
         return Response(response)
 
 
-class GetFormTest(APIView):
+class GetFormTestView(APIView):
     def get(self, request):
         response = {"status": 100, "form": None}
         response["form"] = {
@@ -96,7 +96,7 @@ class GetFormTest(APIView):
         return Response(response)
 
 
-class ActivityList(APIView):
+class ActivityListView(APIView):
     def get(self, request):
         response = {"status": 100, "msg": None, "activities": []}
         num = Activity.objects.count()
@@ -117,7 +117,7 @@ class ActivityList(APIView):
             return Response(response)
 
 
-class ActivityResponse(APIView):
+class ActivityView(APIView):
     def post(self, request):
         name = request.GET.get('name')
         from_date = parse_date(request.GET.get('from'))
@@ -134,7 +134,7 @@ class ActivityResponse(APIView):
         return Response(response)
 
 
-class RegistrationForm(APIView):
+class RegistrationFormView(APIView):
     def post(self, request, id):
         application_format = json.dumps(request.data)
         print(application_format)
@@ -149,7 +149,7 @@ class RegistrationForm(APIView):
         return Response(json.loads(activity.application_format))
 
 
-class ExaminerList(APIView):
+class ExaminerListView(APIView):
     def get(self, request, id):
         activity = Activity.objects.get(id=id)
 
@@ -173,7 +173,7 @@ class ExaminerList(APIView):
         # return Response(response)
 
 
-class Examiner(APIView):
+class ExaminerView(APIView):
     def post(self, request, id):
         username = request.GET.get('username')
         password = request.GET.get('password')
@@ -195,7 +195,7 @@ class Examiner(APIView):
         return Response(response)
 
 
-class SectionList(APIView):
+class SectionListView(APIView):
     def get(self, request, id):
         sections = Section.objects.filter(a_id=id)
         sections_info = []
@@ -204,7 +204,7 @@ class SectionList(APIView):
         return Response({"sections": sections_info})
 
 
-class Section(APIView):
+class SectionView(APIView):
     def post(self, request, id):
         name = request.GET.get('name')
         ac = Activity.objects.get(id=id)
@@ -223,7 +223,7 @@ class Section(APIView):
         return Response(response)
 
 
-class TranscriptForm(APIView):
+class TranscriptFormView(APIView):
     def post(self, request, id, sectionID):
         transcript_format = json.dumps(request.data)
         section = Section.objects.get(s_id=sectionID, a_id=id)
@@ -236,7 +236,7 @@ class TranscriptForm(APIView):
         return Response(json.loads(Section.objects.get(s_id=sectionID, a_id=id)))
 
 
-# class GetActivityDetail(APIView):
+# class GetActivityDetailView(APIView):
 #     def get(self, request):
 #         response = {"status": 100, "msg": None, "form": None, "sections": []}
 #         activity_id = request.GET.get('id')
@@ -257,7 +257,7 @@ class TranscriptForm(APIView):
 #         return Response(response)
 
 
-# class GetSection(APIView):
+# class GetSectionView(APIView):
 #     def get(self, request):
 #         # response = {"status": 100, "msg": None, "form": None, "sections": []}
 #         activity_id = request.GET.get('activityID')
@@ -275,7 +275,7 @@ class TranscriptForm(APIView):
 #
 #         # return Response(response)
 
-class Register(APIView):
+class RegisterView(APIView):
     def post(self, request):
         wx_id = request.GET.get('wxID')
         candidates = Candidate.objects.filter(wx_id=wx_id)
@@ -289,7 +289,7 @@ class Register(APIView):
         return Response(response)
 
 
-class Apply(APIView):
+class ApplyView(APIView):
     def post(self, request):
         wx_id = request.GET.get('wxID')
         candidate = Candidate.objects.get(wx_id=wx_id)
@@ -317,7 +317,7 @@ class Apply(APIView):
         return Response(response)
 
 
-class Status(APIView):
+class StatusView(APIView):
     def get(self, request):
         wx_id = request.GET.get('wxID')
         candidate = Candidate.objects.get(wx_id=wx_id)
@@ -327,7 +327,7 @@ class Status(APIView):
         return Response(response)
 
 
-class AuthExaminerLogin(APIView):
+class AuthExaminerLoginView(APIView):
     @csrf_exempt
     def post(self, request):
         response = {"status": 100, "msg": None}
@@ -345,7 +345,7 @@ class AuthExaminerLogin(APIView):
         return Response(response)
 
 
-class SectionExaminer(APIView):
+class SectionExaminerView(APIView):
     def get(self, request):
         response = {"status": 100, "msg": None, "sections": []}
         username = request.GET.get('username')
@@ -360,7 +360,7 @@ class SectionExaminer(APIView):
         return Response(response)
 
 
-class CandidateListExaminer(APIView):
+class CandidateListExaminerView(APIView):
     def get(self, request):
         response = {"status": 100, "msg": None, "candidates": []}
         s_id = request.GET.get('s_ID')
@@ -375,7 +375,7 @@ class CandidateListExaminer(APIView):
         return Response(response)
 
 
-class Transcript(APIView):
+class TranscriptView(APIView):
     def get(self, request):
         response = {"status": 100, "msg": None, "application": None, "transcript": None}
         wxID = request.GET.get("wxID")
