@@ -7,6 +7,10 @@
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <title>管理员</title>
   <link rel="stylesheet" href="../static/layui/css/layui.css" media="all">
+  <style type="text/css">
+    a{color:#009688;}
+    a:hover{color:#8ddad2;}
+  </style>
 </head>
 
 <body class="layui-layout-body">
@@ -15,6 +19,7 @@
       <div class="layui-logo"> <a href="activity.html">军乐队活动管理 </a></div>
 
       <ul class="layui-nav layui-layout-right">
+        
         <li class="layui-nav-item" lay-unselect="">
           <a href="javascript:;"><img src="../static/illust_72066950_20181219_203453.jpg" class="layui-nav-img">管理员</a>
           <dl class="layui-nav-child">
@@ -29,19 +34,16 @@
     <div class="layui-side layui-bg-black">
       <div class="layui-side-scroll">
         <ul class="layui-nav layui-nav-tree" lay-filter="test">
-          <li class="layui-nav-item layui-nav-itemed">
-
-            <dl class="layui-nav-child">
-              <dd><a href="modify.html">定制报名表</a></dd>
-              <dd><a href="segment.html">定制环节</a></dd>
-            </dl>
+          <li class="layui-nav-item">
+            <a href="modify.html">定制报名表</a>           
           </li>
-          <li class="layui-nav-item layui-nav-itemed">
-
-            <dl class="layui-nav-child">
-              <dd><a href="accountManage.html">考官账号管理</a></dd>
-            </dl>
+          <li class="layui-nav-item">
+            <a href="segment.html">定制环节</a>
           </li>
+          <li class="layui-nav-item">
+            <a href="accountManage.html">考官账号管理</a></dd>
+          </li>
+
         </ul>
       </div>
     </div>
@@ -51,27 +53,10 @@
         <div class="layui-row layui-col-space15">
           <div class="layui-col-md12">
             <div class="layui-card">
-
-                <button type="button" class="layui-btn" id="DeleteSegment">删除当前环节</button>
-                                 <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存当前环节</button>
-                                 <button type="button" class="layui-btn" id="NewSegment">添加新环节</button>
-
-                <!-- <div class="layui-card">
-                      <div class="layui-card-body">
-                          <div class="layui-form-item">
-                              <div class="layui-input-block">
-                                  <button type="button" class="layui-btn" id="DeleteSegment">删除当前环节</button>
-                                 <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存当前环节</button>
-                                 <button type="button" class="layui-btn" id="NewSegment">添加新环节</button>
-
-                              </div>
-                          </div>
-                      </div>
-                  </div> -->
-
-
               <div class="layui-card-body">
-                <form class="layui-form" action="" lay-filter="FormDesign"> {%  csrf_token %}
+                <form class="layui-form" action="" lay-filter="FormDesign"> {%  csrf_token %}                    
+                          
+
                   <div class="layui-card">
                     <div class="layui-card-body" id="toAdd">
                         <div class="layui-tab" lay-filter="activitySegment">
@@ -79,12 +64,17 @@
                             <ul class="layui-tab-title" id="titleToAdd">
                               <li class="layui-this" lay-id="0">初试</li>
                               <li lay-id="1">复试</li>
-
                             </ul>
+                            
+                            <div class="layui-form-item" style="margin-top: 15px;">
+                              <button type="button" class="layui-btn" id="DeleteSegment">删除当前环节</button>
+                              <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存当前环节</button>
+                              <button type="button" class="layui-btn" id="NewSegment">添加新环节</button>
+                            </div>
 
                             <div class="layui-tab-content" id="contentToAdd">
-                              <div class="layui-tab-item layui-show">内容1</div>
-                              <div class="layui-tab-item">内容2</div>
+                              <div class="layui-tab-item layui-show"></div>
+                              <div class="layui-tab-item"></div>
                             </div>
                         </div>
                     </div>
@@ -93,10 +83,7 @@
                   <div class="layui-card">
                       <div class="layui-card-body">
                           <div class="layui-form-item">
-                              <div class="layui-input-block">
                                 <button type="button" class="layui-btn" id="NewDataLine">添加新数据项</button>
-
-                              </div>
                           </div>
                       </div>
                   </div>      
@@ -229,17 +216,22 @@
                 Choices: ChoiceArr
               });
               
-              var modestr = '<div class="layui-form-item"> \
-                  <label class="layui-form-label">' + Fdata.Info + '</label> \
-                  <div class="layui-input-block"> \
-                    <select name="example" lay-filter="show"> \
-                      <option value=""></option> ';
-              strs.map(function(value,index,arr){
-                modestr += '<option value="' + index.toString() + '">' + value + '</option>';
-              });               
-              modestr += '</select> \
-              <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
-                  </div> \
+              var modestr = 
+                '<div class="layui-form-item"> \
+                  <div class="layui-inline">\
+                    <label class="layui-form-label">' + Fdata.Info + '</label> \
+                    <div class="layui-input-inline" > \
+                      <select name="example" lay-filter="show"> \
+                        <option value=""></option> ';
+                          strs.map(function(value,index,arr){
+                            modestr += '<option value="' + index.toString() + '">' + value + '</option>';
+                          });               
+                          modestr += '</select> \
+                    </div> \
+                  </div>\
+                  <div class="layui-inline" > \
+                    <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
+                  </div>\
                 </div>';
               $(".layui-show").append(modestr);
               //alert(modestr);

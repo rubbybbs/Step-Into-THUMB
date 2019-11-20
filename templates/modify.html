@@ -7,12 +7,16 @@
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <title>管理员</title>
   <link rel="stylesheet" href="../static/layui/css/layui.css" media="all">
+  <style type="text/css">
+    a{color:#009688;}
+    a:hover{color:#8ddad2;}
+  </style>
 </head>
 
 <body class="layui-layout-body">
   <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-        <div  class="layui-logo"> <a href="activity.html">军乐队活动管理 </a></div>
+        <div  class="layui-logo" > <a href="activity.html">军乐队活动管理 </a></div>
 
       <ul class="layui-nav layui-layout-right">
         <li class="layui-nav-item" lay-unselect="">
@@ -27,23 +31,20 @@
     </div>
 
     <div class="layui-side layui-bg-black">
-      <div class="layui-side-scroll">
-        <ul class="layui-nav layui-nav-tree" lay-filter="test">
-          <li class="layui-nav-item layui-nav-itemed">
-
-            <dl class="layui-nav-child">
-              <dd><a href="modify.html">定制报名表</a></dd>
-              <dd><a href="segment.html">定制环节</a></dd>
-            </dl>
-          </li>
-          <li class="layui-nav-item layui-nav-itemed">
-
-            <dl class="layui-nav-child">
-              <dd><a href="accountManage.html">考官账号管理</a></dd>
-            </dl>
-          </li>
-        </ul>
-      </div>
+        <div class="layui-side-scroll">
+          <ul class="layui-nav layui-nav-tree" lay-filter="test">
+            <li class="layui-nav-item">
+              <a href="modify.html">定制报名表</a>           
+            </li>
+            <li class="layui-nav-item">
+              <a href="segment.html">定制环节</a>
+            </li>
+            <li class="layui-nav-item">
+              <a href="accountManage.html">考官账号管理</a></dd>
+            </li>
+  
+          </ul>
+        </div>
     </div>
 
     <div class="layui-body" , lay-filter="graph">
@@ -188,17 +189,22 @@
                 Choices: ChoiceArr
               });
               
-              var modestr = '<div class="layui-form-item"> \
-                  <label class="layui-form-label">' + Fdata.Info + '</label> \
-                  <div class="layui-input-block" > \
-                    <select name="example" lay-filter="show" > \
-                      <option value=""></option> ';
-              strs.map(function(value,index,arr){
-                modestr += '<option value="' + index.toString() + '">' + value + '</option>';
-              });               
-              modestr += '</select> \
-                      <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
-                  </div> \
+              var modestr = 
+                '<div class="layui-form-item"> \
+                  <div class="layui-inline">\
+                    <label class="layui-form-label">' + Fdata.Info + '</label> \
+                    <div class="layui-input-inline" > \
+                      <select name="example" lay-filter="show"> \
+                        <option value=""></option> ';
+                          strs.map(function(value,index,arr){
+                            modestr += '<option value="' + index.toString() + '">' + value + '</option>';
+                          });               
+                          modestr += '</select> \
+                    </div> \
+                  </div>\
+                  <div class="layui-inline" > \
+                    <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
+                  </div>\
                 </div>';
               $("#toAdd").append(modestr);
               //alert(modestr);

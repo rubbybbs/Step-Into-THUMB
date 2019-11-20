@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>管理员</title>
+  <link rel="stylesheet" href="../static/layui/css/layui.css" media="all">
+</head>
+
+<body class="layui-layout-body">
+  <div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+      <div class="layui-logo">军乐团活动管理</div>
+
+      <ul class="layui-nav layui-layout-right">
+        <li class="layui-nav-item" lay-unselect="">
+          <a href="javascript:;"><img src="../static/illust_72066950_20181219_203453.jpg" class="layui-nav-img">管理员</a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;">修改信息</a></dd>
+            <dd><a href="javascript:;">安全管理</a></dd>
+            <dd><a href="index.html">退出</a></dd>
+          </dl>
+        </li>
+      </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+      <div class="layui-side-scroll">
+        <ul class="layui-nav layui-nav-tree" lay-filter="test">
+          <li class="layui-nav-item">
+            <a href="modify.html">定制报名表</a>           
+          </li>
+          <li class="layui-nav-item">
+            <a href="segment.html">定制环节</a>
+          </li>
+          <li class="layui-nav-item">
+            <a href="accountManage.html">考官账号管理</a></dd>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+
+    <div class="layui-body" , lay-filter="graph">
+      <div style="padding: 20px; background-color: #F2F2F2;">
+        <div class="layui-row layui-col-space15">
+          <div class="layui-col-md12">
+            <div class="layui-card">
+              <div class="layui-card-body">
+                <form class="layui-form" action="" lay-filter="FormDesign"> {%  csrf_token %}                    
+                  <div class="layui-card">
+                    <div class="layui-card-body" id="toAdd">
+                      <div class="layui-form-item">
+                          <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm" id="NewDataLine">添加新考官</button>
+                      </div>
+
+                      <!--  展示区  -->
+                      <table class="layui-table" lay-data="{height: 800, url:'Step-Into-THUMB/admin/activity/' + layui.data('LocalData').ActID + '/examiner-list'}" lay-filter="accountTable" id="accountTable">
+                        <thead>
+                            <tr>
+                              <th lay-data="{type:'numbers'}"></th>
+                              <th lay-data="{field:'username', width:'20%', style:'cursor: pointer;'}">用户名</th>
+                              <th lay-data="{field:'password', width:'30%', style:'cursor: pointer;'}">密码</th>
+                              <th lay-data="{field:'sections', width:'40%', style:'cursor: pointer;'}">环节</th>
+                              <th lay-data="{templet:'#bar', width:'10%', style:'cursor: pointer;'}">编辑</th>
+                            </tr>
+                        </thead>
+                      </table>
+                    </div>  
+                  </div>                                
+
+                       
+                </form>
+              </div>
+            </div>           
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+
+  <div class="layui-footer">
+    <!-- 底部固定区域 -->
+    © 小组：基于layui以及django
+  </div>
+  </div>
+   
+  <script type="text/html" id="bar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+  </script>
+
+  <script src="../static/layui/layui.js"></script>
+  <script>
+    var currentSegmentNum = 0;
+    var Quz = {
+          id:layui.data('LocalData').ActID,
+          question:new Array(),
+        };
+    var Segments = new Array();
+    layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer', 'table'], function () {
+      var form = layui.form,
+        layer = layui.layer,
+        $ = layui.jquery,
+        layedit = layui.layedit,
+        laydate = layui.laydate,
+        table = layui.table;
+
+
+      layer.ready(function(){
+        var LocalData=layui.data('LocalData');
+        layer.msg('初始化列表'+LocalData.ActID.toString());
+      });
+
+      //监听提交
+      table.on('tool(accountTable)', function(obj){
+        var data = obj.data;
+        if (obj.event === 'setSegment'){
+          layer.prompt({
+            formType: 2
+            ,title: '修改环节为：'
+            ,value: data.sections
+          }, function(value, index){
+            layer.close(index);
+            
+            //#TODO：发送修改的Ajax请求
+            
+
+            obj.update({
+              sections: value
+            });
+          });
+        }
+      });
+      
+      form.on('submit(submitForm)', function (data) {
+        // 创建活动的弹出层
+        layer.open({
+          id: "NewLineSet",
+          title: '新考官设置',
+          shadeClose: true,
+          shade: 0.8,
+          area: ['450px', '400px'],
+          content: '\
+            <form class="layui-form" action="" lay-filter="FormNewLine">{%  csrf_token %}\
+                <div class="layui-form-item">\
+                  <label class="layui-form-label">考官账号名称</label>\
+                  <div class="layui-input-block">\
+                    <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入名称" class="layui-input">\
+                  </div>\
+                </div>\
+                <div class="layui-form-item">\
+                  <label class="layui-form-label">考官密码</label>\
+                  <div class="layui-input-block">\
+                    <input type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入密码" class="layui-input">\
+                  </div>\
+                </div>\
+                <div class="layui-form-item"> \
+                  <label class="layui-form-label">选择环节</label> \
+                  <div class="layui-input-block"> \
+                    <select name="sections" lay-filter="sections"> \
+                      <option value="0">环节1</option>\
+                      <option value="1">环节2</option>\
+                    </select> \
+                  </div> \
+                </div>\
+            </form>',
+          success: function (layero, index) {
+            form.render();
+          },
+          btn: ['确认', '取消'],
+          yes: function (index, layero) {
+            var Fdata = form.val('FormNewLine');
+            
+            //#TODO 通过ajax获取数据并解析
+                       
+            layer.close(index);     
+            location.reload();       
+          },
+          btn2: function (index, layero) {}
+        });
+        
+        return false;
+      });
+
+    });
+
+    layui.use('element', function () {
+      var element = layui.element; //导航的hover效果、二级菜单等功能
+    });
+  </script>
+</body>
+
+</html>
