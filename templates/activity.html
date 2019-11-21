@@ -258,6 +258,27 @@
 
       $("#toAdd").on("click", "[name='DeleteActivity']", function () {
         layer.msg('删除活动');
+        var rawid = $(this).attr("id");
+        var id = rawid.split('_');
+        var Fdata = form.val('ActivityList');
+
+        $.ajax({
+              url: 'Step-Into-THUMB/admin/delete-activity?activityID=' + parseInt(id[1]),
+              type: 'delete',
+              contentType: 'application/x-www-form-urlencoded',
+              dataType: 'json',
+              headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+              },
+              success: function (data) {
+                if (data.status == 100) {
+                  layer.msg('删除成功');
+                  location.reload();
+                } else {
+                  layer.msg('删除失败，请重试！');
+                }
+              }
+            });
 
 
       });
@@ -269,8 +290,29 @@
       });
 
       $("#toAdd").on("click", "[name='LockActivity']", function () {
-        layer.msg('锁定活动内容');
+        layer.msg('发布活动');
+        var rawid = $(this).attr("id");
+        var id = rawid.split('_');
+        var Fdata = form.val('ActivityList');
 
+        $.ajax({
+              url: 'Step-Into-THUMB/admin/start-activity?activityID=' + parseInt(id[1]),
+              type: 'get',
+              contentType: 'application/x-www-form-urlencoded',
+              dataType: 'json',
+              headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+              },
+
+              success: function (data) {
+                if (data.status == 100) {
+                  layer.msg('发布成功');
+                  location.reload();
+                } else {
+                  layer.msg('发布失败，请重试！');
+                }
+              }
+            });
 
       });
 

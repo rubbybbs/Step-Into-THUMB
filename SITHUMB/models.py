@@ -12,7 +12,7 @@ class Activity(models.Model):
     name = models.CharField(max_length=100, default="")
     from_date = models.DateField(default=None)
     to_date = models.DateField(default=None)
-    application_format = models.TextField()
+    application_format = models.TextField(default="")
 
 
 class Section(models.Model):

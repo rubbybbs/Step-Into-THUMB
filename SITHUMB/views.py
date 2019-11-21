@@ -127,6 +127,10 @@ class ActivityView(APIView):
         name = request.GET.get('name')
         from_date = parse_date(request.GET.get('from'))
         to_date = parse_date(request.GET.get('to'))
+        if from_date == None or to_date == None:
+            from_date = parse_date("2000-01-01")
+            to_date = parse_date("2100-01-01")
+
         activity = Activity(name=name, from_date=from_date, to_date=to_date)
         activity.save()
         response = {"status": 100, "a_id": activity.id}
