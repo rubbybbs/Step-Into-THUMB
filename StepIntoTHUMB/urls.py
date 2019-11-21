@@ -37,10 +37,10 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/admin/delete-activity$', views.ActivityView.as_view()),
     # 类型 DELETE 参数 activityID
 
-    url(r'^Step-Into-THUMB/admin/start-status$', views.ActivityStatusView.as_view()),
-    # 类型 GET 参数 activityID
+    url(r'^Step-Into-THUMB/admin/start-activity$', views.ActivityStatusView.as_view()),
+    # 锁定报名表 发布活动 开始报名  类型 GET 参数 activityID
     url(r'^Step-Into-THUMB/admin/stop-activity$', views.ActivityStatusView.as_view()),
-    # 类型 POST 参数 activityID
+    # 结束报名  类型 POST 参数 activityID
 
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/save-registration-form$', views.RegistrationFormView.as_view()),
     # 类型 POST 正文 报名表的json

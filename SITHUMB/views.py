@@ -113,6 +113,7 @@ class ActivityListView(APIView):
             for obj in data:
                 json_obj = {
                     "id": obj.id,
+                    "status": obj.status,
                     "name": obj.name,
                     "from": obj.from_date,
                     "to": obj.to_date
@@ -159,10 +160,14 @@ class RegistrationFormView(APIView):
         application_format = json.dumps(request.data)
         print(application_format)
         activity = Activity.objects.get(id=id)
+        if activity.status != 0:
+            return Response({"status": 400})
+
         activity.application_format = application_format
         activity.save()
         response = {"status": 100, "msg": None}
         return Response(response)
+
 
     def get(self, request, id):
         activity = Activity.objects.get(id=id)
@@ -196,7 +201,7 @@ class ExaminerView(APIView):
         username = request.GET.get('username')
         password = request.GET.get('password')
         sections = request.data["sections"]
-        print(id, username, password)
+
         examiner = User(username=username, password=make_password(password))
         examiner.save()
         examiner.extension.activity = Activity.objects.get(id=id)
@@ -226,7 +231,7 @@ class SectionView(APIView):
     def post(self, request, id):
         name = request.GET.get('name')
         activity = Activity.objects.get(id=id)
-        section = Section(a_id=id, s_id=ac.section_cnt, name=name)
+        section = Section(a_id=id, s_id=activity.section_cnt, name=name)
         section.save()
         activity.section_cnt += 1
         activity.save()
