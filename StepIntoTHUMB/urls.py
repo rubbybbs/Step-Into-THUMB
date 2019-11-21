@@ -68,6 +68,11 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/save-transcript-form$', views.TranscriptFormView.as_view()),
     # 类型 POST 正文...
 
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/admission/admit$', views.AdmissionView.as_view()),
+    # 类型 GET  参数 wx_ID
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/admission/refuse$', views.AdmissionView.as_view()),
+    # 类型 POST 参数 wx_ID
+
     # url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/application$', views.GetActivityDetailView.as_view()),
 
     # activityID 使用 cur_activity_ID
@@ -75,6 +80,7 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/examiner/get-section$', views.SectionExaminerView.as_view()),
     url(r'^Step-Into-THUMB/examiner/get-candidate-list$', views.CandidateListExaminerView.as_view()),
     url(r'^Step-Into-THUMB/examiner/transcript$', views.TranscriptView.as_view()),
+
 
     url(r'^Step-Into-THUMB/candidate/register$', views.RegisterView.as_view()),
     # POST 参数：wxID
@@ -86,7 +92,5 @@ urlpatterns = [
     # GET 参数：activityID
     url(r'^Step-Into-THUMB/candidate/get-status$', views.StatusView.as_view()),
     # GET
-    url(r'^Step-Into-THUMB/candidate/login$', views.CandidateLoginView.as_view()),
-
-    url(r'^api-token-auth/', obtain_jwt_token),
+    url(r'^api-token-auth', obtain_jwt_token),
 ]

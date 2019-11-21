@@ -47,6 +47,7 @@ class Candidate(models.Model):
 
 class Application(models.Model):
     a_id = models.IntegerField(default=0)
+    admitted = models.BooleanField(default=False)
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='applications', null=True)
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='applications', null=True)
     examiners = models.ManyToManyField(Examiner)

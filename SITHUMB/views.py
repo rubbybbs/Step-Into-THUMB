@@ -167,7 +167,7 @@ class ActivityStatusView(APIView):
 class RegistrationFormView(APIView):
     def post(self, request, id):
         application_format = str(request.data).replace('\'', '"')
-        print(application_format)
+
         activity = Activity.objects.get(id=id)
         if activity.status != 0:
             return Response({"status": 400})
@@ -278,6 +278,23 @@ class TranscriptFormView(APIView):
         else:
             return Response({'form': transcript_format})
 
+
+class AdmissionView(APIView):
+    def post(self, request, id):
+        wx_id = request.GET.get("wx_id")
+        a = Application.objects.get(activity=id, candidate__wx_id=wx_id)
+        a.admitted = False
+        a.save()
+        return Response({"status": 100})
+
+    def get(self, request, id):
+        wx_id = request.GET.get("wx_id")
+        a = Application.objects.get(activity=id, candidate__wx_id=wx_id)
+        a.admitted = True
+        a.save()
+        return Response({"status": 100})
+
+
 class CandidateListForAdminView(APIView):
     def get(self, request):
         response = {"msg": None, "candidates": []}
@@ -302,14 +319,15 @@ class CandidateListForAdminView(APIView):
                 response["candidates"].append(json_obj)
         return Response(response)
 
+
 class CandidateDetailForAdminView(APIView):
     def get(self, request):
         response = {"msg": None, "candidate": None}
         wxID = request.GET.get("wxID")
         candidate = Application.objects.get(activity=cur_activity_id, candidate__wx_id=wxID)
         response["candidate"] = {
-            "application": json.loads(candidate.application_form),
-            "transcript": json.loads(candidate.transcript)
+            "application": candidate.application_form,
+            "transcript": candidate.transcript
         }
         return Response(response)
 
@@ -357,16 +375,19 @@ class CandidateDetailForAdminView(APIView):
 
 class RegisterView(APIView):
     def post(self, request):
-        wx_id = request.GET.get('wxID')
-        candidates = Candidate.objects.filter(wx_id=wx_id)
-
+        code = request.GET.get("code")
+        appID = "wxc9568dc74b390136"
+        appSecret = "1bdc626b0ea48761d84e4b1762c59641"
+        url = "https://api.weixin.qq.com/sns/jscode2session"
+        res = requests.get(url, appid=appID, secret=appSecret, js_code=code, grant_type="authorization_code")
+        openID = res["openid"]
+        candidates = Candidate.objects.filter(wx_id=openID)
         if len(candidates) == 0:
-            Candidate.objects.create(wx_id=wx_id)
-            response = {"status": 100, "msg": None}
+            Candidate.objects.create(wx_id=openID)
+            return Response({"status": 100, "openID": openID})
         else:
             response = {"status": 400, "msg": "Already exist"}
-
-        return Response(response)
+            return Response(response)
 
     def get(self, request):
         if cur_activity_id == -1:
@@ -479,8 +500,8 @@ class TranscriptView(APIView):
         response = {"status": 100, "msg": None, "application": None, "transcript": None}
         wxID = request.GET.get("wxID")
         candidate = Application.objects.get(candidate__wx_id=wxID, activity=cur_activity_id)
-        response["application"] = json.loads(candidate.application_form)
-        response["transcript"] = json.loads(candidate.transcript)
+        response["application"] = candidate.application_form
+        response["transcript"] = candidate.transcript
         return Response(response)
 
     def post(self, request):
@@ -494,21 +515,6 @@ class TranscriptView(APIView):
         transcrpit = json.loads(candidate.transcript)["sections"]
         for sec in transcrpit:
             if sec["s_ID"] == s_ID:
-                sec["form"] = request.body
+                sec["form"] = str(request.data).replace('\'', '"')
                 break
         return Response(response)
-
-
-class CandidateLogin(APIView):
-    def post(self, request):
-        code = request.GET.get("code")
-        appID = "wxc9568dc74b390136"
-        appSecret = "1bdc626b0ea48761d84e4b1762c59641"
-        url = "https://api.weixin.qq.com/sns/jscode2session"
-        res = requests.get(url, appid=appID, secret=appSecret, js_code=code, grant_type="authorization_code")
-        openID = res["openid"]
-        print(openID)
-        return Response({"openID": openID})
-
-
-
