@@ -32,11 +32,15 @@ urlpatterns = [
 
     url(r'^Step-Into-THUMB/admin/activity-list$', views.ActivityListView.as_view()),
     # 类型 GET
-    url(r'^Step-Into-THUMB/admin/create-activity$', views.ActivityResponseView.as_view()),
+    url(r'^Step-Into-THUMB/admin/create-activity$', views.ActivityView.as_view()),
     # 类型 POST 正文 含有活动名称、开始日期、结束日期的json
-    url(r'^Step-Into-THUMB/admin/delete-activity$', views.ActivityResponseView.as_view()),
+    url(r'^Step-Into-THUMB/admin/delete-activity$', views.ActivityView.as_view()),
     # 类型 DELETE 参数 activityID
 
+    url(r'^Step-Into-THUMB/admin/start-status$', views.ActivityStatusView.as_view()),
+    # 类型 GET 参数 activityID
+    url(r'^Step-Into-THUMB/admin/stop-activity$', views.ActivityStatusView.as_view()),
+    # 类型 POST 参数 activityID
 
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/save-registration-form$', views.RegistrationFormView.as_view()),
     # 类型 POST 正文 报名表的json
@@ -51,7 +55,6 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/delete-examiner$', views.ExaminerView.as_view()),
     # 类型 DELETE 参数 "username":
 
-
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section-list$', views.SectionListView.as_view()),
     # 类型 GET 返回 环节列表 {"sections": ["sectionID":, "name":]}
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/create-section$', views.SectionView.as_view()),
@@ -63,7 +66,6 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/save-transcript-form$', views.TranscriptFormView.as_view()),
     # 类型 POST 正文...
 
-
     # url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/application$', views.GetActivityDetailView.as_view()),
 
     # activityID 使用 cur_activity_ID
@@ -73,8 +75,13 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/examiner/transcript$', views.TranscriptView.as_view()),
 
     url(r'^Step-Into-THUMB/candidate/register$', views.RegisterView.as_view()),
+    # POST 参数：wxID
+    url(r'^Step-Into-THUMB/candidate/get-empty-form$', views.RegisterView.as_view()),
+    # GET
     url(r'^Step-Into-THUMB/candidate/submit-application$', views.ApplyView.as_view()),
-    # POST 正文：。。。
+    # POST 正文：报名表json
+    url(r'^Step-Into-THUMB/candidate/get-application$', views.ApplyView.as_view()),
+    # GET 参数：activityID
     url(r'^Step-Into-THUMB/candidate/get-status$', views.StatusView.as_view()),
     # GET
 

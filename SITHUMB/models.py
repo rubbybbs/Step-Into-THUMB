@@ -7,6 +7,7 @@ from django.db.models.signals import post_save
 
 class Activity(models.Model):
     id = models.AutoField(primary_key=True, unique=True)
+    status = models.IntegerField(default=0) # 0:活动制定中 1：活动发布 2：报名结束
     section_cnt = models.IntegerField(default=0)
     name = models.CharField(max_length=100, default="")
     from_date = models.DateField(default=None)

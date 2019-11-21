@@ -22,7 +22,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-cur_activity_id = 1
+cur_activity_id = -1
+try:
+    cur_activity_id = Activity.objects.get(status=1).id
+except Exception:
+    pass
 
 
 def index(request):
@@ -134,6 +138,22 @@ class ActivityView(APIView):
         return Response(response)
 
 
+class ActivityStatusView(APIView):
+    def get(self, request):
+        activity_id = request.GET.get("activityID")
+        a = Activity.objects.get(id=activity_id)
+        a.status = 1
+        response = {"status": 100, "a_id": activity_id}
+        return Response(response)
+
+    def post(self, request):
+        activity_id = request.GET.get("activityID")
+        a = Activity.objects.get(id=activity_id)
+        a.status = 2
+        response = {"status": 100, "a_id": activity_id}
+        return Response(response)
+
+
 class RegistrationFormView(APIView):
     def post(self, request, id):
         application_format = json.dumps(request.data)
@@ -170,8 +190,6 @@ class ExaminerListView(APIView):
                                        "sections": sections_info})
             return Response({"examiners": examiners_info})
 
-        # return Response(response)
-
 
 class ExaminerView(APIView):
     def post(self, request, id):
@@ -207,12 +225,12 @@ class SectionListView(APIView):
 class SectionView(APIView):
     def post(self, request, id):
         name = request.GET.get('name')
-        ac = Activity.objects.get(id=id)
+        activity = Activity.objects.get(id=id)
         section = Section(a_id=id, s_id=ac.section_cnt, name=name)
         section.save()
-        ac.section_cnt += 1
-        ac.save()
-        section.activity = ac
+        activity.section_cnt += 1
+        activity.save()
+        section.activity = activity
         section.save()
         response = {"status": 100, "msg": None}
         return Response(response)
@@ -288,14 +306,24 @@ class RegisterView(APIView):
 
         return Response(response)
 
+    def get(self, request):
+        if cur_activity_id == -1:
+            return Response({"status": 400})
+        a = Activity.objects.get(id=cur_activity_id)
+        return Response(json.loads(a.application_format))
+
 
 class ApplyView(APIView):
     def post(self, request):
+        if cur_activity_id == -1:
+            return Response({"status": 400})
+
         wx_id = request.GET.get('wxID')
         candidate = Candidate.objects.get(wx_id=wx_id)
         application_form = json.dumps(request.data)
         candidate.name = request.data["姓名"]
         candidate.student_id = request.data["学号"]
+
         activity = Activity.objects.get(id=cur_activity_id)
         try:
             application = candidate.applications.get(a_id=cur_activity_id)
@@ -309,16 +337,20 @@ class ApplyView(APIView):
         response = {"status": 100, "msg": None}
         return Response(response)
 
+
     def get(self, request):
         wx_id = request.GET.get('wxID')
         a_id = request.GET.get('activityID')
         candidate = Candidate.objects.get(wx_id=wx_id)
-        response = json.loads(candidate.applications.get(a_id=cur_activity_id).application_form)
+        response = json.loads(candidate.applications.get(a_id=a_id).application_form)
         return Response(response)
 
 
 class StatusView(APIView):
     def get(self, request):
+        if cur_activity_id == -1:
+            return Response({"status": 400})
+
         wx_id = request.GET.get('wxID')
         candidate = Candidate.objects.get(wx_id=wx_id)
         stage = candidate.applications.get(a_id=cur_activity_id).stage
@@ -377,6 +409,9 @@ class CandidateListExaminerView(APIView):
 
 class TranscriptView(APIView):
     def get(self, request):
+        if cur_activity_id == -1:
+            return Response({"status": 400})
+
         response = {"status": 100, "msg": None, "application": None, "transcript": None}
         wxID = request.GET.get("wxID")
         candidate = Application.objects.get(wxID=wxID, activity=cur_activity_id)
@@ -385,6 +420,9 @@ class TranscriptView(APIView):
         return Response(response)
 
     def post(self, request):
+        if cur_activity_id == -1:
+            return Response({"status": 400})
+
         response = {"status": 100, "msg": None}
         wxID = request.GET.get("wxID")
         s_ID = request.GET.get("s_ID")
