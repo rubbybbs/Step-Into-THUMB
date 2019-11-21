@@ -195,7 +195,9 @@ class ExaminerListView(APIView):
         else:
             examiners = activity.examiners.all()
             examiners_info = []
+            examiners_count = 0
             for e in examiners:
+                examiners_count += 1
                 sections = e.sections.all()
                 sections_info = []
                 for s in sections:
@@ -203,7 +205,7 @@ class ExaminerListView(APIView):
                 examiners_info.append({"username": e.username,
                                        "password": e.user.password,
                                        "sections": sections_info})
-            return Response({"examiners": examiners_info})
+            return Response({"code":0,"msg":"", "count": examiners_count, "data": examiners_info})
 
 
 class ExaminerView(APIView):
@@ -252,6 +254,9 @@ class SectionView(APIView):
 
     def delete(self, request, id, sectionID):
         Section.objects.filter(a_id=id, s_id=sectionID).delete()
+        activity = Activity.objects.get(id=id)
+        activity.section_cnt -= 1
+        activity.save()
         response = {"status": 100, "msg": None}
         return Response(response)
 
@@ -266,7 +271,11 @@ class TranscriptFormView(APIView):
         return Response(response)
 
     def get(self, request, id, sectionID):
-        return Response({'form': Section.objects.get(s_id=sectionID, a_id=id).transcript_format})
+        transcript_format = Section.objects.get(s_id=sectionID, a_id=id).transcript_format;
+        if transcript_format == '':
+            return Response({'form': '{"question":[]}'})
+        else:
+            return Response({'form': transcript_format})
 
 class CandidateListForAdminView(APIView):
     def get(self, request):

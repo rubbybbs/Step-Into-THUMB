@@ -62,9 +62,9 @@
                       <table class="layui-table" lay-data="{height: 800, url:'Step-Into-THUMB/admin/activity/' + layui.data('LocalData').ActID + '/examiner-list'}" lay-filter="accountTable" id="accountTable">
                         <thead>
                             <tr>
-                              <th lay-data="{type:'numbers'}"></th>
+                              <th lay-data="{type:'numbers', width:'10%'}"></th>
                               <th lay-data="{field:'username', width:'20%', style:'cursor: pointer;'}">用户名</th>
-                              <th lay-data="{field:'password', width:'30%', style:'cursor: pointer;'}">密码</th>
+                              <th lay-data="{field:'password', width:'20%', style:'cursor: pointer;'}">密码</th>
                               <th lay-data="{field:'sections', width:'40%', style:'cursor: pointer;'}">环节</th>
                               <th lay-data="{templet:'#bar', width:'10%', style:'cursor: pointer;'}">编辑</th>
                             </tr>
@@ -148,7 +148,7 @@
           title: '新考官设置',
           shadeClose: true,
           shade: 0.8,
-          area: ['450px', '400px'],
+          area: ['500px', '400px'],
           content: '\
             <form class="layui-form" action="" lay-filter="FormNewLine">{%  csrf_token %}\
                 <div class="layui-form-item">\
