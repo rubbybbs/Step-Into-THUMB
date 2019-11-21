@@ -148,6 +148,7 @@ class ActivityStatusView(APIView):
         activity_id = request.GET.get("activityID")
         a = Activity.objects.get(id=activity_id)
         a.status = 1
+        a.save();
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
@@ -155,13 +156,14 @@ class ActivityStatusView(APIView):
         activity_id = request.GET.get("activityID")
         a = Activity.objects.get(id=activity_id)
         a.status = 2
+        a.save();
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
 
 class RegistrationFormView(APIView):
     def post(self, request, id):
-        application_format = json.dumps(request.data)
+        application_format = str(request.data).replace('\'', '"')
         print(application_format)
         activity = Activity.objects.get(id=id)
         if activity.status != 0:
@@ -172,10 +174,12 @@ class RegistrationFormView(APIView):
         response = {"status": 100, "msg": None}
         return Response(response)
 
-
     def get(self, request, id):
         activity = Activity.objects.get(id=id)
-        return Response(json.loads(activity.application_format))
+        if activity.application_format == '':
+            return Response({'form': '{"question":[]}'})
+        else:
+            return Response({'form': activity.application_format})
 
 
 class ExaminerListView(APIView):
@@ -252,7 +256,7 @@ class SectionView(APIView):
 
 class TranscriptFormView(APIView):
     def post(self, request, id, sectionID):
-        transcript_format = json.dumps(request.data)
+        transcript_format = str(request.data).replace('\'', '"')
         section = Section.objects.get(s_id=sectionID, a_id=id)
         section.transcript_format = transcript_format
         section.save()
@@ -260,7 +264,8 @@ class TranscriptFormView(APIView):
         return Response(response)
 
     def get(self, request, id, sectionID):
-        return Response(json.loads(Section.objects.get(s_id=sectionID, a_id=id)))
+        Section.objects.get(s_id=sectionID, a_id=id)
+        return Response(json.loads())
 
 
 # class GetActivityDetailView(APIView):
@@ -345,7 +350,6 @@ class ApplyView(APIView):
             application.save()
         response = {"status": 100, "msg": None}
         return Response(response)
-
 
     def get(self, request):
         wx_id = request.GET.get('wxID')

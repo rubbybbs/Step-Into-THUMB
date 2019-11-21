@@ -132,8 +132,7 @@
 
       //监听提交
       form.on('submit(rootLogIn)', function (data) {
-        var data = form.val('loginf'); 
-        alert(JSON.stringify(data));
+        var data = form.val('loginf');
         
         $.ajax({
                 url:'/Step-Into-THUMB/admin/login?username='+data.account+'&password='+data.password,
@@ -146,7 +145,6 @@
                   password: data.password
                 },
                 success:function(data){
-                    alert(JSON.stringify(data));
                     if (data.msg == "登录成功") {
                         layer.msg('登录成功');
                         layui.data('locstore', {

@@ -111,16 +111,89 @@
 
       layer.ready(function(){
         var LocalData=layui.data('LocalData');
-        layer.msg('初始化列表'+LocalData.ActID.toString());
 
         //#TODO 通过ajax获取数据并解析
+        $.ajax({
+            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/get-registration-form',
+            type: 'get',
+            contentType: 'application/x-www-form-urlencoded',
+            dataType: 'json',
+            success: function (data) {
+                var str=data.form;
+                var obj=JSON.parse(str);
+                    obj.question.map(function(value){
+                    if (value.type=='Blank'){
+                        Quz["question"].push({
+                            name: value.name,
+                            type: "Blank"
+                          });
+                        $("#toAdd").append(
+                            '<div class="layui-form-item"> \
+                                <label class="layui-form-label">' + value.name + '</label> \
+                                <div class="layui-input-block"> \
+                                  <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
+                                  <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
+                                </div> \
+                            </div>'
+                        );
+                        form.render();
+                    } else if (value.type=='Choice'){
+                        Quz["question"].push({
+                            name: value.name,
+                            type: "Choice",
+                            Choices: value.Choices
+                          });
+                        var modestr =
+                            '<div class="layui-form-item"> \
+                              <div class="layui-inline">\
+                                <label class="layui-form-label">' + value.name + '</label> \
+                                <div class="layui-input-inline" > \
+                                  <select name="example" lay-filter="show"> \
+                                    <option value=""></option> ';
+                                      value.Choices.map(function(value,index,arr){
+                                        modestr += '<option value="' + index.toString() + '">' + value.Choice + '</option>';
+                                      });
+                                      modestr += '</select> \
+                                </div> \
+                              </div>\
+                              <div class="layui-inline" > \
+                                <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
+                              </div>\
+                            </div>';
+                          $("#toAdd").append(modestr);
+                          //alert(modestr);
+                          form.render();
+                    }
+                });
+            }
+        });
       });
 
       //监听提交
       form.on('submit(submitForm)', function (data) {
         alert(JSON.stringify(Quz));
-
+        var Fdata = form.val('FormDesign');
+        var LocalData=layui.data('LocalData');
         //#TODO 通过ajax获取数据并解析
+        $.ajax({
+            url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/save-registration-form',
+            type: 'post',
+            contentType: 'application/json',
+            dataType: 'json',
+            headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+            },
+            data:JSON.stringify(Quz),
+            success: function (data) {
+                if (data.status == 100) {
+                    layer.msg('获取成功');
+                } else {
+                    layer.msg('获取失败请重试');
+                }
+
+            }
+        });
+
         return false;
       });
 
@@ -223,7 +296,6 @@
         var topic = mParent.firstElementChild.innerText;
         var deleteIndex=-1;
         Quz['question'].map(function(value, index){
-          alert(topic);
           if (value.name == topic) {
             deleteIndex=index;    
           }

@@ -134,12 +134,25 @@
 
 
         // #TODO:接入接口
-        element.tabAdd('activitySegment', {
-              title: '新选项'+ (Math.random()*1000|0) //用于演示
-              ,content: '内容'+ (Math.random()*1000|0)
-              ,id: currentSegmentNum
+        $.ajax({
+            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
+            type: 'get',
+            contentType: 'application/x-www-form-urlencoded',
+            dataType: 'json',
+            success: function (data) {
+                data.sections.map(function(value)){
+                    element.tabAdd('activitySegment', {
+                      title: value.name
+                      ,content: function () {
+
+                        }
+                      ,id: value.sectionID
+                    });
+                }
+            }
         });
-        //#TODO 通过ajax获取数据并解析
+
+
       });
 
       //监听提交

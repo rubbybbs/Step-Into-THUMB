@@ -46,45 +46,6 @@
                 </div>
                 <div class="layui-card-body" id="toAdd">
 
-{#                  <blockquote class="layui-elem-quote layui-quote-nm" id="activity_2">#}
-{#                      <fieldset class="layui-elem-field layui-field-title" style="margin-bottom: 5px; margin-top: 5px;">#}
-{#                        <legend>#}
-{#                          <div class="layui-input-inline  layui-form-item">#}
-{#                            <label style="margin-right: 20px;">活动2</label>#}
-{#                            <button type="button" id="ModifyActivity_2" name="ModifyActivity"#}
-{#                              class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">#}
-{#                              <i class="layui-icon">&#xe642;</i>#}
-{#                            </button>#}
-{#                            <button type="button" id="DeleteActivity_2" name="DeleteActivity"#}
-{#                              class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">#}
-{#                              <i class="layui-icon">&#xe640;</i>#}
-{#                            </button>#}
-{#                            <button type="button" id="FinalCheckActivity_2" name="FinalCheckActivity"#}
-{#                              class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">#}
-{#                              <i class="layui-icon">&#xe63c;</i>#}
-{#                            </button>#}
-{#                            <button type="button" id="LockActivity_2" name="LockActivity"#}
-{#                              class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">#}
-{#                              <i class="layui-icon">&#xe679;</i>#}
-{#                            </button>#}
-{#                          </div>#}
-{#                        </legend>#}
-{#                      </fieldset>#}
-{#                      <div class="layui-collapse" lay-filter="test" style="margin-bottom: 5px;">#}
-{#                        <div class="layui-colla-item">#}
-{#                          <h2 class="layui-colla-title" style="background-color:white;">活动时间</h2>#}
-{#                          <div class="layui-colla-content layui-show">#}
-{#                            <p>5019.9.10-2019.10.1</p>#}
-{#                          </div>#}
-{#                        </div>#}
-{#                        <div class="layui-colla-item">#}
-{#                          <h2 class="layui-colla-title" style="background-color:white;">报名表状态</h2>#}
-{#                          <div class="layui-colla-content layui-show">#}
-{#                            <p>开放修改</p>#}
-{#                          </div>#}
-{#                        </div>#}
-{#                      </div>#}
-{#                    </blockquote>#}
                 </div>
               </div>
             </div>
@@ -120,13 +81,10 @@
                   layer.msg('获取成功');
 
                   data.activities.map(function(value,index){
-                      var modestr =
-                        '<blockquote class="layui-elem-quote layui-quote-nm" id="activity_' + value.id + '">\n' +
-                          '<fieldset class="layui-elem-field layui-field-title" style="margin-bottom: 5px; margin-top: 5px;">\n' +
-                              '<legend>\n' +
-                                '<div class="layui-input-inline  layui-form-item">\n' +
-                                    '<label style="margin-right: 20px;">' + value.name +'</label>\n' +
-                                    '<button type="button" id="Modifyactivity_' + value.id + '" name="ModifyActivity"\n' +
+                      var activityStatus='', buttonField='';
+                      if (value.status==0){
+                          activityStatus='活动制定中';
+                          buttonField='<button type="button" id="Modifyactivity_' + value.id + '" name="ModifyActivity"\n' +
                                     'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
                                         '<i class="layui-icon">&#xe642;</i>\n' +
                                     '</button>\n' +
@@ -134,14 +92,38 @@
                                         'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
                                         '<i class="layui-icon">&#xe640;</i>\n' +
                                     '</button>\n' +
-                                    '<button type="button" id="FinalCheckactivity_' + value.id + '" name="FinalCheckActivity"\n' +
-                                        'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
-                                        '<i class="layui-icon">&#xe63c;</i>\n' +
-                                    '</button>\n' +
                                     '<button type="button" id="Lockactivity_' + value.id + '" name="LockActivity"\n' +
                                         'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
                                         '<i class="layui-icon">&#xe679;</i>\n' +
+                                    '</button>\n';
+                      } else if (value.status==1){
+                          activityStatus='活动已发布';
+                          buttonField='<button type="button" id="Deleteactivity_' + value.id + '" name="DeleteActivity"\n' +
+                                        'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
+                                        '<i class="layui-icon">&#xe640;</i>\n' +
                                     '</button>\n' +
+                                    '<button type="button" id="Finishactivity_' + value.id + '" name="FinishActivity"\n' +
+                                        'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
+                                        '<i class="layui-icon">&#xe679;</i>\n' +
+                                    '</button>\n';
+                      } else if (value.status==2){
+                          activityStatus='报名结束';
+                          buttonField='<button type="button" id="Deleteactivity_' + value.id + '" name="DeleteActivity"\n' +
+                                        'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
+                                        '<i class="layui-icon">&#xe640;</i>\n' +
+                                    '</button>\n' +
+                                    '<button type="button" id="FinalCheckactivity_' + value.id + '" name="FinalCheckActivity"\n' +
+                                        'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
+                                        '<i class="layui-icon">&#xe63c;</i>\n' +
+                                    '</button>\n';
+                      }
+                      var modestr =
+                        '<blockquote class="layui-elem-quote layui-quote-nm" id="activity_' + value.id + '">\n' +
+                          '<fieldset class="layui-elem-field layui-field-title" style="margin-bottom: 5px; margin-top: 5px;">\n' +
+                              '<legend>\n' +
+                                '<div class="layui-input-inline  layui-form-item">\n' +
+                                    '<label style="margin-right: 20px;">' + value.name +'</label>\n'
+                                    + buttonField +
                                 '</div>\n' +
                               '</legend>\n' +
                           '</fieldset>\n' +
@@ -153,9 +135,9 @@
                                 '</div>\n' +
                             '</div>\n' +
                             '<div class="layui-colla-item">\n' +
-                                '<h2 class="layui-colla-title" style="background-color:white;">报名状态</h2>\n' +
+                                '<h2 class="layui-colla-title" style="background-color:white;">活动状态</h2>\n' +
                                 '<div class="layui-colla-content layui-show">\n' +
-                                    '<p>开放报名</p>\n' +
+                                    '<p>' + activityStatus + '</p>\n' +
                                 '</div>\n' +
                             '</div>\n' +
                           '</div>\n' +
@@ -241,14 +223,12 @@
         });
 
 
-        // #TODO:接入接口
       });
 
       $("#toAdd").on("click", "[name='ModifyActivity']", function () {
         var rawid = $(this).attr("id");
         layer.msg('更改活动' + rawid);
         var id = rawid.split('_');
-        // #TODO:本地储存id
         layui.data('LocalData', {
           key: 'ActID',
           value: parseInt(id[1])
@@ -310,6 +290,33 @@
                   location.reload();
                 } else {
                   layer.msg('发布失败，请重试！');
+                }
+              }
+            });
+
+      });
+
+      $("#toAdd").on("click", "[name='FinishActivity']", function () {
+        layer.msg('结束报名');
+        var rawid = $(this).attr("id");
+        var id = rawid.split('_');
+        var Fdata = form.val('ActivityList');
+
+        $.ajax({
+              url: 'Step-Into-THUMB/admin/stop-activity?activityID=' + parseInt(id[1]),
+              type: 'post',
+              contentType: 'application/x-www-form-urlencoded',
+              dataType: 'json',
+              headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+              },
+
+              success: function (data) {
+                if (data.status == 100) {
+                  layer.msg('结束报名成功');
+                  location.reload();
+                } else {
+                  layer.msg('操作失败，请重试！');
                 }
               }
             });
