@@ -50,6 +50,8 @@ def application_account(request):
     return render(request, "accountManage.html")
 
 
+# 管理员相关接口
+
 class AuthAdminLoginView(APIView):
     @csrf_exempt
     def post(self, request):
@@ -194,7 +196,9 @@ class ExaminerListView(APIView):
         else:
             examiners = activity.examiners.all()
             examiners_info = []
+            examiners_count = 0
             for e in examiners:
+                examiners_count += 1
                 sections = e.sections.all()
                 sections_info = []
                 for s in sections:
@@ -202,7 +206,7 @@ class ExaminerListView(APIView):
                 examiners_info.append({"username": e.username,
                                        "password": e.user.password,
                                        "sections": sections_info})
-            return Response({"examiners": examiners_info})
+            return Response({"code":0,"msg":"", "count": examiners_count, "data": examiners_info})
 
 
 class ExaminerView(APIView):
@@ -251,6 +255,9 @@ class SectionView(APIView):
 
     def delete(self, request, id, sectionID):
         Section.objects.filter(a_id=id, s_id=sectionID).delete()
+        activity = Activity.objects.get(id=id)
+        activity.section_cnt -= 1
+        activity.save()
         response = {"status": 100, "msg": None}
         return Response(response)
 
@@ -265,8 +272,46 @@ class TranscriptFormView(APIView):
         return Response(response)
 
     def get(self, request, id, sectionID):
-        return Response({'form': Section.objects.get(s_id=sectionID, a_id=id).transcript_format})
+        transcript_format = Section.objects.get(s_id=sectionID, a_id=id).transcript_format;
+        if transcript_format == '':
+            return Response({'form': '{"question":[]}'})
+        else:
+            return Response({'form': transcript_format})
 
+class CandidateListForAdminView(APIView):
+    def get(self, request):
+        response = {"msg": None, "candidates": []}
+        s_ID = request.GET.get("s_ID")
+        # stage和s_ID的对应关系还需要进一步确定
+        if s_ID == -1:
+            candidate_list = Application.objects.filter(activity=cur_activity_id)
+            for candidate in candidate_list:
+                json_obj = {
+                    "name": candidate.candidate.name,
+                    "ID": candidate.candidate.student_id
+                }
+                response["candidates"].append(json_obj)
+        else:
+            candidate_list = Application.objects.filter(activity=cur_activity_id, stage=s_ID)
+            for candidate in candidate_list:
+                json_obj = {
+                    "name": candidate.candidate.name,
+                    "ID": candidate.candidate.student_id,
+                    "wxID": candidate.candidate.wx_id
+                }
+                response["candidates"].append(json_obj)
+        return Response(response)
+
+class CandidateDetailForAdminView(APIView):
+    def get(self, request):
+        response = {"msg": None, "candidate": None}
+        wxID = request.GET.get("wxID")
+        candidate = Application.objects.get(activity=cur_activity_id, candidate__wx_id=wxID)
+        response["candidate"] = {
+            "application": json.loads(candidate.application_form),
+            "transcript": json.loads(candidate.transcript)
+        }
+        return Response(response)
 
 # class GetActivityDetailView(APIView):
 #     def get(self, request):
@@ -306,6 +351,8 @@ class TranscriptFormView(APIView):
 #             return Response({"name": name, "form": transcript_format})
 #
 #         # return Response(response)
+
+# 考生相关接口
 
 
 class RegisterView(APIView):
@@ -373,6 +420,9 @@ class StatusView(APIView):
         return Response(response)
 
 
+# 考官相关接口
+
+
 class AuthExaminerLoginView(APIView):
     @csrf_exempt
     def post(self, request):
@@ -413,9 +463,9 @@ class CandidateListExaminerView(APIView):
         candidate_list = Application.objects.filter(stage=s_id)
         for candidate in candidate_list:
             jsonobj = {
-                "name": candidate.name,
-                "ID": candidate.ID,
-                "wxID": candidate.wx_id
+                "name": candidate.candidate.name,
+                "ID": candidate.candidate.ID,
+                "wxID": candidate.candidate.wx_id
             }
             response["candidates"].append(jsonobj)
         return Response(response)
@@ -428,7 +478,7 @@ class TranscriptView(APIView):
 
         response = {"status": 100, "msg": None, "application": None, "transcript": None}
         wxID = request.GET.get("wxID")
-        candidate = Application.objects.get(wxID=wxID, activity=cur_activity_id)
+        candidate = Application.objects.get(candidate__wx_id=wxID, activity=cur_activity_id)
         response["application"] = json.loads(candidate.application_form)
         response["transcript"] = json.loads(candidate.transcript)
         return Response(response)
@@ -440,7 +490,7 @@ class TranscriptView(APIView):
         response = {"status": 100, "msg": None}
         wxID = request.GET.get("wxID")
         s_ID = request.GET.get("s_ID")
-        candidate = Application.objects.get(wxID=wxID, activity=cur_activity_id)
+        candidate = Application.objects.get(candidate__wx_id=wxID, activity=cur_activity_id)
         transcrpit = json.loads(candidate.transcript)["sections"]
         for sec in transcrpit:
             if sec["s_ID"] == s_ID:
