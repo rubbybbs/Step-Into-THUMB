@@ -148,7 +148,7 @@ class ActivityStatusView(APIView):
         activity_id = request.GET.get("activityID")
         a = Activity.objects.get(id=activity_id)
         a.status = 1
-        a.save();
+        a.save()
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
@@ -156,7 +156,7 @@ class ActivityStatusView(APIView):
         activity_id = request.GET.get("activityID")
         a = Activity.objects.get(id=activity_id)
         a.status = 2
-        a.save();
+        a.save()
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
@@ -264,8 +264,7 @@ class TranscriptFormView(APIView):
         return Response(response)
 
     def get(self, request, id, sectionID):
-        Section.objects.get(s_id=sectionID, a_id=id)
-        return Response(json.loads())
+        return Response({'form': Section.objects.get(s_id=sectionID, a_id=id).transcript_format})
 
 
 # class GetActivityDetailView(APIView):
@@ -334,7 +333,7 @@ class ApplyView(APIView):
 
         wx_id = request.GET.get('wxID')
         candidate = Candidate.objects.get(wx_id=wx_id)
-        application_form = json.dumps(request.data)
+        application_form = str(request.data).replace('\'', '"')
         candidate.name = request.data["姓名"]
         candidate.student_id = request.data["学号"]
 
@@ -355,7 +354,7 @@ class ApplyView(APIView):
         wx_id = request.GET.get('wxID')
         a_id = request.GET.get('activityID')
         candidate = Candidate.objects.get(wx_id=wx_id)
-        response = json.loads(candidate.applications.get(a_id=a_id).application_form)
+        response = {"form": candidate.applications.get(a_id=a_id).application_form}
         return Response(response)
 
 
