@@ -7,7 +7,7 @@ from django.db.models.signals import post_save
 
 class Activity(models.Model):
     id = models.AutoField(primary_key=True, unique=True)
-    status = models.IntegerField(default=0) # 0:活动制定中 1：活动发布 2：报名结束
+    status = models.IntegerField(default=0) # 0:活动制定中 1：活动发布
     section_cnt = models.IntegerField(default=0)
     name = models.CharField(max_length=100, default="")
     from_date = models.DateField(default=None)
@@ -28,6 +28,7 @@ class Examiner(models.Model):
     username = models.CharField(max_length=100, default="")
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='examiners', null=True)
     sections = models.ManyToManyField(Section)
+    examinees = models.TextField(default="")
 
 
 @receiver(post_save, sender=User)

@@ -17,6 +17,8 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path
 from SITHUMB import views
+from rest_framework_jwt.views import obtain_jwt_token
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -84,5 +86,7 @@ urlpatterns = [
     # GET 参数：activityID
     url(r'^Step-Into-THUMB/candidate/get-status$', views.StatusView.as_view()),
     # GET
+    url(r'^Step-Into-THUMB/candidate/login$', views.CandidateLoginView.as_view()),
 
+    url(r'^api-token-auth/', obtain_jwt_token),
 ]
