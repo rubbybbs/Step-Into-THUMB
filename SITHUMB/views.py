@@ -14,6 +14,7 @@ from SITHUMB import models
 from .models import *
 from SITHUMB.token_module import get_token, out_token
 from SITHUMB.authentication_module import TokenAuth2
+import requests
 
 import redis
 import json
@@ -306,6 +307,7 @@ class TranscriptFormView(APIView):
 #
 #         # return Response(response)
 
+
 class RegisterView(APIView):
     def post(self, request):
         wx_id = request.GET.get('wxID')
@@ -323,7 +325,7 @@ class RegisterView(APIView):
         if cur_activity_id == -1:
             return Response({"status": 400})
         a = Activity.objects.get(id=cur_activity_id)
-        return Response(json.loads(a.application_format))
+        return Response({"form": a.application_format})
 
 
 class ApplyView(APIView):
@@ -445,3 +447,18 @@ class TranscriptView(APIView):
                 sec["form"] = request.body
                 break
         return Response(response)
+
+
+class CandidateLogin(APIView):
+    def post(self, request):
+        code = request.GET.get("code")
+        appID = "wxc9568dc74b390136"
+        appSecret = "1bdc626b0ea48761d84e4b1762c59641"
+        url = "https://api.weixin.qq.com/sns/jscode2session"
+        res = requests.get(url, appid=appID, secret=appSecret, js_code=code, grant_type="authorization_code")
+        openID = res["openid"]
+        print(openID)
+        return Response({"openID": openID})
+
+
+
