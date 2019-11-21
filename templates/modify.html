@@ -112,7 +112,6 @@
       layer.ready(function(){
         var LocalData=layui.data('LocalData');
 
-        //#TODO 通过ajax获取数据并解析
         $.ajax({
             url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/get-registration-form',
             type: 'get',

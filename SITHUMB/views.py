@@ -250,6 +250,9 @@ class SectionView(APIView):
 
     def delete(self, request, id, sectionID):
         Section.objects.filter(a_id=id, s_id=sectionID).delete()
+        activity = Activity.objects.get(id=id)
+        activity.section_cnt -= 1
+        activity.save()
         response = {"status": 100, "msg": None}
         return Response(response)
 
@@ -264,7 +267,11 @@ class TranscriptFormView(APIView):
         return Response(response)
 
     def get(self, request, id, sectionID):
-        return Response({'form': Section.objects.get(s_id=sectionID, a_id=id).transcript_format})
+        transcript_format = Section.objects.get(s_id=sectionID, a_id=id).transcript_format;
+        if transcript_format == '':
+            return Response({'form': '{"question":[]}'})
+        else:
+            return Response({'form': transcript_format})
 
 
 # class GetActivityDetailView(APIView):

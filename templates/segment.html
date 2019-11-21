@@ -64,8 +64,8 @@
                         <div class="layui-tab" lay-filter="activitySegment">
 
                             <ul class="layui-tab-title" id="titleToAdd">
-                              <li class="layui-this" lay-id="0">初试</li>
-                              <li lay-id="1">复试</li>
+{#                              <li class="layui-this" lay-id="0">初试</li>#}
+{#                              <li lay-id="1">复试</li>#}
                             </ul>
                             
                             <div class="layui-form-item" style="margin-top: 15px;">
@@ -75,8 +75,8 @@
                             </div>
 
                             <div class="layui-tab-content" id="contentToAdd">
-                              <div class="layui-tab-item layui-show"></div>
-                              <div class="layui-tab-item"></div>
+{#                              <div class="layui-tab-item layui-show"></div>#}
+{#                              <div class="layui-tab-item"></div>#}
                             </div>
                         </div>
                     </div>
@@ -113,12 +113,7 @@
   <script src="{% static "layui/layui.js" %}"></script>
   <script>
     var currentSegmentNum = 0;
-    var Quz = new Array();
     var Segments = new Array();
-
-    //此处需删除
-    Quz.push({id:layui.data('LocalData').ActID,
-      question:new Array()});
 
     layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer', 'element'], function () {
       var form = layui.form,
@@ -132,23 +127,78 @@
         var LocalData=layui.data('LocalData');
         layer.msg('初始化列表'+LocalData.ActID.toString());
 
-
-        // #TODO:接入接口
         $.ajax({
             url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
             success: function (data) {
-                data.sections.map(function(value)){
-                    element.tabAdd('activitySegment', {
-                      title: value.name
-                      ,content: function () {
+                data.sections.map(function(value){
 
+                    $.ajax({
+                        url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ value.sectionID +'/get-transcript-form',
+                        type: 'get',
+                        contentType: 'application/x-www-form-urlencoded',
+                        dataType: 'json',
+                        success: function(data){
+                            var Quz=new Array();
+                                    var htmls='';
+                                    var str=data.form;
+                                    var obj=JSON.parse(str);
+                                    obj.question.map(function(value){
+                                        if (value.type=='Blank'){
+                                            Quz.push({
+                                                name: value.name,
+                                                type: "Blank"
+                                              });
+                                            htmls+=
+                                                '<div class="layui-form-item"> \
+                                                    <label class="layui-form-label">' + value.name + '</label> \
+                                                    <div class="layui-input-block"> \
+                                                      <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
+                                                      <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
+                                                    </div> \
+                                                </div>';
+                                        } else if (value.type=='Choice'){
+                                            Quz.push({
+                                                name: value.name,
+                                                type: "Choice",
+                                                Choices: value.Choices
+                                              });
+                                            var modestr =
+                                                '<div class="layui-form-item"> \
+                                                  <div class="layui-inline">\
+                                                    <label class="layui-form-label">' + value.name + '</label> \
+                                                    <div class="layui-input-inline" > \
+                                                      <select name="example" lay-filter="show"> \
+                                                        <option value=""></option> ';
+                                                          value.Choices.map(function(value,index,arr){
+                                                            modestr += '<option value="' + index.toString() + '">' + value.Choice + '</option>';
+                                                          });
+                                                          modestr += '</select> \
+                                                    </div> \
+                                                  </div>\
+                                                  <div class="layui-inline" > \
+                                                    <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
+                                                  </div>\
+                                                </div>';
+                                              htmls+=modestr;
+                                              //alert(modestr);
+                                        }
+                                    });
+
+                            element.tabAdd('activitySegment', {
+                              title: value.name
+                              ,content: htmls
+                              ,id: value.sectionID.toString()
+                            });
+                            element.tabChange('activitySegment', value.sectionID.toString());
+                            Segments.push({'sectionID': value.sectionID, 'question': Quz});
                         }
-                      ,id: value.sectionID
                     });
-                }
+
+                });
+                form.render();
             }
         });
 
@@ -157,9 +207,28 @@
 
       //监听提交
       form.on('submit(submitForm)', function (data) {
-        alert(JSON.stringify(Quz));
+        var LocalData=layui.data('LocalData');
+        var Fdata = form.val('FormDesign');
+        currentSegmentNum = parseInt($(".layui-this").attr("lay-id"));
+        $.ajax({
+            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ currentSegmentNum +'/save-transcript-form',
+            type: 'post',
+            contentType: 'application/json',
+            dataType: 'json',
+            headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+            },
+            data:JSON.stringify(Segments[currentSegmentNum]),
+            success: function (data) {
+                if (data.status == 100) {
+                    layer.msg('保存成功');
+                } else {
+                    layer.msg('保存失败请重试');
+                }
 
-        //#TODO 通过ajax获取数据并解析
+            }
+        });
+
         return false;
       });
 
@@ -202,9 +271,11 @@
           btn: ['确认', '取消'],
           yes: function (index, layero) {
             var Fdata = form.val('FormNewLine');
+            layer.close(index);
+            currentSegmentNum = parseInt($(".layui-this").attr("lay-id"));
 
             if (Fdata.LineType == "0") {
-              Quz[currentSegmentNum]["question"].push({
+              Segments[currentSegmentNum]["question"].push({
                 name: Fdata.Info,
                 type: "Blank"
               });
@@ -225,7 +296,7 @@
               strs.map(function(value,index,arr){
                 ChoiceArr.push({Choice:value});
               });
-              Quz[currentSegmentNum]["question"].push({
+              Segments[currentSegmentNum]["question"].push({
                 name: Fdata.Info,
                 type: "Choice",
                 Choices: ChoiceArr
@@ -252,7 +323,6 @@
               //alert(modestr);
               form.render();
             }
-            layer.close(index);
           },
           btn2: function (index, layero) {}
         });
@@ -263,14 +333,13 @@
         var topic = mParent.firstElementChild.innerText;
         var deleteIndex=-1;
         currentSegmentNum = parseInt($(".layui-this").attr("lay-id"));
-        Quz[currentSegmentNum]['question'].map(function(value, index){
-          alert(topic);
+        Segments[currentSegmentNum]['question'].map(function(value, index){
           if (value.name == topic) {
             deleteIndex=index;    
           }
         });
         if (deleteIndex!=-1){
-          Quz[currentSegmentNum]['question'].splice(deleteIndex, 1);
+          Segments[currentSegmentNum]['question'].splice(deleteIndex, 1);
         }
         
         mParent.remove();
@@ -299,12 +368,27 @@
           },
           btn: ['确认', '取消'],
           yes: function (index, layero) {
-            var Fdata = form.val('FormSegment');
-            alert(JSON.stringify(Fdata));
-            
-            // #TODO 接入接口
+            var Sdata = form.val('FormSegment');
+            var Fdata = form.val('FormDesign');
+            var LocalData=layui.data('LocalData');
             layer.close(index);
-            location.reload();
+            $.ajax({
+              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-section?name='+ Sdata.name,
+              type: 'post',
+              contentType: 'application/x-www-form-urlencoded',
+              dataType: 'json',
+              headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+              },
+              success: function (data) {
+                if (data.status == 100) {
+                  layer.msg('环节创建成功');
+                  location.reload();
+                } else {
+                  layer.msg('环节创建失败，请重试！');
+                }
+              }
+            });
           },
           btn2: function (index, layero) {}
         });
@@ -313,10 +397,27 @@
       
       $("#DeleteSegment").click(function(){
         var uid = $(".layui-this").attr("lay-id");
+        var Fdata = form.val('FormDesign');
+        var LocalData=layui.data('LocalData');
 
-        //#TODO 接入接口
-        Quz.splice(parseInt(uid),1);
-        element.tabDelete('activitySegment', uid);
+        $.ajax({
+              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ uid +'/delete-section',
+              type: 'delete',
+              contentType: 'application/x-www-form-urlencoded',
+              dataType: 'json',
+              headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+              },
+              success: function (data) {
+                if (data.status == 100) {
+                  layer.msg('删除成功');
+                  location.reload();
+                } else {
+                  layer.msg('删除失败，请重试！');
+                }
+              }
+            });
+
       });
 
 
