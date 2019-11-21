@@ -193,7 +193,9 @@ class ExaminerListView(APIView):
         else:
             examiners = activity.examiners.all()
             examiners_info = []
+            examiners_count = 0
             for e in examiners:
+                examiners_count += 1
                 sections = e.sections.all()
                 sections_info = []
                 for s in sections:
@@ -201,7 +203,7 @@ class ExaminerListView(APIView):
                 examiners_info.append({"username": e.username,
                                        "password": e.user.password,
                                        "sections": sections_info})
-            return Response({"examiners": examiners_info})
+            return Response({"code":0,"msg":"", "count": examiners_count, "data": examiners_info})
 
 
 class ExaminerView(APIView):
