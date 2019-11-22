@@ -17,7 +17,6 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path
 from SITHUMB import views
-from rest_framework_jwt.views import obtain_jwt_token
 
 
 urlpatterns = [
@@ -83,7 +82,7 @@ urlpatterns = [
 
 
     url(r'^Step-Into-THUMB/candidate/register$', views.RegisterView.as_view()),
-    # POST 参数：wxID
+    # POST 参数：code  返回 {"3rdsession":  }
     url(r'^Step-Into-THUMB/candidate/get-empty-form$', views.RegisterView.as_view()),
     # GET
     url(r'^Step-Into-THUMB/candidate/submit-application$', views.ApplyView.as_view()),
@@ -92,5 +91,5 @@ urlpatterns = [
     # GET 参数：activityID
     url(r'^Step-Into-THUMB/candidate/get-status$', views.StatusView.as_view()),
     # GET
-    url(r'^api-token-auth', obtain_jwt_token),
+
 ]

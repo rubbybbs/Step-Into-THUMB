@@ -381,13 +381,12 @@ class RegisterView(APIView):
         url = "https://api.weixin.qq.com/sns/jscode2session"
         res = requests.get(url, appid=appID, secret=appSecret, js_code=code, grant_type="authorization_code")
         openID = res["openid"]
+        session_key = res["session_key"]
+        trd_session = openID + session_key
         candidates = Candidate.objects.filter(wx_id=openID)
         if len(candidates) == 0:
             Candidate.objects.create(wx_id=openID)
-            return Response({"status": 100, "openID": openID})
-        else:
-            response = {"status": 400, "msg": "Already exist"}
-            return Response(response)
+        return Response({"3rdsession": trd_session})
 
     def get(self, request):
         if cur_activity_id == -1:
