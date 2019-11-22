@@ -149,6 +149,8 @@
           shadeClose: true,
           shade: 0.8,
           area: ['500px', '400px'],
+
+          // #TODO 获取环节
           content: '\
             <form class="layui-form" action="" lay-filter="FormNewLine">{%  csrf_token %}\
                 <div class="layui-form-item">\
@@ -179,11 +181,31 @@
           btn: ['确认', '取消'],
           yes: function (index, layero) {
             var Fdata = form.val('FormNewLine');
-            
-            //#TODO 通过ajax获取数据并解析
-                       
-            layer.close(index);     
-            location.reload();       
+            layer.close(index);
+            var LocalData=layui.data('LocalData');
+            var Sdata = form.val('FormActivity');
+            alert(JSON.stringify(Fdata));
+            // #TODO 修改ajax
+            $.ajax({
+              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-examiner?username='+Fdata.username+'&password='+Fdata.password,
+              type: 'post',
+              contentType: 'application/json',
+              dataType: 'json',
+              headers: {
+                'X-CSRFToken': Sdata.csrfmiddlewaretoken
+              },
+              data:{
+                "sections":[1]
+              },
+              success: function (data) {
+                if (data.status == 100) {
+                  layer.msg('表单保存成功');
+                  location.reload();
+                } else {
+                  layer.msg('表单保存失败，请重试！');
+                }
+              }
+            });
           },
           btn2: function (index, layero) {}
         });
