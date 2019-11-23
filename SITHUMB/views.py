@@ -215,7 +215,7 @@ class ExaminerView(APIView):
         password = request.GET.get('password')
         sections = request.data["sections"]
 
-        examiner = User(username=username, password=make_password(password))
+        examiner = User(username=username, password=password)
         examiner.save()
         examiner.extension.activity = Activity.objects.get(id=id)
         for s_id in sections:
@@ -224,9 +224,9 @@ class ExaminerView(APIView):
         response = {"status": 100, "msg": None}
         return Response(response)
 
-    def delete(self, request):
+    def delete(self, request, id):
         username = request.GET.get("username")
-        User.objects.filter(username=username).delete()
+        User.objects.filter(extension__activity__id=id, username=username).delete()
         response = {"status": 100, "msg": None}
         return Response(response)
 

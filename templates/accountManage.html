@@ -65,7 +65,14 @@
                               <th lay-data="{type:'numbers', width:'10%'}"></th>
                               <th lay-data="{field:'username', width:'20%', style:'cursor: pointer;'}">用户名</th>
                               <th lay-data="{field:'password', width:'20%', style:'cursor: pointer;'}">密码</th>
-                              <th lay-data="{field:'sections', width:'40%', style:'cursor: pointer;'}">环节</th>
+                              <th lay-data="{templet: function(d){
+                                var htmls='';
+                                d.sections.map(function(value, index, arr){
+                                    htmls+=value.name;
+                                    if (index!=arr.length-1) htmls+=', ';
+                                });
+                                return htmls;
+                              }, field:'sections', width:'40%', style:'cursor: pointer;'}">环节</th>
                               <th lay-data="{templet:'#bar', width:'10%', style:'cursor: pointer;'}">编辑</th>
                             </tr>
                         </thead>
@@ -93,12 +100,13 @@
     © 小组：基于layui以及django
   </div>
   </div>
-   
+
+
+  <script src="{% static "layui/layui.js" %}"></script>
   <script type="text/html" id="bar">
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
   </script>
 
-  <script src="{% static "layui/layui.js" %}"></script>
   <script>
     var currentSegmentNum = 0;
     var Quz = {
@@ -123,93 +131,110 @@
       //监听提交
       table.on('tool(accountTable)', function(obj){
         var data = obj.data;
-        if (obj.event === 'setSegment'){
-          layer.prompt({
-            formType: 2
-            ,title: '修改环节为：'
-            ,value: data.sections
-          }, function(value, index){
-            layer.close(index);
-            
-            //#TODO：发送修改的Ajax请求
-            
-
-            obj.update({
-              sections: value
-            });
-          });
-        }
-      });
-      
-      form.on('submit(submitForm)', function (data) {
-        // 创建活动的弹出层
-        layer.open({
-          id: "NewLineSet",
-          title: '新考官设置',
-          shadeClose: true,
-          shade: 0.8,
-          area: ['500px', '400px'],
-
-          // #TODO 获取环节
-          content: '\
-            <form class="layui-form" action="" lay-filter="FormNewLine">{%  csrf_token %}\
-                <div class="layui-form-item">\
-                  <label class="layui-form-label">考官账号名称</label>\
-                  <div class="layui-input-block">\
-                    <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入名称" class="layui-input">\
-                  </div>\
-                </div>\
-                <div class="layui-form-item">\
-                  <label class="layui-form-label">考官密码</label>\
-                  <div class="layui-input-block">\
-                    <input type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入密码" class="layui-input">\
-                  </div>\
-                </div>\
-                <div class="layui-form-item"> \
-                  <label class="layui-form-label">选择环节</label> \
-                  <div class="layui-input-block"> \
-                    <select name="sections" lay-filter="sections"> \
-                      <option value="0">环节1</option>\
-                      <option value="1">环节2</option>\
-                    </select> \
-                  </div> \
-                </div>\
-            </form>',
-          success: function (layero, index) {
-            form.render();
-          },
-          btn: ['确认', '取消'],
-          yes: function (index, layero) {
-            var Fdata = form.val('FormNewLine');
-            layer.close(index);
-            var LocalData=layui.data('LocalData');
-            var Sdata = form.val('FormActivity');
-            alert(JSON.stringify(Fdata));
-            // #TODO 修改ajax
+        var Sdata = form.val('FormDesign');
+        var LocalData=layui.data('LocalData');
+        if (obj.event === 'del'){
             $.ajax({
-              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-examiner?username='+Fdata.username+'&password='+Fdata.password,
-              type: 'post',
-              contentType: 'application/json',
+              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/delete-examiner?username='+ data.username,
+              type: 'delete',
+              contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',
               headers: {
                 'X-CSRFToken': Sdata.csrfmiddlewaretoken
               },
-              data:{
-                "sections":[1]
-              },
               success: function (data) {
                 if (data.status == 100) {
-                  layer.msg('表单保存成功');
+                  layer.msg('删除成功');
                   location.reload();
                 } else {
-                  layer.msg('表单保存失败，请重试！');
+                  layer.msg('删除失败，请重试！');
                 }
               }
             });
-          },
-          btn2: function (index, layero) {}
+        }
+      });
+      
+      form.on('submit(submitForm)', function (data) {
+         var LocalData=layui.data('LocalData');
+         var sectionHtml='<div class="layui-form-item"> \
+                  <label class="layui-form-label">选择环节</label> \
+                  <div class="layui-input-block">';
+         $.ajax({
+            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
+            type: 'get',
+            contentType: 'application/x-www-form-urlencoded',
+            dataType: 'json',
+            success: function (data) {
+                data.sections.map(function(value){
+                    sectionHtml+='<input type="checkbox" name="section" value="'+ value.sectionID +'" title="'+ value.name +'">';
+                });
+
+                sectionHtml+= '</select> \
+                  </div> \
+                </div>';
+
+                // 创建活动的弹出层
+                layer.open({
+                  id: "NewLineSet",
+                  title: '新考官设置',
+                  shadeClose: true,
+                  shade: 0.8,
+                  area: ['500px', '400px'],
+                  content: '\
+                    <form class="layui-form" action="" lay-filter="FormNewLine">{%  csrf_token %}\
+                        <div class="layui-form-item">\
+                          <label class="layui-form-label">账号名称</label>\
+                          <div class="layui-input-block">\
+                            <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入名称" class="layui-input">\
+                          </div>\
+                        </div>\
+                        <div class="layui-form-item">\
+                          <label class="layui-form-label">账号密码</label>\
+                          <div class="layui-input-block">\
+                            <input type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入密码" class="layui-input">\
+                          </div>\
+                        </div>'+ sectionHtml +'</form>',
+                  success: function (layero, index) {
+                    form.render();
+                  },
+                  btn: ['确认', '取消'],
+                  yes: function (index, layero) {
+                    var Fdata = form.val('FormNewLine');
+                    var section = new Array();
+                    $("input:checkbox[name='section']:checked").each(function () {
+                        section.push($(this).val());
+                    });
+                    layer.close(index);
+                    var LocalData=layui.data('LocalData');
+                    var Sdata = form.val('FormDesign');
+                    alert(JSON.stringify(Fdata));
+
+                    $.ajax({
+                      url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-examiner?username='+Fdata.username+'&password='+Fdata.password,
+                      type: 'post',
+                      contentType: 'application/json',
+                      dataType: 'json',
+                      headers: {
+                        'X-CSRFToken': Sdata.csrfmiddlewaretoken
+                      },
+                      data:JSON.stringify({
+                        "sections":section
+                      }),
+                      success: function (data) {
+                        if (data.status == 100) {
+                          layer.msg('表单保存成功');
+                          location.reload();
+                        } else {
+                          layer.msg('表单保存失败，请重试！');
+                        }
+                      }
+                    });
+                  },
+                  btn2: function (index, layero) {}
+                });
+            }
         });
-        
+
         return false;
       });
 
