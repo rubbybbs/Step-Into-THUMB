@@ -34,6 +34,7 @@ App({
     })
   },
   globalData: { //用户信息
-    userInfo: null
+    userInfo: null,
+    flag: false
   }
 })

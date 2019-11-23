@@ -1,1 +1,6 @@
 /* pages/form/form.wxss */
+@import '../../style/weui.wxss';
+
+.page {
+  height: 100%;
+}
