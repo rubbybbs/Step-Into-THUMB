@@ -31,3 +31,7 @@
   position: fixed;
   bottom: 40rpx;
 }
+
+.button {
+  width: 35%;
+}

@@ -375,18 +375,22 @@ class CandidateDetailForAdminView(APIView):
 
 class RegisterView(APIView):
     def post(self, request):
-        code = request.GET.get("code")
+        code = request.data["code"]
+
+        print(code)
         appID = "wxc9568dc74b390136"
         appSecret = "1bdc626b0ea48761d84e4b1762c59641"
         url = "https://api.weixin.qq.com/sns/jscode2session"
-        res = requests.get(url, appid=appID, secret=appSecret, js_code=code, grant_type="authorization_code")
-        openID = res["openid"]
-        session_key = res["session_key"]
+        res = requests.get(url+"?appid="+appID+"&secret="+appSecret+"&js_code="+code+"&grant_type=authorization_code")
+        ress = json.loads(res.text)
+        openID = ress["openid"]
+        session_key = ress["session_key"]
         trd_session = openID + session_key
+        print(trd_session)
         candidates = Candidate.objects.filter(wx_id=openID)
         if len(candidates) == 0:
             Candidate.objects.create(wx_id=openID)
-        return Response({"3rdsession": trd_session})
+        return Response({"session": trd_session})
 
     def get(self, request):
         if cur_activity_id == -1:
