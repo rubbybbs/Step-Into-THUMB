@@ -54,6 +54,14 @@ def application_finalcheck(request):
     return render(request, "finalcheck.html")
 
 
+def application_detail(request):
+    return render(request, "examinerDetail.html")
+
+
+def application_score(request):
+    return render(request, "score.html")
+
+
 # 管理员相关接口
 
 class AuthAdminLoginView(APIView):

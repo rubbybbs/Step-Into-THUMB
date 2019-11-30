@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <meta name="viewport"
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>管理员</title>
+  <title>考官</title>
   <link rel="stylesheet" href="{% static "layui/css/layui.css" %}" media="all">
   <style type="text/css">
     a{color:#009688;}
@@ -23,7 +23,7 @@
       <ul class="layui-nav layui-layout-right">
         
         <li class="layui-nav-item" lay-unselect="">
-          <a href="javascript:;"><img src="../static/illust_72066950_20181219_203453.jpg" class="layui-nav-img">管理员</a>
+          <a href="javascript:;"><img src="../static/illust_72066950_20181219_203453.jpg" class="layui-nav-img">考官</a>
           <dl class="layui-nav-child">
             <dd><a href="javascript:;">修改信息</a></dd>
             <dd><a href="javascript:;">安全管理</a></dd>
@@ -38,46 +38,17 @@
         <div class="layui-row layui-col-space15">
           <div class="layui-col-md12">
             <div class="layui-card">
-              <div class="layui-card-header">活动报名人员终评</div>
+              <div class="layui-card-header">活动报名人员评价</div>
               <div class="layui-card-body">
-                <form class="layui-form" action="" lay-filter="FormDesign"> {%  csrf_token %}                    
-                          
+                <form class="layui-form" action="" lay-filter="FormDesign"> {%  csrf_token %}
 
                   <div class="layui-card">
                     <div class="layui-card-body" id="toAdd">
                         <div class="layui-tab" lay-filter="activitySegment">
-
                             <ul class="layui-tab-title" id="titleToAdd">
-                                <li class="layui-this" lay-id="100">全部</li>
-                                <li lay-id="101">最终录取</li>
                             </ul>
-                            
 
                             <div class="layui-tab-content" id="contentToAdd">
-                                <div class="layui-tab-item layui-show">
-                                    <table class="layui-table" lay-data="{height: 900, url:''}" lay-filter="accountTable" id="accountTable">
-                                      <thead>
-                                          <tr>
-                                            <th lay-data="{type:'numbers', width:'10%'}"></th>
-                                            <th lay-data="{field:'', width:'30%', style:'cursor: pointer;'}">姓名</th>
-                                            <th lay-data="{field:'', width:'40%', style:'cursor: pointer;'}">学号</th>
-                                            <th lay-data="{templet:'#bar', width:'20%', style:'cursor: pointer;'}">编辑</th>
-                                          </tr>
-                                      </thead>
-                                    </table>
-                                </div>
-                                <div class="layui-tab-item">
-                                    <table class="layui-table" lay-data="{height: 900, url:''}" lay-filter="FinalAdmit" id="FinalAdmit">
-                                      <thead>
-                                          <tr>
-                                            <th lay-data="{type:'numbers', width:'10%'}"></th>
-                                            <th lay-data="{field:'', width:'30%', style:'cursor: pointer;'}">姓名</th>
-                                            <th lay-data="{field:'', width:'40%', style:'cursor: pointer;'}">学号</th>
-                                            <th lay-data="{templet:'#bar', width:'20%', style:'cursor: pointer;'}">编辑</th>
-                                          </tr>
-                                      </thead>
-                                    </table>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -126,7 +97,7 @@
         layer.msg('初始化列表'+LocalData.ActID.toString());
 
         $.ajax({
-            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
+            url: '',
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
@@ -196,7 +167,7 @@
         } else if (obj.event === 'refuse'){
           // #TODO ajax请求
 
-        };
+        }
       });
     });
 
