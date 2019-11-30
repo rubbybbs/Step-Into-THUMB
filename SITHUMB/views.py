@@ -50,6 +50,10 @@ def application_account(request):
     return render(request, "accountManage.html")
 
 
+def application_finalcheck(request):
+    return render(request, "finalcheck.html")
+
+
 # 管理员相关接口
 
 class AuthAdminLoginView(APIView):

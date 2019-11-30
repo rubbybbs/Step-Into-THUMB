@@ -26,6 +26,7 @@ urlpatterns = [
     path('modify.html', views.application_form),
     path('segment.html', views.application_segment),
     path('accountManage.html', views.application_account),
+    path('finalcheck.html', views.application_finalcheck),
     
     url(r'^Step-Into-THUMB/admin/login$', views.AuthAdminLoginView.as_view()),
     url(r'^Step-Into-THUMB/admin/logintest$', views.LoginTestView.as_view()),
