@@ -7,7 +7,7 @@ Page({
    * 页面的初始数据
    */
   data: {
-    ques: [],
+    questions: [],
   },
   initForm(form) {
     
@@ -24,17 +24,44 @@ Page({
       },
       success: function (res) {
         //console.log(res.data["form"])]
-        let Form = JSON.parse(res.data["form"])
-        console.log(Form)
-        let gen = []
+        let Form = JSON.parse(res.data["form"]);
+        console.log(Form);
+        let gen = [];
         for (let x in Form['question']) {
           console.log(Form['question'][x])
-          let ques = Form['question'][x]
+          let ques = Form['question'][x];
+          if (ques.type=="Choice") {
+            ques["changeFunc"] = "bindChange" + x;
+            ques["ChoiceIndex"] = 1;
+            ques["ChoicesArray"] = [];
+            for (let item in ques.Choices) {
+              console.log("!", ques.Choices[item]);
+              ques.ChoicesArray.push(ques.Choices[item].Choice);
+            }
+            console.log(ques.Choices)
+            
+            _this[ques["changeFunc"]] = function(e) {
+              console.log(e)
+              console.log(ques.name, '发生选择改变，携带值为', e.detail.value);
+              let tmp = this.data.questions;
+              tmp[x]["ChoiceIndex"] = e.detail.value;
+              _this.setData({
+                questions: tmp
+              })
+              console.log(_this.data.questions[x].ChoicesArray)
+              /*
+              let tmp = "bindChange" + x
+              _this.setData({
+                [tmp]: e.detail.value
+              });*/
+            }
+            console.log("changeFunc", "bindChange" + x)
+          }
           gen.push(ques)
         }
-        console.log(gen)
+        console.log("gen",gen)
         _this.setData({
-          ques: gen
+          questions: gen
         })
       }
     })
@@ -89,7 +116,16 @@ Page({
 
   },
 
+  bindChange0: function (e) {
+    console.log(e)
+    console.log('picker country 发生选择改变，携带值为', e.detail.value);
+
+    
+  },
+
   formSubmit: function (e) {
     console.log(e)
-  }
+    console.log(this.data.temp)
+    console.log(this.data.questions[2].ChoicesArray[this.data.Index])
+  },
 })

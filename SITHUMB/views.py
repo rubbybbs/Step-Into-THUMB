@@ -389,8 +389,7 @@ class RegisterView(APIView):
         ress = json.loads(res.text)
         openID = ress["openid"]
         session_key = ress["session_key"]
-        trd_session = openID + session_key
-        print(trd_session)
+        trd_session = openID + "-" + session_key
         candidates = Candidate.objects.filter(wx_id=openID)
         if len(candidates) == 0:
             Candidate.objects.create(wx_id=openID)
@@ -408,7 +407,8 @@ class ApplyView(APIView):
         if cur_activity_id == -1:
             return Response({"status": 400})
 
-        wx_id = request.GET.get('wxID')
+        session = request.GET.get('session')
+        wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
         application_form = str(request.data).replace('\'', '"')
         candidate.name = request.data["姓名"]
@@ -428,10 +428,14 @@ class ApplyView(APIView):
         return Response(response)
 
     def get(self, request):
-        wx_id = request.GET.get('wxID')
-        a_id = request.GET.get('activityID')
+        if cur_activity_id == -1:
+            return Response({"status": 400})
+
+        session = request.GET.get('session')
+        wx_id = session.split("-")[0]
+
         candidate = Candidate.objects.get(wx_id=wx_id)
-        response = {"form": candidate.applications.get(a_id=a_id).application_form}
+        response = {"form": candidate.applications.get(a_id=cur_activity_id).application_form}
         return Response(response)
 
 
@@ -440,7 +444,8 @@ class StatusView(APIView):
         if cur_activity_id == -1:
             return Response({"status": 400})
 
-        wx_id = request.GET.get('wxID')
+        session = request.GET.get('session')
+        wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
         stage = candidate.applications.get(a_id=cur_activity_id).stage
         section = Section.objects.get(a_id=cur_activity_id, s_id=stage)
