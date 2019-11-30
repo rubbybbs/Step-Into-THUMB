@@ -86,10 +86,10 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/candidate/get-empty-form$', views.RegisterView.as_view()),
     # GET
     url(r'^Step-Into-THUMB/candidate/submit-application$', views.ApplyView.as_view()),
-    # POST 正文：报名表json
+    # POST 参数:session  正文：报名表json
     url(r'^Step-Into-THUMB/candidate/get-application$', views.ApplyView.as_view()),
-    # GET 参数：activityID
+    # GET 参数：session
     url(r'^Step-Into-THUMB/candidate/get-status$', views.StatusView.as_view()),
-    # GET
+    # GET 参数：session
 
 ]
