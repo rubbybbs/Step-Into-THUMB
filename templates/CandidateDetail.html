@@ -194,13 +194,14 @@
           var LocalData = layui.data('LocalData');
           var currentSudent = LocalData.wxID;
           var currentSegment = LocalData.currentSegment;
+          var currentUser = LocalData.username;
           var Fdata = form.val('SegmentList');
           var Sdata = form.val('FormSubmit');
           scoreForm.map(function(value){
               value['answer'] = Sdata[value['name']];
           });
           $.ajax({
-              url: 'Step-Into-THUMB/examiner/transcript?wxID=' + currentSudent + '&s_ID=' + currentSegment,
+              url: 'Step-Into-THUMB/examiner/transcript?wxID=' + currentSudent + '&s_ID=' + currentSegment + '&username=' + currentUser,
               type: 'post',
               contentType: 'application/json',
               headers: {
