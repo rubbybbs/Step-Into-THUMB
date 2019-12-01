@@ -148,6 +148,9 @@ class ActivityView(APIView):
 
         activity = Activity(name=name, from_date=from_date, to_date=to_date)
         activity.save()
+        activity.application_format = "{\"id\":"+str(activity.id)+", \"question\": [{\"name\": \"姓名\", \"type\": " \
+                                                             "\"Blank\"}, {\"name\": \"学号\", \"type\": \"Blank\"}]} "
+        activity.save()
         response = {"status": 100, "a_id": activity.id}
         return Response(response)
 
@@ -428,23 +431,27 @@ class ApplyView(APIView):
         except:
             application = Application(a_id=cur_activity_id, candidate=candidate,
                                       application_form=application_form, activity=activity)
-            application.save()
+
         else:
             application.application_form = application_form
-            application.save()
+        sections = []
+        for sec in activity.sections:
+            sections.append(sec.transcript_format)
+        application.transcript = str({"sections": sections})
+        application.save()
         response = {"status": 100, "msg": None}
         return Response(response)
 
-    def get(self, request):
-        if cur_activity_id == -1:
-            return Response({"status": 400})
-
-        session = request.GET.get('session')
-        wx_id = session.split("-")[0]
-
-        candidate = Candidate.objects.get(wx_id=wx_id)
-        response = {"form": candidate.applications.get(a_id=cur_activity_id).application_form}
-        return Response(response)
+    # def get(self, request):
+    #     if cur_activity_id == -1:
+    #         return Response({"status": 400})
+    #
+    #     session = request.GET.get('session')
+    #     wx_id = session.split("-")[0]
+    #
+    #     candidate = Candidate.objects.get(wx_id=wx_id)
+    #     response = {"form": candidate.applications.get(a_id=cur_activity_id).application_form}
+    #     return Response(response)
 
 
 class StatusView(APIView):
@@ -534,7 +541,9 @@ class TranscriptView(APIView):
         candidate = Application.objects.get(candidate__wx_id=wxID, activity=cur_activity_id)
         transcrpit = json.loads(candidate.transcript)["sections"]
         for sec in transcrpit:
-            if sec["s_ID"] == s_ID:
-                sec["form"] = str(request.data).replace('\'', '"')
+            if sec["sectionID"] == s_ID:
+                sec["answer"] = str(request.data).replace('\'', '"')
                 break
+        candidate.transcript = json.dumps({"sections": transcrpit})
+        candidate.save()
         return Response(response)
