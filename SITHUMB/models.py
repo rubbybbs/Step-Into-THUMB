@@ -26,6 +26,7 @@ class Section(models.Model):
 class Examiner(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='extension', null=True)
     username = models.CharField(max_length=100, default="")
+    password = models.CharField(max_length=256, default="")
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='examiners', null=True)
     sections = models.ManyToManyField(Section)
     examinees = models.TextField(default="")

@@ -219,7 +219,7 @@ class ExaminerListView(APIView):
                 for s in sections:
                     sections_info.append({"sectionID": s.s_id, "name": s.name})
                 examiners_info.append({"username": e.username,
-                                       "password": e.user.password,
+                                       "password": e.password,
                                        "sections": sections_info})
             return Response({"code": 0, "msg": "", "count": examiners_count, "data": examiners_info})
 
@@ -230,7 +230,7 @@ class ExaminerView(APIView):
         password = request.GET.get('password')
         sections = request.data["sections"]
 
-        examiner = User(username=username, password=password)
+        examiner = User(username=username, password=make_password(password))
         examiner.save()
         examiner.extension.activity = Activity.objects.get(id=id)
         # 创建历史考生列表结构
@@ -245,6 +245,7 @@ class ExaminerView(APIView):
             }
             examinees["sections"].append(json_obj)
         examiner.extension.examinees = json.dumps(examinees)
+        examiner.extension.password = password
         examiner.extension.save()
         response = {"status": 100, "msg": None}
         return Response(response)
@@ -258,10 +259,11 @@ class ExaminerView(APIView):
 
 class SectionListView(APIView):
     def get(self, request, id):
-        sections = Section.objects.filter(a_id=id)
+        sections = Section.objects.filter(a_id=id).order_by("s_id")
         sections_info = []
         for s in sections:
             sections_info.append({"sectionID": s.s_id, "name": s.name})
+        print(sections_info)
         return Response({"sections": sections_info})
 
 
@@ -450,8 +452,8 @@ class ApplyView(APIView):
             }
             for sec in sections:
                 json_obj = {
-                    "s_ID": sec.s_id,
-                    "answer": sec.transcript_format,
+                    "sectionID": sec.s_id,
+                    "question": sec.transcript_format,
                     "examiner": None
                 }
                 transcript_obj["sections"].append(json_obj)
