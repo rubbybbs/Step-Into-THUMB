@@ -78,6 +78,7 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/examiner/login$', views.AuthExaminerLoginView.as_view()),
     url(r'^Step-Into-THUMB/examiner/get-section$', views.SectionExaminerView.as_view()),
     url(r'^Step-Into-THUMB/examiner/get-candidate-list$', views.CandidateListExaminerView.as_view()),
+    url(r'^Step-Into-THUMB/examiner/get-history-candidate-list$', views.HistoryCandidateListExaminerView.as_view()),
     url(r'^Step-Into-THUMB/examiner/transcript$', views.TranscriptView.as_view()),
 
 
