@@ -592,4 +592,6 @@ class TranscriptView(APIView):
                 break
         candidate.transcript = json.dumps({"sections": transcrpit})
         candidate.save()
+        examiner.examinees = json.dumps({"sections": histroy_candidate_list})
+        examiner.save()
         return Response(response)
