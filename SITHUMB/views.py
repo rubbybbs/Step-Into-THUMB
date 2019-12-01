@@ -450,8 +450,8 @@ class ApplyView(APIView):
             }
             for sec in sections:
                 json_obj = {
-                    "sectionID": sec.s_id,
-                    "answer": None,
+                    "s_ID": sec.s_id,
+                    "answer": sec.transcript_format,
                     "examiner": None
                 }
                 transcript_obj["sections"].append(json_obj)
@@ -577,7 +577,7 @@ class TranscriptView(APIView):
         examiner = Examiner.objects.get(username=username)
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]
         for sec in transcrpit:
-            if sec["sectionID"] == s_ID:
+            if sec["s_ID"] == s_ID:
                 sec["answer"] = str(request.data).replace('\'', '"')
                 sec["examiner"] = username
                 # 在考官的历史列表中加入该考生
