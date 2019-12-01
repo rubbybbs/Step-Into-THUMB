@@ -83,15 +83,19 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/examiner/get-candidate-list$', views.CandidateListExaminerView.as_view()),
     url(r'^Step-Into-THUMB/examiner/transcript$', views.TranscriptView.as_view()),
 
+    # get  {"sections":[{"sectionID":.., "question":[{"name":,"type":,"answer":},...]}]}
+    # post {}
+
+
 
     url(r'^Step-Into-THUMB/candidate/register$', views.RegisterView.as_view()),
     # POST 参数：code  返回 {"3rdsession":  }
     url(r'^Step-Into-THUMB/candidate/get-empty-form$', views.RegisterView.as_view()),
     # GET
     url(r'^Step-Into-THUMB/candidate/submit-application$', views.ApplyView.as_view()),
-    # POST 参数:session  正文：报名表json
-    url(r'^Step-Into-THUMB/candidate/get-application$', views.ApplyView.as_view()),
-    # GET 参数：session
+    # POST 参数:session  正文：报名表json 每个问题项相较空表加一个"answer"的字段
+    # url(r'^Step-Into-THUMB/candidate/get-application$', views.ApplyView.as_view()),
+    # # GET 参数：session
     url(r'^Step-Into-THUMB/candidate/get-status$', views.StatusView.as_view()),
     # GET 参数：session
 
