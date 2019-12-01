@@ -131,7 +131,7 @@
       //自定义验证规则 
 
       //监听提交
-      form.on('submit(rootLogIn)', function (data) {
+      form.on('submit(rootLogIn)', function () {
         var data = form.val('loginf');
         
         $.ajax({
@@ -147,14 +147,14 @@
                 success:function(data){
                     if (data.msg == "登录成功") {
                         layer.msg('登录成功');
-                        layui.data('locstore', {
+                        layui.data('LocalData', {
                           key: 'token',
                           value: data.token
                         });
                         location.assign("activity.html");
                     }else {
                         layer.msg('登录失败');
-                        layui.data('locstore', null); 
+                        layui.data('LocalData', null);
                         return false;
                     }
                 }
@@ -162,23 +162,29 @@
         return false;
       });
 
-      form.on('submit(userLogIn)', function (data) {
-        var data = form.val('loginF'); 
-        alert(JSON.stringify(data));
+      form.on('submit(userLogIn)', function () {
+        var data = form.val('loginf');
         $.ajax({
-                url:'.py',  
+                url:'/Step-Into-THUMB/examiner/login?username='+data.account+'&password='+data.password,
                 type:'post',
-                dataType:'text',
+                contentType: "application/x-www-form-urlencoded",
+                dataType:'json',
+                headers: {'X-CSRFToken': data.csrfmiddlewaretoken},
                 data:{
                     username:data.username,
                     password:data.password,
                 },
                 success:function(data){
-                    if (data == 1) {
+                    if (data.msg == "登录成功") {
                         layer.msg('登录成功');
-                        location.assign("system_activityMember.html")
+                        layui.data('LocalData', {
+                          key: 'token',
+                          value: data.token
+                        });
+                        location.assign("score.html");
                     }else {
                         layer.msg('登录失败');
+                        layui.data('LocalData', null);
                         return false;
                     }
                 }

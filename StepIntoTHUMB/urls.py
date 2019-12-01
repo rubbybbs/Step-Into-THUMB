@@ -26,6 +26,9 @@ urlpatterns = [
     path('modify.html', views.application_form),
     path('segment.html', views.application_segment),
     path('accountManage.html', views.application_account),
+    path('finalcheck.html', views.application_finalcheck),
+    path('score.html', views.application_score),
+    path('CandidateDetail.html', views.application_detail),
     
     url(r'^Step-Into-THUMB/admin/login$', views.AuthAdminLoginView.as_view()),
     url(r'^Step-Into-THUMB/admin/logintest$', views.LoginTestView.as_view()),
@@ -81,16 +84,20 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/examiner/get-history-candidate-list$', views.HistoryCandidateListExaminerView.as_view()),
     url(r'^Step-Into-THUMB/examiner/transcript$', views.TranscriptView.as_view()),
 
+    # get  {"sections":[{"sectionID":.., "question":[{"name":,"type":,"answer":},...]}]}
+    # post {}
+
+
 
     url(r'^Step-Into-THUMB/candidate/register$', views.RegisterView.as_view()),
     # POST 参数：code  返回 {"3rdsession":  }
     url(r'^Step-Into-THUMB/candidate/get-empty-form$', views.RegisterView.as_view()),
     # GET
     url(r'^Step-Into-THUMB/candidate/submit-application$', views.ApplyView.as_view()),
-    # POST 正文：报名表json
-    url(r'^Step-Into-THUMB/candidate/get-application$', views.ApplyView.as_view()),
-    # GET 参数：activityID
+    # POST 参数:session  正文：报名表json 每个问题项相较空表加一个"answer"的字段
+    # url(r'^Step-Into-THUMB/candidate/get-application$', views.ApplyView.as_view()),
+    # # GET 参数：session
     url(r'^Step-Into-THUMB/candidate/get-status$', views.StatusView.as_view()),
-    # GET
+    # GET 参数：session
 
 ]

@@ -50,6 +50,18 @@ def application_account(request):
     return render(request, "accountManage.html")
 
 
+def application_finalcheck(request):
+    return render(request, "finalcheck.html")
+
+
+def application_detail(request):
+    return render(request, "CandidateDetail.html")
+
+
+def application_score(request):
+    return render(request, "score.html")
+
+
 # 管理员相关接口
 
 class AuthAdminLoginView(APIView):
@@ -135,6 +147,9 @@ class ActivityView(APIView):
             to_date = parse_date("2100-01-01")
 
         activity = Activity(name=name, from_date=from_date, to_date=to_date)
+        activity.save()
+        activity.application_format = "{\"id\":"+str(activity.id)+", \"question\": [{\"name\": \"姓名\", \"type\": " \
+                                                             "\"Blank\"}, {\"name\": \"学号\", \"type\": \"Blank\"}]} "
         activity.save()
         response = {"status": 100, "a_id": activity.id}
         return Response(response)
@@ -397,8 +412,7 @@ class RegisterView(APIView):
         ress = json.loads(res.text)
         openID = ress["openid"]
         session_key = ress["session_key"]
-        trd_session = openID + session_key
-        print(trd_session)
+        trd_session = openID + "-" + session_key
         candidates = Candidate.objects.filter(wx_id=openID)
         if len(candidates) == 0:
             # 创建考生对象
@@ -417,44 +431,49 @@ class ApplyView(APIView):
         if cur_activity_id == -1:
             return Response({"status": 400})
 
-        wx_id = request.GET.get('wxID')
+        session = request.GET.get('session')
+        wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
         application_form = str(request.data).replace('\'', '"')
         candidate.name = request.data["姓名"]
         candidate.student_id = request.data["学号"]
 
-        activity = Activity.objects.get(id=cur_activity_id)
+        sections = Section.objects.filter(a_id=cur_activity_id)
         try:
             application = candidate.applications.get(a_id=cur_activity_id)
         except:
             application = Application(a_id=cur_activity_id, candidate=candidate,
                                       application_form=application_form, activity=activity)
             # 创建评分表
-            section_cnt = activity.section_cnt
             transcript_obj = {
                 "sections": []
             }
-            for sec in range(0, section_cnt):
+            for sec in sections:
                 json_obj = {
-                    "s_ID": sec,
-                    "form": None,
+                    "sectionID": sec.s_id,
+                    "answer": None,
                     "examiner": None
                 }
                 transcript_obj["sections"].append(json_obj)
             application.transcript = json.dumps(transcript_obj)
             application.save()
+
         else:
             application.application_form = application_form
             application.save()
         response = {"status": 100, "msg": None}
         return Response(response)
 
-    def get(self, request):
-        wx_id = request.GET.get('wxID')
-        a_id = request.GET.get('activityID')
-        candidate = Candidate.objects.get(wx_id=wx_id)
-        response = {"form": candidate.applications.get(a_id=a_id).application_form}
-        return Response(response)
+    # def get(self, request):
+    #     if cur_activity_id == -1:
+    #         return Response({"status": 400})
+    #
+    #     session = request.GET.get('session')
+    #     wx_id = session.split("-")[0]
+    #
+    #     candidate = Candidate.objects.get(wx_id=wx_id)
+    #     response = {"form": candidate.applications.get(a_id=cur_activity_id).application_form}
+    #     return Response(response)
 
 
 class StatusView(APIView):
@@ -462,7 +481,8 @@ class StatusView(APIView):
         if cur_activity_id == -1:
             return Response({"status": 400})
 
-        wx_id = request.GET.get('wxID')
+        session = request.GET.get('session')
+        wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
         stage = candidate.applications.get(a_id=cur_activity_id).stage
         section = Section.objects.get(a_id=cur_activity_id, s_id=stage)
@@ -557,8 +577,8 @@ class TranscriptView(APIView):
         examiner = Examiner.objects.get(username=username)
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]
         for sec in transcrpit:
-            if sec["s_ID"] == s_ID:
-                sec["form"] = str(request.data).replace('\'', '"')
+            if sec["sectionID"] == s_ID:
+                sec["answer"] = str(request.data).replace('\'', '"')
                 sec["examiner"] = username
                 # 在考官的历史列表中加入该考生
                 for s in histroy_candidate_list:
@@ -570,4 +590,6 @@ class TranscriptView(APIView):
                         }
                         s["candidates"].append(json_obj)
                 break
+        candidate.transcript = json.dumps({"sections": transcrpit})
+        candidate.save()
         return Response(response)
