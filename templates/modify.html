@@ -126,15 +126,26 @@
                             name: value.name,
                             type: "Blank"
                           });
-                        $("#toAdd").append(
-                            '<div class="layui-form-item"> \
+                        if (value.name != "姓名" && value.name != "学号") {
+                            $("#toAdd").append(
+                                '<div class="layui-form-item"> \
                                 <label class="layui-form-label">' + value.name + '</label> \
                                 <div class="layui-input-block"> \
                                   <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
                                   <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
                                 </div> \
                             </div>'
-                        );
+                            );
+                        } else {
+                            $("#toAdd").append(
+                                '<div class="layui-form-item"> \
+                                <label class="layui-form-label">' + value.name + '</label> \
+                                <div class="layui-input-block"> \
+                                  <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
+                                </div> \
+                            </div>'
+                            );
+                        }
                         form.render();
                     } else if (value.type=='Choice'){
                         Quz["question"].push({
@@ -170,7 +181,6 @@
 
       //监听提交
       form.on('submit(submitForm)', function (data) {
-        alert(JSON.stringify(Quz));
         var Fdata = form.val('FormDesign');
         var LocalData=layui.data('LocalData');
         //#TODO 通过ajax获取数据并解析

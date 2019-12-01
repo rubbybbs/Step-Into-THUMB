@@ -16,23 +16,29 @@
     <div class="layui-header">
       <div class="layui-logo">军乐团活动管理</div>
       <!-- 头部区域（可配合layui已有的水平导航） -->
-
+    </div>
 
     <div class="layui-body" , lay-filter="graph" , style="left:0px;">
       <div style="padding: 20px; background-color: #F2F2F2;">
-        <div class="layui-row layui-col-space15">
-          <div class="layui-col-md12">
-              <div class="layui-card">
-                  <div class="layui-card-header">人员信息</div>
-                  <div class="layui-card-body" id="toAdd">
-                    <div class="layui-tab" lay-filter="activitySegment">
-                            <ul class="layui-tab-title" id="titleToAdd"></ul>
-                            <div class="layui-tab-content" id="contentToAdd"></div>
-                        </div>
+          <form class="layui-form" action="" lay-filter="SegmentList"> {%  csrf_token %}
+            <div style="display:none;">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm" id="FinishScore">提交</button>
+            </div>
+          </form>
+            <div class="layui-row layui-col-space15">
+              <div class="layui-col-md12">
+                  <div class="layui-card">
+                      <div class="layui-card-header">人员信息</div>
+                      <div class="layui-card-body" id="toAdd">
+                        <div class="layui-tab" lay-filter="activitySegment">
+                                <ul class="layui-tab-title" id="titleToAdd"></ul>
+                                <div class="layui-tab-content" id="contentToAdd"></div>
+                            </div>
+                      </div>
                   </div>
               </div>
-          </div>
-        </div>
+            </div>
+
       </div>
 
 
@@ -42,6 +48,7 @@
 
   <script src="{% static "layui/layui.js" %}"></script>
   <script>
+    var scoreForm = new Object();
     layui.use(['form', 'layedit', 'laydate', 'jquery','element', 'layer'], function () {
       var form = layui.form,
         layer = layui.layer,
@@ -60,63 +67,157 @@
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
             success: function (data) {
-                var form = data.application;
-                var obj=JSON.parse(str);
+                var Cform = data.application;
+                var obj=JSON.parse(Cform);
                 var htmls='';
                     obj.question.map(function(value){
-                        htmls+=
+                        if (value.answer)
+                          htmls+=
                             '<div class="layui-form-item"> \
                                 <label class="layui-form-label">' + value.name + '</label> \
                                 <div class="layui-input-block"> \
                                 <input type="text" autocomplete="on" value="' + value.answer + '" class="layui-input" readonly="true"> \
                                 </div> \
                             </div>';
+                        else
+                          htmls+=
+                            '<div class="layui-form-item"> \
+                                <label class="layui-form-label">' + value.name + '</label> \
+                                <div class="layui-input-block"> \
+                                <input type="text" autocomplete="on" value="未填写" class="layui-input" readonly="true"> \
+                                </div> \
+                            </div>';
                     });
                     element.tabAdd('activitySegment', {
-                              title: 报名表
+                              title: '报名表'
                               ,content: htmls
                               ,id: 'CandidateForm'
                             });
-                    element.tabChange('activitySegment', 'CandidateForm');
                     form.render();
                 var str = data.transcript;
                 obj=JSON.parse(str);
-                    obj.map(function(value){
-                        if (value.segmentname == currentSegment){
+                    obj.sections.map(function(value){
+                        if (value.sectionID == currentSegment){
+                            scoreForm = value.question;
+                            htmls = '<form  class="layui-form" action="" lay-filter="FormSubmit">';
+                            value.question.map(function(value){
+                                if (value.type=='Blank'){
+                                            if (value.answer){
+                                                htmls+=
+                                                '<div class="layui-form-item"> \
+                                                    <label class="layui-form-label">' + value.name + '</label> \
+                                                    <div class="layui-input-block"> \
+                                                      <input type="text" name="' + value.name + '"autocomplete="on" value="' + value.answer + '" class="layui-input"> \
+                                                    </div> \
+                                                </div>';
+                                            } else {
+                                                htmls+=
+                                                '<div class="layui-form-item"> \
+                                                    <label class="layui-form-label">' + value.name + '</label> \
+                                                    <div class="layui-input-block"> \
+                                                      <input type="text" name="' + value.name + '"autocomplete="off" class="layui-input"> \
+                                                    </div> \
+                                                </div>';
+                                            }
+
+                                        } else if (value.type=='Choice'){
+                                            var modestr =
+                                                '<div class="layui-form-item"> \
+                                                  <div class="layui-inline">\
+                                                    <label class="layui-form-label">' + value.name + '</label> \
+                                                    <div class="layui-input-inline" > \
+                                                      <select name="'+ value.name +'" lay-filter="show"> \
+                                                        <option value=""></option> ';
+                                                          if (value.answer){
+                                                              var isequal=value.answer;
+                                                              value.Choices.map(function(value,index,arr){
+                                                                if (value.Choice==isequal) modestr += '<option value="' + value.Choice + '" selected="">' + value.Choice + '</option>';
+                                                                else modestr += '<option value="' + value.Choice + '">' + value.Choice + '</option>';
+                                                              });
+                                                          } else {
+                                                              value.Choices.map(function(value,index,arr){
+                                                                modestr += '<option value="' + value.Choice + '">' + value.Choice + '</option>';
+                                                              });
+                                                          }
+                                                          modestr += '</select> \
+                                                    </div> \
+                                                  </div>\
+                                                </div>';
+                                              htmls+=modestr;
+                                        }
+                            });
+                            htmls+='<div class="layui-form-item">\n' +
+                                    '<button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm" id="FinishScore">提交</button>\n' +
+                                '</div>' +
+                                '</form>';
+                            element.tabAdd('activitySegment', {
+                              title: value.name
+                              ,content: htmls
+                              ,id: value.sectionID.toString()
+                            });
+                        } else {
                             htmls = '';
                             value.question.map(function(value){
-                                htmls+=
+                                if (value.answer)
+                                  htmls+=
                                     '<div class="layui-form-item"> \
                                         <label class="layui-form-label">' + value.name + '</label> \
                                         <div class="layui-input-block"> \
                                         <input type="text" autocomplete="on" value="' + value.answer + '" class="layui-input" readonly="true"> \
                                         </div> \
                                     </div>';
+                                else
+                                  htmls+=
+                                    '<div class="layui-form-item"> \
+                                        <label class="layui-form-label">' + value.name + '</label> \
+                                        <div class="layui-input-block"> \
+                                        <input type="text" autocomplete="on" value="未评价" class="layui-input" readonly="true"> \
+                                        </div> \
+                                    </div>';
                             });
                             element.tabAdd('activitySegment', {
-                              title: value.segmentname
+                              title: value.name
                               ,content: htmls
                               ,id: value.sectionID.toString()
                             });
-                        } else {
-                            htmls = '';
-                            htmls+=
-                            '<div class="layui-form-item"> \
-                                <label class="layui-form-label">' + value.name + '</label> \
-                                <div class="layui-input-block"> \
-                                <input type="text" autocomplete="on" value="' + value.answer + '" class="layui-input" readonly="true"> \
-                                </div> \
-                            </div>';
                         }
 
-
-
                     });
+                    element.tabChange('activitySegment', currentSegment.toString());
                     form.render();
             }
         });
       });
 
+      //$("#toAdd").on("click", "#FinishScore",function() {
+      form.on('submit(submitForm)', function (data) {
+          var LocalData = layui.data('LocalData');
+          var currentSudent = LocalData.wxID;
+          var currentSegment = LocalData.currentSegment;
+          var Fdata = form.val('SegmentList');
+          var Sdata = form.val('FormSubmit');
+          scoreForm.map(function(value){
+              value['answer'] = Sdata[value['name']];
+          });
+          $.ajax({
+              url: 'Step-Into-THUMB/examiner/transcript?wxID=' + currentSudent + '&s_ID=' + currentSegment,
+              type: 'post',
+              contentType: 'application/json',
+              headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+              },
+              dataType: 'json',
+              data:JSON.stringify(scoreForm),
+              success: function (data) {
+                if (data.status == 100) {
+                    layer.msg('提交成功');
+                } else {
+                    layer.msg('提交失败请重试');
+                }
+              }
+          });
+          return false;
+      });
     });
 
   </script>

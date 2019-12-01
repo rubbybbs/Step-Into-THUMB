@@ -112,7 +112,7 @@
 
       <div class="layui-form-item">
         <div class="layui-input-block">
-          <button type="submit" class="layui-btn" lay-submit="" lay-filter="userLogIn">考官登陆</button>
+          <button type="button" class="layui-btn" id="userLogIn">考官登陆</button>
         </div>
       </div>
     </div>
@@ -133,7 +133,10 @@
       //监听提交
       form.on('submit(rootLogIn)', function () {
         var data = form.val('loginf');
-        
+        layui.data('LocalData', {
+            key: 'username',
+            value: data.account
+        });
         $.ajax({
                 url:'/Step-Into-THUMB/admin/login?username='+data.account+'&password='+data.password,
                 type:'post',
@@ -162,8 +165,12 @@
         return false;
       });
 
-      form.on('submit(userLogIn)', function () {
+      $('#userLogIn').click(function () {
         var data = form.val('loginf');
+        layui.data('LocalData', {
+            key: 'username',
+            value: data.account
+        });
         $.ajax({
                 url:'/Step-Into-THUMB/examiner/login?username='+data.account+'&password='+data.password,
                 type:'post',

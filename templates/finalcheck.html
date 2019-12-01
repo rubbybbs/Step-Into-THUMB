@@ -125,41 +125,35 @@
         var LocalData=layui.data('LocalData');
         layer.msg('初始化列表'+LocalData.ActID.toString());
 
-        $.ajax({
-            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
+       $.ajax({
+            url: 'Step-Into-THUMB/examiner/get-section?username='+LocalData.username,
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
             success: function (data) {
-                data.sections.map(function(value){
-                    $.ajax({
-                        url: '',
-                        type: 'get',
-                        contentType: 'application/x-www-form-urlencoded',
-                        dataType: 'json',
-                        success: function(data){
-                            var htmls = '<table class="layui-hide" id="section'+ value.sectionID +'"></table>';
-                            element.tabAdd('activitySegment', {
-                              title: value.name
-                              ,content: htmls
-                              ,id: value.sectionID.toString()
-                            });
-                            table.render({
-                                elem: '#section'+value.sectionID
-                                ,url:''
-                                ,cellMinWidth: 80
-                                ,cols: [[
-                                  {type:'numbers', width:'10%'}
-                                  ,{field:'', width:'30%', title: '姓名'}
-                                  ,{field:'', width:'40%', title: '学号'}
+                if (data.status==100) {
+                    data.sections.map(function (value) {
+                        var htmls = '<table class="layui-table" id="section' + value.s_ID + '"></table>';
+                        element.tabAdd('activitySegment', {
+                            title: value.name
+                            , content: htmls
+                            , id: value.s_ID.toString()
+                        });
+                        table.render({
+                            elem: '#section' + value.s_ID
+                            , url: 'Step-Into-THUMB/examiner/get-candidate-list?s_ID='+ value.s_ID
+                            , cellMinWidth: 80
+                            , cols: [[
+                                {type:'numbers', width:'10%'}
+                                  ,{field:'name', width:'20%', title: '姓名'}
+                                  ,{field:'ID', width:'20%', title: '学号'}
+                                  ,{field:'wxID', width:'30%', title: '微信号'}
                                   ,{templet:'#bar', width:'20%', title: '编辑', style:'cursor: pointer;'}
-                                ]]
-                              });
-                        }
+                            ]]
+                        });
                     });
-
-                });
-                form.render();
+                    form.render();
+                }
             }
         });
 
@@ -167,29 +161,20 @@
       });
 
       //监听提交
-      table.on('tool(accountTable)', function(obj){
+      table.on('tool()', function(obj){
         var data = obj.data;
         var Sdata = form.val('FormDesign');
         var LocalData=layui.data('LocalData');
         if (obj.event === 'detail'){
-
-            window.open("examinerDetail.html", "_blank");
-            $.ajax({
-              url: '',
-              type: '',
-              contentType: 'application/x-www-form-urlencoded',
-              dataType: 'json',
-              headers: {
-                'X-CSRFToken': Sdata.csrfmiddlewaretoken
-              },
-              success: function (data) {
-                if (data.status == 100) {
-                  layer.msg('成功');
-                } else {
-                  layer.msg('失败，请重试！');
-                }
-              }
+            layui.data('LocalData', {
+                key: 'wxID',
+                value: data.wxID
             });
+            layui.data('LocalData', {
+                key: 'currentSegment',
+                value: -1
+            });
+            window.open("CandidateDetail.html", "_blank");
         } else if (obj.event === 'accept'){
           // #TODO ajax请求
 

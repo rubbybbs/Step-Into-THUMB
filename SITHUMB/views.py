@@ -221,7 +221,7 @@ class ExaminerListView(APIView):
                 examiners_info.append({"username": e.username,
                                        "password": e.user.password,
                                        "sections": sections_info})
-            return Response({"code":0,"msg":"", "count": examiners_count, "data": examiners_info})
+            return Response({"code": 0, "msg": "", "count": examiners_count, "data": examiners_info})
 
 
 class ExaminerView(APIView):
@@ -506,16 +506,19 @@ class SectionExaminerView(APIView):
 
 class CandidateListExaminerView(APIView):
     def get(self, request):
-        response = {"status": 100, "msg": None, "candidates": []}
+        response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_id = request.GET.get('s_ID')
+        count = 0
         candidate_list = Application.objects.filter(stage=s_id)
         for candidate in candidate_list:
+            count += 1
             jsonobj = {
                 "name": candidate.candidate.name,
-                "ID": candidate.candidate.ID,
+                "ID": candidate.candidate.student_id,
                 "wxID": candidate.candidate.wx_id
             }
-            response["candidates"].append(jsonobj)
+            response["data"].append(jsonobj)
+        response["count"] = count
         return Response(response)
 
 
@@ -537,13 +540,13 @@ class TranscriptView(APIView):
 
         response = {"status": 100, "msg": None}
         wxID = request.GET.get("wxID")
-        s_ID = request.GET.get("s_ID")
+        s_ID = int(request.GET.get("s_ID"))
         candidate = Application.objects.get(candidate__wx_id=wxID, activity=cur_activity_id)
-        transcrpit = json.loads(candidate.transcript)["sections"]
-        for sec in transcrpit:
+        transcript = json.loads(candidate.transcript)["sections"]
+        for sec in transcript:
             if sec["sectionID"] == s_ID:
-                sec["answer"] = str(request.data).replace('\'', '"')
+                sec["question"] = request.data
                 break
-        candidate.transcript = json.dumps({"sections": transcrpit})
+        candidate.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
         candidate.save()
         return Response(response)
