@@ -263,7 +263,6 @@ class SectionListView(APIView):
         sections_info = []
         for s in sections:
             sections_info.append({"sectionID": s.s_id, "name": s.name})
-        print(sections_info)
         return Response({"sections": sections_info})
 
 
