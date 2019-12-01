@@ -233,8 +233,18 @@ class ExaminerView(APIView):
         examiner = User(username=username, password=password)
         examiner.save()
         examiner.extension.activity = Activity.objects.get(id=id)
+        # 创建历史考生列表结构
+        examinees = {
+            "sections": []
+        }
         for s_id in sections:
             examiner.extension.sections.add(Section.objects.get(s_id=s_id, a_id=id))
+            json_obj = {
+                "s_ID": s_id,
+                "candidates": []
+            }
+            examinees["sections"].append(json_obj)
+        examiner.extension.examinees = json.dumps(examinees)
         examiner.extension.save()
         response = {"status": 100, "msg": None}
         return Response(response)
@@ -346,6 +356,7 @@ class CandidateDetailForAdminView(APIView):
         }
         return Response(response)
 
+
 # class GetActivityDetailView(APIView):
 #     def get(self, request):
 #         response = {"status": 100, "msg": None, "form": None, "sections": []}
@@ -396,13 +407,15 @@ class RegisterView(APIView):
         appID = "wxc9568dc74b390136"
         appSecret = "1bdc626b0ea48761d84e4b1762c59641"
         url = "https://api.weixin.qq.com/sns/jscode2session"
-        res = requests.get(url+"?appid="+appID+"&secret="+appSecret+"&js_code="+code+"&grant_type=authorization_code")
+        res = requests.get(
+            url + "?appid=" + appID + "&secret=" + appSecret + "&js_code=" + code + "&grant_type=authorization_code")
         ress = json.loads(res.text)
         openID = ress["openid"]
         session_key = ress["session_key"]
         trd_session = openID + "-" + session_key
         candidates = Candidate.objects.filter(wx_id=openID)
         if len(candidates) == 0:
+            # 创建考生对象
             Candidate.objects.create(wx_id=openID)
         return Response({"session": trd_session})
 
@@ -425,20 +438,29 @@ class ApplyView(APIView):
         candidate.name = request.data["姓名"]
         candidate.student_id = request.data["学号"]
 
-        activity = Activity.objects.get(id=cur_activity_id)
+        sections = Section.objects.filter(a_id=cur_activity_id)
         try:
             application = candidate.applications.get(a_id=cur_activity_id)
         except:
             application = Application(a_id=cur_activity_id, candidate=candidate,
                                       application_form=application_form, activity=activity)
+            # 创建评分表
+            transcript_obj = {
+                "sections": []
+            }
+            for sec in sections:
+                json_obj = {
+                    "s_ID": sec.s_id,
+                    "answer": sec.transcript_format,
+                    "examiner": None
+                }
+                transcript_obj["sections"].append(json_obj)
+            application.transcript = json.dumps(transcript_obj)
+            application.save()
 
         else:
             application.application_form = application_form
-        sections = []
-        for sec in activity.sections:
-            sections.append(sec.transcript_format)
-        application.transcript = str({"sections": sections})
-        application.save()
+            application.save()
         response = {"status": 100, "msg": None}
         return Response(response)
 
@@ -522,10 +544,21 @@ class CandidateListExaminerView(APIView):
         return Response(response)
 
 
+class HistoryCandidateListExaminerView(APIView):
+    def get(self, request):
+        response = {"status": 100, "candidates": None}
+        username = request.GET.get('username')
+        examiner = Examiner.objects.get(username=username)
+        response["candidates"] = json.loads(examiner.examinees)
+        return Response(response)
+
+
 class TranscriptView(APIView):
     def get(self, request):
         if cur_activity_id == -1:
-            return Response({"status": 400})
+            res = Response()
+            res.status_code = 404
+            return res
 
         response = {"status": 100, "msg": None, "application": None, "transcript": None}
         wxID = request.GET.get("wxID")
@@ -541,12 +574,27 @@ class TranscriptView(APIView):
         response = {"status": 100, "msg": None}
         wxID = request.GET.get("wxID")
         s_ID = int(request.GET.get("s_ID"))
+        username = request.GET.get("username")
         candidate = Application.objects.get(candidate__wx_id=wxID, activity=cur_activity_id)
         transcript = json.loads(candidate.transcript)["sections"]
+        examiner = Examiner.objects.get(username=username)
+        histroy_candidate_list = json.loads(examiner.examinees)["sections"]
         for sec in transcript:
             if sec["sectionID"] == s_ID:
                 sec["question"] = request.data
+                sec["examiner"] = username
+                # 在考官的历史列表中加入该考生
+                for s in histroy_candidate_list:
+                    if s["s_ID"] == s_ID:
+                        json_obj = {
+                            "name": candidate.candidate.name,
+                            "ID": candidate.candidate.student_id,
+                            "wxID": candidate.candidate.wx_id
+                        }
+                        s["candidates"].append(json_obj)
                 break
         candidate.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
         candidate.save()
+        examiner.examinees = json.dumps({"sections": histroy_candidate_list})
+        examiner.save()
         return Response(response)
