@@ -28,7 +28,7 @@ urlpatterns = [
     path('accountManage.html', views.application_account),
     path('finalcheck.html', views.application_finalcheck),
     path('score.html', views.application_score),
-    path('examinerDetail.html', views.application_detail),
+    path('CandidateDetail.html', views.application_detail),
     
     url(r'^Step-Into-THUMB/admin/login$', views.AuthAdminLoginView.as_view()),
     url(r'^Step-Into-THUMB/admin/logintest$', views.LoginTestView.as_view()),

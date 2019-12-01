@@ -165,7 +165,7 @@
       form.on('submit(userLogIn)', function () {
         var data = form.val('loginf');
         $.ajax({
-                url:'',
+                url:'/Step-Into-THUMB/examiner/login?username='+data.account+'&password='+data.password,
                 type:'post',
                 contentType: "application/x-www-form-urlencoded",
                 dataType:'json',

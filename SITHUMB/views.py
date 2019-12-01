@@ -55,7 +55,7 @@ def application_finalcheck(request):
 
 
 def application_detail(request):
-    return render(request, "examinerDetail.html")
+    return render(request, "CandidateDetail.html")
 
 
 def application_score(request):
