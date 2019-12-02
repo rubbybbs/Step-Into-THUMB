@@ -24,10 +24,17 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 cur_activity_id = -1
-try:
-    cur_activity_id = Activity.objects.get(status=1).id
-except Exception:
-    pass
+
+
+def update_cur_activity():
+    global cur_activity_id
+    try:
+        cur_activity_id = Activity.objects.get(status=1).id
+    except Exception:
+        pass
+
+
+update_cur_activity()
 
 
 def index(request):
@@ -148,8 +155,8 @@ class ActivityView(APIView):
 
         activity = Activity(name=name, from_date=from_date, to_date=to_date)
         activity.save()
-        activity.application_format = "{\"id\":"+str(activity.id)+", \"question\": [{\"name\": \"姓名\", \"type\": " \
-                                                             "\"Blank\"}, {\"name\": \"学号\", \"type\": \"Blank\"}]} "
+        activity.application_format = "{\"id\":" + str(activity.id) + ", \"question\": [{\"name\": \"姓名\", \"type\": " \
+                                                                      "\"Blank\"}, {\"name\": \"学号\", \"type\": \"Blank\"}]} "
         activity.save()
         response = {"status": 100, "a_id": activity.id}
         return Response(response)
@@ -167,6 +174,7 @@ class ActivityStatusView(APIView):
         a = Activity.objects.get(id=activity_id)
         a.status = 1
         a.save()
+        update_cur_activity()
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
@@ -175,6 +183,7 @@ class ActivityStatusView(APIView):
         a = Activity.objects.get(id=activity_id)
         a.status = 2
         a.save()
+        update_cur_activity()
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
@@ -434,18 +443,22 @@ class ApplyView(APIView):
 
         session = request.GET.get('session')
         wx_id = session.split("-")[0]
+        activity = Activity.objects.get(id=cur_activity_id)
         candidate = Candidate.objects.get(wx_id=wx_id)
         application_form = str(request.data).replace('\'', '"')
-        candidate.name = request.data["姓名"]
-        candidate.student_id = request.data["学号"]
+        for q in request.data["question"]:
+            if q["name"] == "姓名":
+                candidate.name = q["answer"]
+            elif q["name"] == "学号":
+                candidate.student_id = q["answer"]
+        candidate.save()
 
-        sections = Section.objects.filter(a_id=cur_activity_id)
         try:
             application = candidate.applications.get(a_id=cur_activity_id)
         except:
-            application = Application(a_id=cur_activity_id, candidate=candidate,
-                                      application_form=application_form, activity=activity)
+            print("here")
             # 创建评分表
+            sections = Section.objects.filter(a_id=cur_activity_id)
             transcript_obj = {
                 "sections": []
             }
@@ -456,9 +469,10 @@ class ApplyView(APIView):
                     "examiner": None
                 }
                 transcript_obj["sections"].append(json_obj)
-            application.transcript = json.dumps(transcript_obj)
-            application.save()
 
+            application = Application(a_id=cur_activity_id, candidate=candidate, application_form=application_form,
+                                      activity=activity, transcript=json.dumps(transcript_obj))
+            application.save()
         else:
             application.application_form = application_form
             application.save()
@@ -563,9 +577,10 @@ class TranscriptView(APIView):
 
         response = {"status": 100, "msg": None, "application": None, "transcript": None}
         wxID = request.GET.get("wxID")
-        candidate = Application.objects.get(candidate__wx_id=wxID, activity=cur_activity_id)
+        candidate = Application.objects.get(candidate__wx_id=wxID, activity__id=cur_activity_id)
         response["application"] = candidate.application_form
         response["transcript"] = candidate.transcript
+        print(response)
         return Response(response)
 
     def post(self, request):
@@ -576,7 +591,7 @@ class TranscriptView(APIView):
         wxID = request.GET.get("wxID")
         s_ID = int(request.GET.get("s_ID"))
         username = request.GET.get("username")
-        candidate = Application.objects.get(candidate__wx_id=wxID, activity=cur_activity_id)
+        candidate = Application.objects.get(candidate__wx_id=wxID, activity__id=cur_activity_id)
         transcript = json.loads(candidate.transcript)["sections"]
         examiner = Examiner.objects.get(username=username)
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]

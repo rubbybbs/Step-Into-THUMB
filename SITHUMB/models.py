@@ -51,7 +51,6 @@ class Application(models.Model):
     admitted = models.BooleanField(default=False)
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='applications', null=True)
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='applications', null=True)
-    examiners = models.ManyToManyField(Examiner)
     stage = models.IntegerField(default=0)
     application_form = models.TextField(default="")
     transcript = models.TextField(default="")
