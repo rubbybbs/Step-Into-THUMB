@@ -58,10 +58,10 @@
                                     <table class="layui-table" lay-data="{height: 900, url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-1'}" lay-filter="accountTable" id="accountTable">
                                       <thead>
                                           <tr>
-                                            <th lay-data="{type:'numbers', width:'5%'}"></th>
-                                            <th lay-data="{field:'name', width:'5%'}">姓名</th>
-                                            <th lay-data="{field:'ID', width:'10%'}">学号</th>
-                                            <th lay-data="{field:'addition', width:'60%', style:'cursor: pointer;', event: 'editAddition'}">备注</th>
+                                            <th lay-data="{type:'numbers', width:'10%'}"></th>
+                                            <th lay-data="{field:'name', width:'10%'}">姓名</th>
+                                            <th lay-data="{field:'ID', width:'30%'}">学号</th>
+                                            <th lay-data="{field:'wxID', width:'30%'}">微信号</th>
                                             <th lay-data="{templet:'#bar', width:'20%', style:'cursor: pointer;'}">编辑</th>
                                           </tr>
                                       </thead>
@@ -72,8 +72,8 @@
                                       <thead>
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
-                                            <th lay-data="{field:'', width:'30%', style:'cursor: pointer;'}">姓名</th>
-                                            <th lay-data="{field:'', width:'40%', style:'cursor: pointer;'}">学号</th>
+                                            <th lay-data="{field:'name', width:'30%', style:'cursor: pointer;'}">姓名</th>
+                                            <th lay-data="{field:'ID', width:'40%', style:'cursor: pointer;'}">学号</th>
                                             <th lay-data="{templet:'#bar', width:'20%', style:'cursor: pointer;'}">编辑</th>
                                           </tr>
                                       </thead>
@@ -106,11 +106,17 @@
 
 
   <script src="{% static "layui/layui.js" %}"></script>
+
   <script type="text/html" id="bar">
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="detail">详情</a>
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="acccept">录取</a>
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="refuse" style="hidden">取消</a>
   </script>
+
+  <script type="text/html" id="bar2">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="detail">详情</a>
+  </script>
+
   <script>
 
     layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer', 'element', 'table'], function () {
@@ -127,34 +133,32 @@
         layer.msg('初始化列表'+LocalData.ActID.toString());
 
        $.ajax({
-            url: 'Step-Into-THUMB/examiner/get-section?username='+LocalData.username,
+            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
             success: function (data) {
-                if (data.status==100) {
                     data.sections.map(function (value) {
-                        var htmls = '<table class="layui-table" id="section' + value.s_ID + '"></table>';
+                        var htmls = '<table class="layui-table" id="section' + value.sectionID + '"></table>';
                         element.tabAdd('activitySegment', {
                             title: value.name
                             , content: htmls
-                            , id: value.s_ID.toString()
+                            , id: value.sectionID.toString()
                         });
                         table.render({
-                            elem: '#section' + value.s_ID
-                            , url: 'Step-Into-THUMB/examiner/get-candidate-list?s_ID='+ value.s_ID
+                            elem: '#section' + value.sectionID
+                            , url: 'Step-Into-THUMB/admin/activity/'+LocalData.ActID+'/get-candidate-list?s_ID='+ value.sectionID
                             , cellMinWidth: 80
                             , cols: [[
                                 {type:'numbers', width:'10%'}
                                   ,{field:'name', width:'20%', title: '姓名'}
                                   ,{field:'ID', width:'20%', title: '学号'}
                                   ,{field:'wxID', width:'30%', title: '微信号'}
-                                  ,{templet:'#bar', width:'20%', title: '编辑', style:'cursor: pointer;'}
+                                  ,{templet:'#bar2', width:'20%', title: '编辑', style:'cursor: pointer;'}
                             ]]
                         });
                     });
                     form.render();
-                }
             }
         });
 
@@ -173,7 +177,7 @@
             });
             layui.data('LocalData', {
                 key: 'currentSegment',
-                value: -1
+                value: -2
             });
             window.open("CandidateDetail.html", "_blank");
         } else if (obj.event === 'accept'){
@@ -183,7 +187,19 @@
           // #TODO ajax请求
 
         } else if (obj.event === 'editAddition'){
-          // #TODO ajax请求
+          layer.prompt({
+            formType: 2
+            ,title: '修改学号为 ['+ data.ID +'] 的同学备注'
+            ,value: data.addition
+          }, function(value, index){
+            layer.close(index);
+
+            // #TODO 发送修改的Ajax请求
+
+            obj.update({
+              addition: value
+            });
+          });
 
         }
         return false;
