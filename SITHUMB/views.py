@@ -578,17 +578,17 @@ class CandidateListExaminerView(APIView):
 
 class HistoryCandidateListExaminerView(APIView):
     def get(self, request):
-        response = {"status": 100, "count": 0, "data": []}
+        response = {"code": 0, "msg": None, "count": 0, "data": []}
         username = request.GET.get('username')
         s_id = int(request.GET.get('s_ID'))
         examiner = Examiner.objects.get(username=username)
         sections = json.loads(examiner.examinees)["sections"]
         # 后评分的先显示
         for sec in sections:
-            if s_id == sec["s_id"]:
+            if s_id == sec["s_ID"]:
                 response["count"] = len(sec["candidates"])
                 for i in range(len(sec["candidates"])):
-                    response["data"].append(sec["sections"].pop())
+                    response["data"].append(sec["candidates"].pop())
         return Response(response)
 
 
