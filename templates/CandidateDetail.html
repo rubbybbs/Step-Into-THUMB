@@ -102,9 +102,9 @@
                     obj.sections.map(function(value){
                         if (value.sectionID == currentSegment){
                             console.log(value);
-                            scoreForm = value.form.question;
+                            scoreForm = value.question;
                             htmls = '<form  class="layui-form" action="" lay-filter="FormSubmit">';
-                            value.form.question.map(function(value){
+                            value.question.map(function(value){
                                 if (value.type=='Blank'){
                                             if (value.answer){
                                                 htmls+=
@@ -169,8 +169,7 @@
                             });
                         } else {
                             htmls = '';
-                            console.log(value);
-                            value.form.question.map(function(value){
+                            value.question.map(function(value){
                                 if (value.answer)
                                   htmls+=
                                     '<div class="layui-form-item"> \

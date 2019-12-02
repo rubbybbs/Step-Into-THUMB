@@ -340,18 +340,11 @@ class CandidateListForAdminView(APIView):
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_ID = int(request.GET.get("s_ID"))
         # stage和s_ID的对应关系还需要进一步确定
+        # s_ID与显示的考生列表关系如下：
+        # 1） 当section为必须通过时，其前置必须通过的section也必须全部通过，才显示
+        # 2） 当section为非必须通过时，只要考过试，就显示。
         if s_ID == -1:
             candidate_list = Application.objects.filter(activity__id=id)
-            for candidate in candidate_list:
-                json_obj = {
-                    "name": candidate.candidate.name,
-                    "ID": candidate.candidate.student_id,
-                    "wxID": candidate.candidate.wx_id
-                }
-                response["data"].append(json_obj)
-                response["count"] += 1
-        else:
-            candidate_list = Application.objects.filter(activity__id=id, stage=s_ID)
             for candidate in candidate_list:
                 json_obj = {
                     "name": candidate.candidate.name,
@@ -474,7 +467,7 @@ class ApplyView(APIView):
             elif q["name"] == "学号":
                 candidate.student_id = q["answer"]
         candidate.save()
-        sections = Section.objects.filter(activity__id=cur_activity_id)
+        sections = Section.objects.filter(activity__id=cur_activity_id).order_by("s_id")
         for sec in sections:
             tmp = json.loads(sec.examinees)["examinees"]
             tmp.append({
@@ -497,8 +490,10 @@ class ApplyView(APIView):
                 if sec.transcript_format != "":
                     json_obj = {
                         "sectionID": sec.s_id,
+                        "compulsory": str(sec.compulsory),
+                        "passed": "undecided",
                         "name": sec.name,
-                        "form": json.loads(sec.transcript_format),
+                        "question": json.loads(sec.transcript_format)["question"],
                         "examiner": "null"
                     }
                     transcript_obj["sections"].append(json_obj)
@@ -507,10 +502,7 @@ class ApplyView(APIView):
                     json_obj = {
                         "sectionID": sec.s_id,
                         "name": sec.name,
-                        "form": {
-                            "section_id": -1,
-                            "question": []
-                        },
+                        "question": [],
                         "examiner": "null"
                     }
                     transcript_obj["sections"].append(json_obj)
@@ -607,7 +599,7 @@ class HistoryCandidateListExaminerView(APIView):
         sections = json.loads(examiner.examinees)["sections"]
         # 后评分的先显示
         for sec in sections:
-            if s_id == sec["s_ID"]:
+            if s_id == int(sec["s_ID"]):
                 response["count"] = len(sec["candidates"])
                 for i in range(len(sec["candidates"])):
                     response["data"].append(sec["candidates"].pop())
@@ -641,11 +633,20 @@ class TranscriptView(APIView):
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]
         for sec in transcript:
             if sec["sectionID"] == s_id:
-                sec["form"]["question"] = request.data
+                sec["question"] = request.data
                 sec["examiner"] = username
+                if sec["compulsory"] == "True":
+                    # 考生是否通过
+                    if eligible == 1:
+                        sec["passed"] = "True"
+                    elif eligible == 0:
+                        sec["passed"] = "False"
+                else:
+                    sec["passed"] = "Pass"
                 # 在考官的历史列表中加入该考生
                 for s in histroy_candidate_list:
-                    if s["s_ID"] == s_id:
+                    print(int(s["s_ID"]) == s_id)
+                    if int(s["s_ID"]) == s_id:
                         # 第一次评分的时候才加入历史记录
                         json_obj = {
                             "name": application.candidate.name,
@@ -656,10 +657,6 @@ class TranscriptView(APIView):
                             s["candidates"].append(json_obj)
                 break
         application.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
-        if eligible == 1:
-            application.stage += 1
-        elif eligible == 0:
-            application.stage = - application.stage - 1
         tmp = json.loads(section.examinees)["examinees"]
         section.examinees = json.dumps({"examinees": [e for e in tmp if e["wxID"] != wx_id]}, ensure_ascii=False)
         section.save()
