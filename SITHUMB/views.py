@@ -365,13 +365,12 @@ class CandidateListForAdminView(APIView):
 
 class CandidateDetailForAdminView(APIView):
     def get(self, request, id):
-        response = {"msg": None, "candidate": None}
+        response = {"msg": None,  "application": None, "transcript": None}
         wxID = request.GET.get("wxID")
         candidate = Application.objects.get(activity__id=id, candidate__wx_id=wxID)
-        response["candidate"] = {
-            "application": candidate.application_form,
-            "transcript": candidate.transcript
-        }
+        response["application"] = candidate.application_form
+        response["transcript"] = candidate.transcript
+
         return Response(response)
 
 
@@ -380,7 +379,12 @@ class CommentForCandidateView(APIView):
         response = {"msg": None}
         wxID = request.GET.get("wxID")
         candidiate = Application.objects.get(activity=id, candidate__wx_id=wxID)
-        candidiate.transcript["comment"] = request.data
+        print(request.data)
+        print(type(request.data))
+        print(request.data["comment"])
+        tmp = json.loads(candidiate.transcript)
+        tmp["comment"]  = request.data["comment"]
+        candidiate.transcript = json.dumps(tmp, ensure_ascii=False)
         candidiate.save()
         return Response(response)
 
@@ -584,6 +588,8 @@ class SectionExaminerView(APIView):
 
 class CandidateListExaminerView(APIView):
     def get(self, request):
+        if cur_activity_id == -1:
+            return Response({"status": 404, "code": 404})
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_id = request.GET.get('s_ID')
         section = Section.objects.get(s_id=s_id)
@@ -610,14 +616,11 @@ class HistoryCandidateListExaminerView(APIView):
 
 class TranscriptView(APIView):
     def get(self, request):
-        if cur_activity_id == -1:
-            res = Response()
-            res.status_code = 404
-            return res
-
         response = {"status": 100, "msg": None, "application": None, "transcript": None}
         wxID = request.GET.get("wxID")
-        candidate = Application.objects.get(candidate__wx_id=wxID, activity__id=cur_activity_id)
+        username = request.GET.get("username")
+        examiner = Examiner.objects.get(username=username)
+        candidate = Application.objects.get(candidate__wx_id=wxID, activity__id=examiner.activity.id)
         response["application"] = candidate.application_form
         response["transcript"] = candidate.transcript
         return Response(response)

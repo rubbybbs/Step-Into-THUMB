@@ -26,7 +26,7 @@
             </div>
           </form>
             <div class="layui-row layui-col-space15">
-              <div class="layui-col-md12">
+              <div class="layui-col-md12" id="toAddAddition">
                   <div class="layui-card">
                       <div class="layui-card-header">人员信息</div>
                       <div class="layui-card-body" id="toAdd">
@@ -61,8 +61,11 @@
         var LocalData=layui.data('LocalData');
         var currentSudent=LocalData.wxID;
         var currentSegment=LocalData.currentSegment;
+        var url = '';
+        if (currentSegment==-2) url='Step-Into-THUMB/admin/activity/'+LocalData.ActID+'/get-candidate-detail?wxID='+currentSudent;
+        else url='Step-Into-THUMB/examiner/transcript?wxID=' + currentSudent +'&username=' + LocalData.username;
         $.ajax({
-            url: 'Step-Into-THUMB/examiner/transcript?wxID=' + currentSudent,
+            url: url,
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
@@ -195,11 +198,47 @@
                     });
                     element.tabChange('activitySegment', currentSegment.toString());
                     form.render();
+
+                if (currentSegment==-2){
+
+                    $("#toAddAddition").append('<div class="layui-card">\n' +
+                        '                      <div class="layui-card-header">备注</div>\n' +
+                        '                      <div class="layui-card-body">\n' +
+                        '<div class="layui-form-item layui-form-text">\n' +
+                        '    \n' +
+                        '      <textarea class="layui-textarea" id="Addition">'+obj.comment+'</textarea>\n' +
+                        '    \n' +
+                        '</div>' +
+                        '<button type="button" class="layui-btn" id="AddAddition">提交</button>\n' +
+                        '                      </div>\n' +
+                        '                  </div>');
+                    form.render();
+                }
+            }
+        });
+
+
+      });
+
+      $("#toAddAddition").on("click", "#AddAddition",function() {
+        var LocalData = layui.data('LocalData');
+        var Fdata = form.val('SegmentList');
+        var str = $("#Addition").val();
+        $.ajax({
+            url: 'Step-Into-THUMB/admin/activity/'+LocalData.ActID+'/add-comment?wxID='+LocalData.wxID,
+            type: 'post',
+            contentType: 'application/json',
+            dataType: 'json',
+            headers: {
+                'X-CSRFToken': Fdata.csrfmiddlewaretoken
+              },
+            data: JSON.stringify({"comment":str}),
+            success: function (data) {
+                layer.msg('提交成功');
             }
         });
       });
 
-      //$("#toAdd").on("click", "#FinishScore",function() {
       form.on('submit(submitForm)', function (data) {
           var LocalData = layui.data('LocalData');
           var currentSudent = LocalData.wxID;
