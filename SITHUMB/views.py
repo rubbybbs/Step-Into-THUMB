@@ -335,20 +335,21 @@ class AdmissionView(APIView):
 
 
 class CandidateListForAdminView(APIView):
-    def get(self, request):
-        response = {"msg": None, "data": []}
-        s_ID = request.GET.get("s_ID")
+    def get(self, request, id):
+        response = {"code": 0, "msg": None, "count": 0, "data": []}
+        s_ID = int(request.GET.get("s_ID"))
         # stage和s_ID的对应关系还需要进一步确定
         if s_ID == -1:
-            candidate_list = Application.objects.filter(activity__id=cur_activity_id)
+            candidate_list = Application.objects.filter(activity__id=id)
             for candidate in candidate_list:
                 json_obj = {
                     "name": candidate.candidate.name,
                     "ID": candidate.candidate.student_id
                 }
-                response["candidates"].append(json_obj)
+                response["data"].append(json_obj)
+                response["count"] += 1
         else:
-            candidate_list = Application.objects.filter(activity__id=cur_activity_id, stage=s_ID)
+            candidate_list = Application.objects.filter(activity__id=id, stage=s_ID)
             for candidate in candidate_list:
                 json_obj = {
                     "name": candidate.candidate.name,
@@ -356,6 +357,7 @@ class CandidateListForAdminView(APIView):
                     "wxID": candidate.candidate.wx_id
                 }
                 response["data"].append(json_obj)
+                response["count"] += 1
         return Response(response)
 
 

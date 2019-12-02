@@ -55,12 +55,13 @@
 
                             <div class="layui-tab-content" id="contentToAdd">
                                 <div class="layui-tab-item layui-show">
-                                    <table class="layui-table" lay-data="{height: 900, url:''}" lay-filter="accountTable" id="accountTable">
+                                    <table class="layui-table" lay-data="{height: 900, url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-1'}" lay-filter="accountTable" id="accountTable">
                                       <thead>
                                           <tr>
-                                            <th lay-data="{type:'numbers', width:'10%'}"></th>
-                                            <th lay-data="{field:'', width:'30%', style:'cursor: pointer;'}">姓名</th>
-                                            <th lay-data="{field:'', width:'40%', style:'cursor: pointer;'}">学号</th>
+                                            <th lay-data="{type:'numbers', width:'5%'}"></th>
+                                            <th lay-data="{field:'name', width:'5%'}">姓名</th>
+                                            <th lay-data="{field:'ID', width:'10%'}">学号</th>
+                                            <th lay-data="{field:'addition', width:'60%', style:'cursor: pointer;', event: 'editAddition'}">备注</th>
                                             <th lay-data="{templet:'#bar', width:'20%', style:'cursor: pointer;'}">编辑</th>
                                           </tr>
                                       </thead>
@@ -181,7 +182,15 @@
         } else if (obj.event === 'refuse'){
           // #TODO ajax请求
 
-        };
+        } else if (obj.event === 'editAddition'){
+          // #TODO ajax请求
+
+        }
+        return false;
+      });
+
+      table.on('edit()', function(obj){
+        return false;
       });
     });
 
