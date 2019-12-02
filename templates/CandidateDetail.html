@@ -20,7 +20,7 @@
 
     <div class="layui-body" , lay-filter="graph" , style="left:0px;">
       <div style="padding: 20px; background-color: #F2F2F2;">
-          <form class="layui-form" action="" lay-filter="SegmentList"> {%  csrf_token %}
+          <form class="layui-form" action="" lay-filter="SegmentList" id="isPass"> {%  csrf_token %}
             <div style="display:none;">
                 <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm" id="FinishScore">提交</button>
             </div>
@@ -147,7 +147,15 @@
                                               htmls+=modestr;
                                         }
                             });
-                            htmls+='<div class="layui-form-item">\n' +
+                            htmls+=
+                                '  <div class="layui-form-item">\n' +
+                                '    <label class="layui-form-label">是否通过</label>\n' +
+                                '    <div class="layui-input-block">\n' +
+                                '      <input type="radio" name="Pass" value="1" title="是">\n' +
+                                '      <input type="radio" name="Pass" value="0" title="否">\n' +
+                                '    </div>\n' +
+                                '  </div>' +
+                                '<div class="layui-form-item">\n' +
                                     '<button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm" id="FinishScore">提交</button>\n' +
                                 '</div>' +
                                 '</form>';
@@ -197,13 +205,15 @@
           var currentSudent = LocalData.wxID;
           var currentSegment = LocalData.currentSegment;
           var currentUser = LocalData.username;
+          var isPass = '2';
           var Fdata = form.val('SegmentList');
           var Sdata = form.val('FormSubmit');
           scoreForm.map(function(value){
               value['answer'] = Sdata[value['name']];
           });
+          if (Sdata.Pass) isPass=Sdata.Pass;
           $.ajax({
-              url: 'Step-Into-THUMB/examiner/transcript?wxID=' + currentSudent + '&s_ID=' + currentSegment + '&username=' + currentUser,
+              url: 'Step-Into-THUMB/examiner/transcript?wxID=' + currentSudent + '&s_ID=' + currentSegment + '&username=' + currentUser + '&eligible=' + isPass,
               type: 'post',
               contentType: 'application/json',
               headers: {
@@ -214,6 +224,9 @@
               success: function (data) {
                 if (data.status == 100) {
                     layer.msg('提交成功');
+                    if (currentSegment==-1) location.assign("history.html");
+                    else if (currentSegment==-2) location.assign("finalcheck.html");
+                    else location.assign("score.html");
                 } else {
                     layer.msg('提交失败请重试');
                 }

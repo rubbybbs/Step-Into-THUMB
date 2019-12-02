@@ -66,7 +66,7 @@
                             </div>
                         </div>
                     </div>
-                  </div>                                
+                  </div>
      
                 </form>
               </div>
@@ -91,7 +91,7 @@
 
   <script src="{% static "layui/layui.js" %}"></script>
   <script type="text/html" id="bar">
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="detail">评分</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="detail">详情</a>
   </script>
   <script>
 
@@ -109,14 +109,14 @@
         var currentSection='';
 
         $.ajax({
-            url: 'Step-Into-THUMB/examiner/get-section?username='+LocalData.username,
+            url: 'Step-Into-THUMB/examiner/get-history-candidate-list?username='+LocalData.username,
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
             success: function (data) {
                 if (data.status==100) {
                     var first = 0;
-                    data.sections.map(function (value) {
+                    data.candidates.sections.map(function (value) {
                         var htmls = '<table class="layui-table" id="section' + value.s_ID + '"></table>';
                         element.tabAdd('activitySegment', {
                             title: value.name
@@ -129,7 +129,7 @@
                         }
                         table.render({
                             elem: '#section' + value.s_ID
-                            , url: 'Step-Into-THUMB/examiner/get-candidate-list?s_ID='+ value.s_ID
+                            , url:
                             , cellMinWidth: 80
                             , cols: [[
                                 {type:'numbers', width:'10%'}
@@ -159,7 +159,7 @@
             });
             layui.data('LocalData', {
                 key: 'currentSegment',
-                value: uid
+                value: -1
             });
             location.assign("CandidateDetail.html");
         }

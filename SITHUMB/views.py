@@ -69,6 +69,10 @@ def application_score(request):
     return render(request, "score.html")
 
 
+def application_history(request):
+    return render(request, "history.html")
+
+
 # 管理员相关接口
 
 class AuthAdminLoginView(APIView):

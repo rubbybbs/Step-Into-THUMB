@@ -22,6 +22,7 @@ from SITHUMB import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index),
+    path('index.html', views.index),
     path('activity.html', views.activity),
     path('modify.html', views.application_form),
     path('segment.html', views.application_segment),
@@ -29,6 +30,7 @@ urlpatterns = [
     path('finalcheck.html', views.application_finalcheck),
     path('score.html', views.application_score),
     path('CandidateDetail.html', views.application_detail),
+    path('history.html', views.application_history),
     
     url(r'^Step-Into-THUMB/admin/login$', views.AuthAdminLoginView.as_view()),
     url(r'^Step-Into-THUMB/admin/logintest$', views.LoginTestView.as_view()),
