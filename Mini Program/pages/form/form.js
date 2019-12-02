@@ -25,19 +25,17 @@ Page({
         'content-type': 'application/json'
       },
       success: function (res) {
-        //console.log(res.data["form"])]
         let Form = JSON.parse(res.data["form"]);
-        console.log(Form);
+        console.log(Form['question']);
         let gen = [];
         for (let x in Form['question']) {
           console.log(Form['question'][x])
           let ques = Form['question'][x];
           if (ques.type=="Choice") {
             ques["changeFunc"] = "bindChange" + x;
-            ques["ChoiceIndex"] = 1;
+            ques["ChoiceIndex"] = 0;
             ques["ChoicesArray"] = [];
             for (let item in ques.Choices) {
-              console.log("!", ques.Choices[item]);
               ques.ChoicesArray.push(ques.Choices[item].Choice);
             }
             console.log(ques.Choices)
@@ -130,7 +128,6 @@ Page({
   formSubmit: function (e) {
     let question = []
     for (let x in this.data.questions) {
-      console.log(this.data.questions[x])
       let q = this.data.questions[x]
       if(q.type == "Blank"){
         q.answer = e.detail.value[q.name]
@@ -147,7 +144,7 @@ Page({
       }
       
     }
-    
+    console.log(question)
     let session = wx.getStorageSync('key')
     wx.request({
       url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/submit-application?session='+session, 
