@@ -98,9 +98,10 @@
                 obj=JSON.parse(str);
                     obj.sections.map(function(value){
                         if (value.sectionID == currentSegment){
-                            scoreForm = value.question;
+                            console.log(value);
+                            scoreForm = value.form.question;
                             htmls = '<form  class="layui-form" action="" lay-filter="FormSubmit">';
-                            value.question.map(function(value){
+                            value.form.question.map(function(value){
                                 if (value.type=='Blank'){
                                             if (value.answer){
                                                 htmls+=
@@ -157,7 +158,8 @@
                             });
                         } else {
                             htmls = '';
-                            value.question.map(function(value){
+                            console.log(value);
+                            value.form.question.map(function(value){
                                 if (value.answer)
                                   htmls+=
                                     '<div class="layui-form-item"> \

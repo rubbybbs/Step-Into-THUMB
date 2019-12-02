@@ -456,22 +456,35 @@ class ApplyView(APIView):
         try:
             application = candidate.applications.get(a_id=cur_activity_id)
         except:
-            print("here")
             # 创建评分表
             sections = Section.objects.filter(a_id=cur_activity_id)
             transcript_obj = {
                 "sections": []
             }
             for sec in sections:
-                json_obj = {
-                    "sectionID": sec.s_id,
-                    "question": sec.transcript_format,
-                    "examiner": None
-                }
-                transcript_obj["sections"].append(json_obj)
+                if sec.transcript_format != "":
+                    json_obj = {
+                        "sectionID": sec.s_id,
+                        "name": sec.name,
+                        "form": json.loads(sec.transcript_format),
+                        "examiner": "null"
+                    }
+                    transcript_obj["sections"].append(json_obj)
+                else:
+                    # 实际上线时不会出现。
+                    json_obj = {
+                        "sectionID": sec.s_id,
+                        "name": sec.name,
+                        "form": {
+                            "section_id": -1,
+                            "question": []
+                        },
+                        "examiner": "null"
+                    }
+                    transcript_obj["sections"].append(json_obj)
 
             application = Application(a_id=cur_activity_id, candidate=candidate, application_form=application_form,
-                                      activity=activity, transcript=json.dumps(transcript_obj))
+                                      activity=activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
             application.save()
         else:
             application.application_form = application_form
@@ -580,7 +593,6 @@ class TranscriptView(APIView):
         candidate = Application.objects.get(candidate__wx_id=wxID, activity__id=cur_activity_id)
         response["application"] = candidate.application_form
         response["transcript"] = candidate.transcript
-        print(response)
         return Response(response)
 
     def post(self, request):
@@ -597,7 +609,8 @@ class TranscriptView(APIView):
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]
         for sec in transcript:
             if sec["sectionID"] == s_ID:
-                sec["question"] = request.data
+                print(request.data)
+                sec["form"]["question"] = request.data
                 sec["examiner"] = username
                 # 在考官的历史列表中加入该考生
                 for s in histroy_candidate_list:
