@@ -604,8 +604,8 @@ class TranscriptView(APIView):
         s_ID = int(request.GET.get("s_ID"))
         eligible = int(request.GET.get("eligible"))
         username = request.GET.get("username")
-        candidate = Application.objects.get(candidate__wx_id=wxID, activity__id=cur_activity_id)
-        transcript = json.loads(candidate.transcript)["sections"]
+        application = Application.objects.get(candidate__wx_id=wxID, activity__id=cur_activity_id)
+        transcript = json.loads(application.transcript)["sections"]
         examiner = Examiner.objects.get(username=username)
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]
         for sec in transcript:
@@ -617,18 +617,18 @@ class TranscriptView(APIView):
                 for s in histroy_candidate_list:
                     if s["s_ID"] == s_ID:
                         json_obj = {
-                            "name": candidate.candidate.name,
-                            "ID": candidate.candidate.student_id,
-                            "wxID": candidate.candidate.wx_id
+                            "name": application.candidate.name,
+                            "ID": application.candidate.student_id,
+                            "wxID": application.candidate.wx_id
                         }
                         s["candidates"].append(json_obj)
                 break
-        candidate.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
+        application.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
         if eligible == 1:
-            candidate.stage += 1
-        else:
-            candidate.stage = - candidate.stage - 1
-        candidate.save()
+            application.stage += 1
+        elif eligible == 0:
+            application.stage = - application.stage - 1
+        application.save()
         examiner.examinees = json.dumps({"sections": histroy_candidate_list})
         examiner.save()
         return Response(response)
