@@ -336,7 +336,7 @@ class AdmissionView(APIView):
 
 class CandidateListForAdminView(APIView):
     def get(self, request):
-        response = {"msg": None, "candidates": []}
+        response = {"msg": None, "data": []}
         s_ID = request.GET.get("s_ID")
         # stage和s_ID的对应关系还需要进一步确定
         if s_ID == -1:
@@ -355,7 +355,7 @@ class CandidateListForAdminView(APIView):
                     "ID": candidate.candidate.student_id,
                     "wxID": candidate.candidate.wx_id
                 }
-                response["candidates"].append(json_obj)
+                response["data"].append(json_obj)
         return Response(response)
 
 
