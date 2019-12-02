@@ -344,7 +344,8 @@ class CandidateListForAdminView(APIView):
             for candidate in candidate_list:
                 json_obj = {
                     "name": candidate.candidate.name,
-                    "ID": candidate.candidate.student_id
+                    "ID": candidate.candidate.student_id,
+                    "wxID": candidate.candidate.wx_id
                 }
                 response["data"].append(json_obj)
                 response["count"] += 1
@@ -362,14 +363,24 @@ class CandidateListForAdminView(APIView):
 
 
 class CandidateDetailForAdminView(APIView):
-    def get(self, request):
+    def get(self, request, id):
         response = {"msg": None, "candidate": None}
         wxID = request.GET.get("wxID")
-        candidate = Application.objects.get(activity__id=cur_activity_id, candidate__wx_id=wxID)
+        candidate = Application.objects.get(activity__id=id, candidate__wx_id=wxID)
         response["candidate"] = {
             "application": candidate.application_form,
             "transcript": candidate.transcript
         }
+        return Response(response)
+
+
+class CommentForCandidateView(APIView):
+    def post(self, request, id):
+        response = {"msg": None}
+        wxID = request.GET.get("wxID")
+        candidiate = Application.objects.get(activity=id, candidate__wx_id=wxID)
+        candidiate.transcript["comment"] = request.data
+        candidiate.save()
         return Response(response)
 
 
@@ -465,7 +476,8 @@ class ApplyView(APIView):
             # 创建评分表
             sections = Section.objects.filter(activity__id=cur_activity_id)
             transcript_obj = {
-                "sections": []
+                "sections": [],
+                "comment": ""
             }
             for sec in sections:
                 if sec.transcript_format != "":
@@ -490,7 +502,7 @@ class ApplyView(APIView):
                     transcript_obj["sections"].append(json_obj)
 
             application = Application(candidate=candidate, application_form=application_form,
-                        activity=activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
+                                      activity=activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
             application.save()
         else:
             application.application_form = application_form
