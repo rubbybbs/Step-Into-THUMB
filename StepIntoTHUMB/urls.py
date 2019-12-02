@@ -75,6 +75,10 @@ urlpatterns = [
 
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/get-candidate-list$', views.CandidateListForAdminView.as_view()),
     # 类型 GET  参数 s_ID
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/get-candidate-detail$', views.CandidateDetailForAdminView.as_view()),
+    # 类型 GET  参数 wx_ID
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/add-comment$', views.CommentForCandidateView.as_view()),
+    # 类型POST  参数 wx_ID 正文 评论内容
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/admission/admit$', views.AdmissionView.as_view()),
     # 类型 GET  参数 wx_ID
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/admission/refuse$', views.AdmissionView.as_view()),
