@@ -17,9 +17,11 @@ class Activity(models.Model):
 
 class Section(models.Model):
     s_id = models.IntegerField(default=0)
+    compulsory = models.BooleanField(default=True)
     name = models.CharField(max_length=100, default="")
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='sections', null=True)
     transcript_format = models.TextField(default="")
+    examinees = models.TextField(default="")
 
 
 class Examiner(models.Model):

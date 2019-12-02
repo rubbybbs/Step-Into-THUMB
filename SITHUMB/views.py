@@ -288,6 +288,7 @@ class SectionView(APIView):
         activity.section_cnt += 1
         activity.save()
         section.activity = activity
+        section.examinees = json.dumps({"examinees":[]})
         section.save()
         response = {"status": 100, "msg": None}
         return Response(response)
@@ -469,7 +470,16 @@ class ApplyView(APIView):
             elif q["name"] == "学号":
                 candidate.student_id = q["answer"]
         candidate.save()
-
+        sections = Section.objects.filter(activity__id=cur_activity_id)
+        for sec in sections:
+            tmp = json.loads(sec.examinees)["examinees"]
+            tmp.append({
+                "name": candidate.name,
+                "wxID": wx_id,
+                "ID": candidate.student_id
+            })
+            sec.examinees = json.dumps({"examinees": tmp}, ensure_ascii=False)
+            sec.save()
         try:
             application = candidate.applications.get(activity__id=cur_activity_id)
         except:
@@ -576,17 +586,9 @@ class CandidateListExaminerView(APIView):
     def get(self, request):
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_id = request.GET.get('s_ID')
-        count = 0
-        candidate_list = Application.objects.filter(stage=s_id)
-        for candidate in candidate_list:
-            count += 1
-            jsonobj = {
-                "name": candidate.candidate.name,
-                "ID": candidate.candidate.student_id,
-                "wxID": candidate.candidate.wx_id
-            }
-            response["data"].append(jsonobj)
-        response["count"] = count
+        section = Section.objects.get(s_id=s_id)
+        response["data"] = json.loads(section.examinees)["examinees"]
+        response["count"] = len(response["data"])
         return Response(response)
 
 
@@ -625,21 +627,22 @@ class TranscriptView(APIView):
             return Response({"status": 400})
 
         response = {"status": 100, "msg": None}
-        wxID = request.GET.get("wxID")
-        s_ID = int(request.GET.get("s_ID"))
+        wx_id = request.GET.get("wxID")
+        s_id = int(request.GET.get("s_ID"))
         eligible = int(request.GET.get("eligible"))
+        section = Section.objects.get(s_id=s_id)
         username = request.GET.get("username")
-        application = Application.objects.get(candidate__wx_id=wxID, activity__id=cur_activity_id)
+        application = Application.objects.get(candidate__wx_id=wx_id, activity__id=cur_activity_id)
         transcript = json.loads(application.transcript)["sections"]
         examiner = Examiner.objects.get(username=username)
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]
         for sec in transcript:
-            if sec["sectionID"] == s_ID:
+            if sec["sectionID"] == s_id:
                 sec["form"]["question"] = request.data
                 sec["examiner"] = username
                 # 在考官的历史列表中加入该考生
                 for s in histroy_candidate_list:
-                    if s["s_ID"] == s_ID:
+                    if s["s_ID"] == s_id:
                         # 第一次评分的时候才加入历史记录
                         json_obj = {
                             "name": application.candidate.name,
@@ -654,6 +657,9 @@ class TranscriptView(APIView):
             application.stage += 1
         elif eligible == 0:
             application.stage = - application.stage - 1
+        tmp = json.loads(section.examinees)["examinees"]
+        section.examinees = json.dumps({"examinees": [e for e in tmp if e["wxID"] != wx_id]}, ensure_ascii=False)
+        section.save()
         application.save()
         examiner.examinees = json.dumps({"sections": histroy_candidate_list}, ensure_ascii=False)
         examiner.save()
