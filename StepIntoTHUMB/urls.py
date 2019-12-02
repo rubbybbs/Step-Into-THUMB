@@ -72,6 +72,9 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/section/(?P<sectionID>[0-9]+)/save-transcript-form$', views.TranscriptFormView.as_view()),
     # 类型 POST 正文...
 
+
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/get-candidate-list$', views.CandidateDetailForAdminView.as_view()),
+    # 类型 GET  参数 s_ID
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/admission/admit$', views.AdmissionView.as_view()),
     # 类型 GET  参数 wx_ID
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/admission/refuse$', views.AdmissionView.as_view()),
