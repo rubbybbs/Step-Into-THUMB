@@ -247,7 +247,7 @@ class ExaminerView(APIView):
             "sections": []
         }
         for s_id in sections:
-            examiner.extension.sections.add(Section.objects.get(s_id=s_id, a_id=id))
+            examiner.extension.sections.add(Section.objects.get(s_id=s_id, activity__id=id))
             json_obj = {
                 "s_ID": s_id,
                 "candidates": []
@@ -268,7 +268,7 @@ class ExaminerView(APIView):
 
 class SectionListView(APIView):
     def get(self, request, id):
-        sections = Section.objects.filter(a_id=id).order_by("s_id")
+        sections = Section.objects.filter(activity__id=id).order_by("s_id")
         sections_info = []
         for s in sections:
             sections_info.append({"sectionID": s.s_id, "name": s.name})
@@ -279,7 +279,7 @@ class SectionView(APIView):
     def post(self, request, id):
         name = request.GET.get('name')
         activity = Activity.objects.get(id=id)
-        section = Section(a_id=id, s_id=activity.section_cnt, name=name)
+        section = Section(s_id=activity.section_cnt, name=name)
         section.save()
         activity.section_cnt += 1
         activity.save()
@@ -289,7 +289,7 @@ class SectionView(APIView):
         return Response(response)
 
     def delete(self, request, id, sectionID):
-        Section.objects.filter(a_id=id, s_id=sectionID).delete()
+        Section.objects.filter(activity__id=id, s_id=sectionID).delete()
         activity = Activity.objects.get(id=id)
         activity.section_cnt -= 1
         activity.save()
@@ -300,14 +300,14 @@ class SectionView(APIView):
 class TranscriptFormView(APIView):
     def post(self, request, id, sectionID):
         transcript_format = str(request.data).replace('\'', '"')
-        section = Section.objects.get(s_id=sectionID, a_id=id)
+        section = Section.objects.get(s_id=sectionID, activity__id=id)
         section.transcript_format = transcript_format
         section.save()
         response = {"status": 100, "msg": None}
         return Response(response)
 
     def get(self, request, id, sectionID):
-        transcript_format = Section.objects.get(s_id=sectionID, a_id=id).transcript_format;
+        transcript_format = Section.objects.get(s_id=sectionID, activity__id=id).transcript_format;
         if transcript_format == '':
             return Response({'form': '{"question":[]}'})
         else:
@@ -317,14 +317,14 @@ class TranscriptFormView(APIView):
 class AdmissionView(APIView):
     def post(self, request, id):
         wx_id = request.GET.get("wx_id")
-        a = Application.objects.get(activity=id, candidate__wx_id=wx_id)
+        a = Application.objects.get(activity__id=id, candidate__wx_id=wx_id)
         a.admitted = False
         a.save()
         return Response({"status": 100})
 
     def get(self, request, id):
         wx_id = request.GET.get("wx_id")
-        a = Application.objects.get(activity=id, candidate__wx_id=wx_id)
+        a = Application.objects.get(activity__id=id, candidate__wx_id=wx_id)
         a.admitted = True
         a.save()
         return Response({"status": 100})
@@ -336,7 +336,7 @@ class CandidateListForAdminView(APIView):
         s_ID = request.GET.get("s_ID")
         # stage和s_ID的对应关系还需要进一步确定
         if s_ID == -1:
-            candidate_list = Application.objects.filter(activity=cur_activity_id)
+            candidate_list = Application.objects.filter(activity__id=cur_activity_id)
             for candidate in candidate_list:
                 json_obj = {
                     "name": candidate.candidate.name,
@@ -344,7 +344,7 @@ class CandidateListForAdminView(APIView):
                 }
                 response["candidates"].append(json_obj)
         else:
-            candidate_list = Application.objects.filter(activity=cur_activity_id, stage=s_ID)
+            candidate_list = Application.objects.filter(activity__id=cur_activity_id, stage=s_ID)
             for candidate in candidate_list:
                 json_obj = {
                     "name": candidate.candidate.name,
@@ -359,7 +359,7 @@ class CandidateDetailForAdminView(APIView):
     def get(self, request):
         response = {"msg": None, "candidate": None}
         wxID = request.GET.get("wxID")
-        candidate = Application.objects.get(activity=cur_activity_id, candidate__wx_id=wxID)
+        candidate = Application.objects.get(activity__id=cur_activity_id, candidate__wx_id=wxID)
         response["candidate"] = {
             "application": candidate.application_form,
             "transcript": candidate.transcript
@@ -454,10 +454,10 @@ class ApplyView(APIView):
         candidate.save()
 
         try:
-            application = candidate.applications.get(a_id=cur_activity_id)
+            application = candidate.applications.get(activity__id=cur_activity_id)
         except:
             # 创建评分表
-            sections = Section.objects.filter(a_id=cur_activity_id)
+            sections = Section.objects.filter(activity__id=cur_activity_id)
             transcript_obj = {
                 "sections": []
             }
@@ -483,8 +483,8 @@ class ApplyView(APIView):
                     }
                     transcript_obj["sections"].append(json_obj)
 
-            application = Application(a_id=cur_activity_id, candidate=candidate, application_form=application_form,
-                                      activity=activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
+            application = Application(candidate=candidate, application_form=application_form,
+                        activity=activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
             application.save()
         else:
             application.application_form = application_form
@@ -512,8 +512,8 @@ class StatusView(APIView):
         session = request.GET.get('session')
         wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
-        stage = candidate.applications.get(a_id=cur_activity_id).stage
-        section = Section.objects.get(a_id=cur_activity_id, s_id=stage)
+        stage = candidate.applications.get(activity__id=cur_activity_id).stage
+        section = Section.objects.get(activity__id=cur_activity_id, s_id=stage)
         response = {"status": "您的下一步是" + section.name + "请在113教室内等待"}
         return Response(response)
 
@@ -602,6 +602,7 @@ class TranscriptView(APIView):
         response = {"status": 100, "msg": None}
         wxID = request.GET.get("wxID")
         s_ID = int(request.GET.get("s_ID"))
+        eligible = int(request.GET.get("eligible"))
         username = request.GET.get("username")
         candidate = Application.objects.get(candidate__wx_id=wxID, activity__id=cur_activity_id)
         transcript = json.loads(candidate.transcript)["sections"]
@@ -623,6 +624,10 @@ class TranscriptView(APIView):
                         s["candidates"].append(json_obj)
                 break
         candidate.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
+        if eligible == 1:
+            candidate.stage += 1
+        else:
+            candidate.stage = - candidate.stage - 1
         candidate.save()
         examiner.examinees = json.dumps({"sections": histroy_candidate_list})
         examiner.save()

@@ -85,7 +85,7 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/examiner/transcript$', views.TranscriptView.as_view()),
 
     # get  {"sections":[{"sectionID":.., "question":[{"name":,"type":,"answer":},...]}]}
-    # post {}
+    # post 参数：s_id:, eligible：0(不通过)/1(通过), username  正文：{}
 
 
 
