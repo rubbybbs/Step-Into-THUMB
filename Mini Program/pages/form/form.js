@@ -9,16 +9,18 @@ Page({
   data: {
     questions: [],
   },
+
   initForm(form) {
     
   },
+
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
     let _this = this
     wx.request({
-      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-empty-form', //仅为示例，并非真实的接口地址
+      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-empty-form', 
       header: {
         'content-type': 'application/json'
       },
@@ -48,7 +50,7 @@ Page({
               _this.setData({
                 questions: tmp
               })
-              console.log(_this.data.questions[x].ChoicesArray)
+              // console.log(_this.data.questions[x].ChoicesArray)
               /*
               let tmp = "bindChange" + x
               _this.setData({
@@ -57,6 +59,8 @@ Page({
             }
             console.log("changeFunc", "bindChange" + x)
           }
+          
+
           gen.push(ques)
         }
         console.log("gen",gen)
@@ -119,13 +123,46 @@ Page({
   bindChange0: function (e) {
     console.log(e)
     console.log('picker country 发生选择改变，携带值为', e.detail.value);
-
+    
     
   },
 
   formSubmit: function (e) {
-    console.log(e)
-    console.log(this.data.temp)
-    console.log(this.data.questions[2].ChoicesArray[this.data.Index])
+    let question = []
+    for (let x in this.data.questions) {
+      console.log(this.data.questions[x])
+      let q = this.data.questions[x]
+      if(q.type == "Blank"){
+        q.answer = e.detail.value[q.name]
+        question.push(q)
+      }
+      else if (q.type == "Choice") {
+        question.push(
+          {
+            name: q.name,
+            type: q.type,
+            answer: q.ChoicesArray[q.ChoiceIndex]
+          }
+        )
+      }
+      
+    }
+    
+    let session = wx.getStorageSync('key')
+    wx.request({
+      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/submit-application?session='+session, 
+      method: 'POST',
+      data:{
+        question
+      },
+      header: {
+        'content-type': 'application/json'
+      },
+      success: function (res) {
+        console.log(res)
+      }
+    })
   },
+
+
 })

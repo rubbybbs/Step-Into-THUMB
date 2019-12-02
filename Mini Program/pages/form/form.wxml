@@ -30,7 +30,8 @@
         <!-- <view class="weui-cells__title">表单组标题</view> -->
         <view class="weui-cells weui-cells_form">
           <view wx:for="{{questions}}">
-            <view wx:if="{{item.type=='Blank'}}"> <template is="Blank" data="{{...item}}"/> </view>
+            <view wx:if="{{item.type=='Blank'}}"> 
+            <template is="Blank" data="{{...item}}"/> </view>
             <view wx:if="{{item.type=='Choice'}}"> <template is="Choice" data="{{...item}}"/> </view>
           </view>
         </view>
