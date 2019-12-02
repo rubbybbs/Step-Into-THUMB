@@ -578,10 +578,17 @@ class CandidateListExaminerView(APIView):
 
 class HistoryCandidateListExaminerView(APIView):
     def get(self, request):
-        response = {"status": 100, "candidates": None}
+        response = {"status": 100, "count": 0, "data": []}
         username = request.GET.get('username')
+        s_id = int(request.GET.get('s_ID'))
         examiner = Examiner.objects.get(username=username)
-        response["candidates"] = json.loads(examiner.examinees)
+        sections = json.loads(examiner.examinees)["sections"]
+        # 后评分的先显示
+        for sec in sections:
+            if s_id == sec["s_id"]:
+                response["count"] = len(sec["candidates"])
+                for i in range(len(sec["candidates"])):
+                    response["data"].append(sec["sections"].pop())
         return Response(response)
 
 
@@ -614,18 +621,19 @@ class TranscriptView(APIView):
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]
         for sec in transcript:
             if sec["sectionID"] == s_ID:
-                print(request.data)
                 sec["form"]["question"] = request.data
                 sec["examiner"] = username
                 # 在考官的历史列表中加入该考生
                 for s in histroy_candidate_list:
                     if s["s_ID"] == s_ID:
+                        # 第一次评分的时候才加入历史记录
                         json_obj = {
                             "name": application.candidate.name,
                             "ID": application.candidate.student_id,
                             "wxID": application.candidate.wx_id
                         }
-                        s["candidates"].append(json_obj)
+                        if json_obj not in s["candidates"]:
+                            s["candidates"].append(json_obj)
                 break
         application.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
         if eligible == 1:
@@ -633,6 +641,6 @@ class TranscriptView(APIView):
         elif eligible == 0:
             application.stage = - application.stage - 1
         application.save()
-        examiner.examinees = json.dumps({"sections": histroy_candidate_list})
+        examiner.examinees = json.dumps({"sections": histroy_candidate_list}, ensure_ascii=False)
         examiner.save()
         return Response(response)
