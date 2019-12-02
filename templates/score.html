@@ -138,6 +138,10 @@
                                   ,{field:'wxID', width:'30%', title: '微信号'}
                                   ,{templet:'#bar', width:'20%', title: '编辑', style:'cursor: pointer;'}
                             ]]
+                            , initSort: {
+                                field: 'ID'
+                                ,type: 'desc'
+                              }
                         });
                     });
                     form.render();

@@ -268,8 +268,14 @@
       });
 
       $("#toAdd").on("click", "[name='FinalCheckActivity']", function () {
-        layer.msg('活动终评');
 
+        var rawid = $(this).attr("id");
+        layer.msg('更改活动' + rawid);
+        var id = rawid.split('_');
+        layui.data('LocalData', {
+          key: 'ActID',
+          value: parseInt(id[1])
+        });
         location.assign("finalcheck.html");
       });
 
