@@ -4,3 +4,11 @@
 .page {
   height: 100%;
 }
+
+.weui-cell__hd_in-select-after {
+  margin-left: 32px;
+}
+
+.weui-cell {
+  margin: 0,0,0,0;
+}

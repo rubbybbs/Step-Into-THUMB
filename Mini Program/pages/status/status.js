@@ -12,7 +12,18 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-
+    let _this = this
+    wx.request({
+      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-status',
+      method: "GET",
+      header: {
+        'content-type': 'application/json'
+      },
+      success: function (res) {
+        console.log(res.data);
+        
+        }
+    })
   },
 
   /**
