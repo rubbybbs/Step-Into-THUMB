@@ -342,36 +342,24 @@ class CandidateListForAdminView(APIView):
         # 1） 当section为必须通过时，其前置必须通过的section也必须全部通过，才显示
         # 2） 当section为非必须通过时，只要考过试，就显示。
         if s_ID == -1:
-            candidate_list = Application.objects.filter(activity__id=id)
-            for candidate in candidate_list:
-                json_obj = {
-                    "name": candidate.candidate.name,
-                    "ID": candidate.candidate.student_id,
-                    "wxID": candidate.candidate.wx_id
-                }
-                response["data"].append(json_obj)
-                response["count"] += 1
+            res_list = Application.objects.filter(activity__id=id)
         elif s_ID == -2:
             sections = Section.objects.filter(compulsory=True).order_by("s_id")
-            section = sections[0]
-            unqualified_list = section.unqualified.all()
-            for application in unqualified_list:
-                response["data"].append({
-                    "name": application.candidate.name,
-                    "ID": application.candidate.student_id,
-                    "wxID": application.candidate.wx_id
-                })
-                response["count"] += 1
+            res_list = sections[0].unqualified.all()
+        elif s_ID == -3:
+            res_list = Application.objects.filter(admitted=True)
         else:
             section = Section.objects.get(s_id=s_ID)
-            qualified_list = section.qualified.all()
-            for application in qualified_list:
-                response["data"].append({
-                    "name": application.candidate.name,
-                    "ID": application.candidate.student_id,
-                    "wxID": application.candidate.wx_id
-                })
-                response["count"] += 1
+            res_list = section.qualified.all()
+
+        for application in res_list:
+            response["data"].append({
+                "name": application.candidate.name,
+                "ID": application.candidate.student_id,
+                "wxID": application.candidate.wx_id,
+                "admitted": application.admitted
+            })
+        response["count"] = len(res_list)
         return Response(response)
 
 
