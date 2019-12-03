@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <meta name="viewport"
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>管理员</title>
+  <title>详细信息</title>
   <link rel="stylesheet" href="{% static "layui/css/layui.css" %}" media="all">
 </head>
 
@@ -18,7 +18,7 @@
       <!-- 头部区域（可配合layui已有的水平导航） -->
     </div>
 
-    <div class="layui-body" , lay-filter="graph" , style="left:0px;">
+    <div class="layui-body" , lay-filter="graph" , style="left:0px;bottom: 0px;">
       <div style="padding: 20px; background-color: #F2F2F2;">
           <form class="layui-form" action="" lay-filter="SegmentList" id="isPass"> {%  csrf_token %}
             <div style="display:none;">
@@ -199,16 +199,21 @@
                     form.render();
 
                 if (currentSegment==-2){
-
+                    var Commentcontent="";
+                    if (obj.comment) Commentcontent=obj.comment;
+                    else Commentcontent="无";
                     $("#toAddAddition").append('<div class="layui-card">\n' +
                         '                      <div class="layui-card-header">备注</div>\n' +
                         '                      <div class="layui-card-body">\n' +
                         '<div class="layui-form-item layui-form-text">\n' +
                         '    \n' +
-                        '      <textarea class="layui-textarea" id="Addition">'+obj.comment+'</textarea>\n' +
+                        '      <textarea class="layui-textarea" id="Addition">'+Commentcontent+'</textarea>\n' +
                         '    \n' +
                         '</div>' +
-                        '<button type="button" class="layui-btn" id="AddAddition">提交</button>\n' +
+                        '<button type="button" class="layui-btn" id="AddAddition">保存备注</button>\n' +
+                        '                      </div>\n' +
+                        '                  </div>' +
+                        '<button type="button" class="layui-btn layui-btn-lg layui-btn-normal layui-btn-radius" id="SubmitCandidate">录取该考生</button>\n' +
                         '                      </div>\n' +
                         '                  </div>');
                     form.render();
@@ -234,6 +239,22 @@
             data: JSON.stringify({"comment":str}),
             success: function (data) {
                 layer.msg('提交成功');
+            }
+        });
+      });
+
+      $("#toAddAddition").on("click", "#SubmitCandidate",function() {
+        var LocalData = layui.data('LocalData');
+        var Fdata = form.val('SegmentList');
+        var str = $("#Addition").val();
+        $.ajax({
+            url: 'Step-Into-THUMB/admin/activity/'+LocalData.ActID+'/admission/admit?wx_id='+LocalData.wxID,
+            type: 'get',
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (data) {
+                layer.msg('提交成功');
+                location.assign("finalcheck.html");
             }
         });
       });

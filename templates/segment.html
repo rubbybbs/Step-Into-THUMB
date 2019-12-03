@@ -25,8 +25,6 @@
         <li class="layui-nav-item" lay-unselect="">
           <a href="javascript:;"><img src="../static/illust_72066950_20181219_203453.jpg" class="layui-nav-img">管理员</a>
           <dl class="layui-nav-child">
-            <dd><a href="javascript:;">修改信息</a></dd>
-            <dd><a href="javascript:;">安全管理</a></dd>
             <dd><a href="index.html">退出</a></dd>
           </dl>
         </li>
@@ -50,7 +48,7 @@
       </div>
     </div>
 
-    <div class="layui-body" , lay-filter="graph">
+    <div class="layui-body" , lay-filter="graph" , style="bottom: 0px;">
       <div style="padding: 20px; background-color: #F2F2F2;">
         <div class="layui-row layui-col-space15">
           <div class="layui-col-md12">
@@ -186,9 +184,12 @@
                                               //alert(modestr);
                                         }
                                     });
-
+                            var compulsoryAppend="";
+                            if (value.compulsory == "True"){
+                                compulsoryAppend="[必]";
+                            }
                             element.tabAdd('activitySegment', {
-                              title: value.name
+                              title: value.name + compulsoryAppend
                               ,content: htmls
                               ,id: value.sectionID.toString()
                             });
@@ -353,7 +354,7 @@
           title: '环节基本设置',
           shadeClose: true,
           shade: 0.8,
-          area: ['450px', '200px'],
+          area: ['450px', '350px'],
           content: '   \
             <form class="layui-form" action="" lay-filter="FormSegment">{%  csrf_token %}\
               <div class="layui-form-item">\
@@ -361,6 +362,13 @@
                 <div class="layui-input-block">\
                   <input type="text" name="name" lay-verify="title" autocomplete="off" placeholder="请输入名称" class="layui-input">\
                 </div>\
+              </div>\
+              <div class="layui-form-item">\
+                 <label class="layui-form-label">是否通过</label>\
+                 <div class="layui-input-block">\
+                    <input type="radio" name="compulsory" value="True" title="是">\
+                    <input type="radio" name="compulsory" value="False" title="否">\
+                 </div>\
               </div>\
             </form>  ',
           success: function (layero, index) {
@@ -373,7 +381,7 @@
             var LocalData=layui.data('LocalData');
             layer.close(index);
             $.ajax({
-              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-section?name='+ Sdata.name,
+              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-section?name='+ Sdata.name +'&compulsory=' + Sdata.compulsory,
               type: 'post',
               contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',

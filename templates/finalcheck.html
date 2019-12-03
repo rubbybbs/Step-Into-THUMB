@@ -25,15 +25,13 @@
         <li class="layui-nav-item" lay-unselect="">
           <a href="javascript:;"><img src="../static/illust_72066950_20181219_203453.jpg" class="layui-nav-img">管理员</a>
           <dl class="layui-nav-child">
-            <dd><a href="javascript:;">修改信息</a></dd>
-            <dd><a href="javascript:;">安全管理</a></dd>
             <dd><a href="index.html">退出</a></dd>
           </dl>
         </li>
       </ul>
     </div>
 
-    <div class="layui-body" , lay-filter="graph" , style="left:0px;">
+    <div class="layui-body" , lay-filter="graph" , style="left:0px;bottom: 0px;">
       <div style="padding: 20px; background-color: #F2F2F2;">
         <div class="layui-row layui-col-space15">
           <div class="layui-col-md12">
@@ -50,6 +48,7 @@
                             <ul class="layui-tab-title" id="titleToAdd">
                                 <li class="layui-this" lay-id="100">全部</li>
                                 <li lay-id="101">最终录取</li>
+                                <li lay-id="102">参加考试</li>
                             </ul>
                             
 
@@ -60,20 +59,37 @@
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
                                             <th lay-data="{field:'name', width:'10%'}">姓名</th>
-                                            <th lay-data="{field:'ID', width:'30%'}">学号</th>
-                                            <th lay-data="{field:'wxID', width:'30%'}">微信号</th>
+                                            <th lay-data="{field:'ID', width:'20%'}">学号</th>
+                                            <th lay-data="{field:'wxID', width:'20%'}">微信号</th>
+                                            <th lay-data="{field:'admitted', width:'20%'}">录取状态</th>
                                             <th lay-data="{templet:'#bar', width:'20%', style:'cursor: pointer;'}">编辑</th>
                                           </tr>
                                       </thead>
                                     </table>
                                 </div>
                                 <div class="layui-tab-item">
-                                    <table class="layui-table" lay-data="{height: 900, url:''}" lay-filter="FinalAdmit" id="FinalAdmit">
+                                    <table class="layui-table" lay-data="{height: 900, url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-3'}" lay-filter="FinalAdmit" id="FinalAdmit">
                                       <thead>
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
-                                            <th lay-data="{field:'name', width:'30%', style:'cursor: pointer;'}">姓名</th>
-                                            <th lay-data="{field:'ID', width:'40%', style:'cursor: pointer;'}">学号</th>
+                                            <th lay-data="{field:'name', width:'10%'}">姓名</th>
+                                            <th lay-data="{field:'ID', width:'20%'}">学号</th>
+                                            <th lay-data="{field:'wxID', width:'20%'}">微信号</th>
+                                            <th lay-data="{field:'admitted', width:'20%'}">录取状态</th>
+                                            <th lay-data="{templet:'#bar2', width:'20%', style:'cursor: pointer;'}">编辑</th>
+                                          </tr>
+                                      </thead>
+                                    </table>
+                                </div>
+                                <div class="layui-tab-item">
+                                    <table class="layui-table" lay-data="{height: 900, url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-2'}" lay-filter="examed" id="examed">
+                                      <thead>
+                                          <tr>
+                                            <th lay-data="{type:'numbers', width:'10%'}"></th>
+                                            <th lay-data="{field:'name', width:'10%'}">姓名</th>
+                                            <th lay-data="{field:'ID', width:'20%'}">学号</th>
+                                            <th lay-data="{field:'wxID', width:'20%'}">微信号</th>
+                                            <th lay-data="{field:'admitted', width:'20%'}">录取状态</th>
                                             <th lay-data="{templet:'#bar', width:'20%', style:'cursor: pointer;'}">编辑</th>
                                           </tr>
                                       </thead>
@@ -108,13 +124,12 @@
   <script src="{% static "layui/layui.js" %}"></script>
 
   <script type="text/html" id="bar">
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="detail">详情</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="acccept">录取</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="refuse" style="hidden">取消</a>
+    <a class="layui-btn layui-btn-xs" lay-event="detail">详情</a>
   </script>
 
   <script type="text/html" id="bar2">
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="detail">详情</a>
+    <a class="layui-btn layui-btn-xs" lay-event="detail">详情</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="refuse">取消</a>
   </script>
 
   <script>
@@ -151,10 +166,11 @@
                             , cellMinWidth: 80
                             , cols: [[
                                 {type:'numbers', width:'10%'}
-                                  ,{field:'name', width:'20%', title: '姓名'}
+                                  ,{field:'name', width:'10%', title: '姓名'}
                                   ,{field:'ID', width:'20%', title: '学号'}
-                                  ,{field:'wxID', width:'30%', title: '微信号'}
-                                  ,{templet:'#bar2', width:'20%', title: '编辑', style:'cursor: pointer;'}
+                                  ,{field:'wxID', width:'20%', title: '微信号'}
+                                  ,{field:'admitted', width:'20%', title: '录取状态'}
+                                  ,{templet:'#bar', width:'20%', title: '编辑', style:'cursor: pointer;'}
                             ]]
                         });
                     });
@@ -180,28 +196,22 @@
                 value: -2
             });
             window.open("CandidateDetail.html", "_blank");
-        } else if (obj.event === 'accept'){
-          // #TODO ajax请求
-
         } else if (obj.event === 'refuse'){
-          // #TODO ajax请求
-
-        } else if (obj.event === 'editAddition'){
-          layer.prompt({
-            formType: 2
-            ,title: '修改学号为 ['+ data.ID +'] 的同学备注'
-            ,value: data.addition
-          }, function(value, index){
-            layer.close(index);
-
-            // #TODO 发送修改的Ajax请求
-
-            obj.update({
-              addition: value
+            $.ajax({
+                url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/admission/refuse?wx_id=' + data.wxID,
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                dataType: 'json',
+                headers: {
+                    'X-CSRFToken': Sdata.csrfmiddlewaretoken
+                },
+                success: function (data) {
+                    location.reload();
+                }
             });
-          });
 
         }
+
         return false;
       });
 

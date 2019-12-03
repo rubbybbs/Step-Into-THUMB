@@ -349,7 +349,7 @@ class CandidateListForAdminView(APIView):
         elif s_ID == -3:
             res_list = Application.objects.filter(admitted=True)
         else:
-            section = Section.objects.get(s_id=s_ID)
+            section = Section.objects.get(activity__id=id, s_id=s_ID)
             res_list = section.qualified.all()
 
         for application in res_list:
