@@ -361,6 +361,7 @@ class CandidateListForAdminView(APIView):
                     "ID": application.candidate.student_id,
                     "wxID": application.candidate.wx_id
                 })
+                response["count"] += 1
         else:
             section = Section.objects.get(s_id=s_ID)
             qualified_list = section.qualified.all()
@@ -370,6 +371,7 @@ class CandidateListForAdminView(APIView):
                     "ID": application.candidate.student_id,
                     "wxID": application.candidate.wx_id
                 })
+                response["count"] += 1
         return Response(response)
 
 
@@ -678,7 +680,7 @@ class TranscriptView(APIView):
         # 若环节为必考且考生不通过，不通过字段中加入该考生
         # 若环节为非必考，在通过字段中直接加入
 
-        compulsory_list = Section.objects.filter(compulsory=True)
+        compulsory_list = Section.objects.filter(compulsory=True).order_by("s_id")
         compulsory_id_list = [sec.s_id for sec in compulsory_list]
         if section.compulsory:
             pos = compulsory_id_list.index(section.s_id)
