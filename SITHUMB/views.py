@@ -360,6 +360,7 @@ class CandidateListForAdminView(APIView):
                     "ID": application.candidate.student_id,
                     "wxID": application.candidate.wx_id
                 })
+                response["count"] += 1
         else:
             section = Section.objects.get(s_id=s_ID)
             qualified_list = section.qualified.all()
@@ -369,6 +370,7 @@ class CandidateListForAdminView(APIView):
                     "ID": application.candidate.student_id,
                     "wxID": application.candidate.wx_id
                 })
+                response["count"] += 1
         return Response(response)
 
 
