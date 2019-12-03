@@ -623,6 +623,7 @@ class TranscriptView(APIView):
         wx_id = request.GET.get("wxID")
         s_id = int(request.GET.get("s_ID"))
         eligible = int(request.GET.get("eligible"))
+        sections = Section.objects.all().order_by("s_id")
         section = Section.objects.get(s_id=s_id)
         username = request.GET.get("username")
         application = Application.objects.get(candidate__wx_id=wx_id, activity__id=cur_activity_id)
@@ -643,7 +644,6 @@ class TranscriptView(APIView):
                     sec["passed"] = "Pass"
                 # 在考官的历史列表中加入该考生
                 for s in histroy_candidate_list:
-                    print(int(s["s_ID"]) == s_id)
                     if int(s["s_ID"]) == s_id:
                         # 第一次评分的时候才加入历史记录
                         json_obj = {
@@ -657,6 +657,25 @@ class TranscriptView(APIView):
         application.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
         tmp = json.loads(section.examinees)["examinees"]
         section.examinees = json.dumps({"examinees": [e for e in tmp if e["wxID"] != wx_id]}, ensure_ascii=False)
+        # 维护各个环节的通过/不通过字段
+        # 若环节为必考且考生通过，通过字段中加入该考生，并将该考生移除出前一个必考环节的通过字段；
+        # 若环节为必考且考生不通过，不通过字段中加入该考生
+        # 若环节为非必考，在通过字段中直接加入
+        compulsory_list = []
+        for sec in sections:
+            if sec.compulsory:
+                compulsory_list.append(sec.s_id)
+        if section.compulsory:
+            if eligible:
+                section.qualified.add(application)
+                pos = compulsory_list.index(sec.s_id)
+                if pos != 0:
+                    pre_sec = Section.objects.get(s_id=compulsory_list[pos - 1])
+                    pre_sec.qualified.remove(application)
+            else:
+                section.unqualified.add(application)
+        else:
+            section.qualified.add(application)
         section.save()
         application.save()
         examiner.examinees = json.dumps({"sections": histroy_candidate_list}, ensure_ascii=False)
