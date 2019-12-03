@@ -689,6 +689,10 @@ class TranscriptView(APIView):
                     pre_sec.qualified.remove(application)
             else:
                 section.unqualified.add(application)
+                pos = compulsory_list.index(sec.s_id)
+                for i in range(pos + 1, len(compulsory_list)):
+                    sec = Section.objects.get(s_id=compulsory_list[i])
+                    sec.checking.remove(application)
         else:
             section.qualified.add(application)
         section.checking.remove(application)
