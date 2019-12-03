@@ -77,7 +77,7 @@ Page({
   },
 
   getUserInfo: function (e) {
-    console.log("login")
+    
     /*app.globalData.userInfo = e.detail.userInfo
     if (app.globalData.userInfo) {
       wx.navigateBack({

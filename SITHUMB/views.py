@@ -282,8 +282,9 @@ class SectionListView(APIView):
 class SectionView(APIView):
     def post(self, request, id):
         name = request.GET.get('name')
+        compulsory = request.GET.get("compulsory")
         activity = Activity.objects.get(id=id)
-        section = Section(s_id=activity.section_cnt, name=name, activity=activity)
+        section = Section(s_id=activity.section_cnt, name=name, compulsory=compulsory, activity=activity)
         section.save()
         activity.section_cnt += 1
         activity.save()
