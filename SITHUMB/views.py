@@ -676,25 +676,19 @@ class TranscriptView(APIView):
         # 若环节为必考且考生通过，通过字段中加入该考生，并将该考生移除出前一个必考环节的通过字段；
         # 若环节为必考且考生不通过，不通过字段中加入该考生
         # 若环节为非必考，在通过字段中直接加入
-        compulsory_list = []
-        for sec in sections:
-            if sec.compulsory:
-                compulsory_list.append(sec.s_id)
+
+        compulsory_list = Section.objects.filter(compulsory=True)
+        compulsory_id_list = [sec.s_id for sec in compulsory_list]
         if section.compulsory:
-            if eligible == 1:
+            pos = compulsory_id_list.index(section.s_id)
+            if eligible:
                 section.qualified.add(application)
-                section.save()
-                pos = compulsory_list.index(sec.s_id)
                 if pos != 0:
-                    pre_sec = Section.objects.get(s_id=compulsory_list[pos - 1])
-                    pre_sec.qualified.remove(application)
+                    compulsory_list[pos-1].qualified.remove(application)
             else:
                 section.unqualified.add(application)
-                section.save()
-                pos = compulsory_list.index(sec.s_id)
                 for i in range(pos + 1, len(compulsory_list)):
-                    sec = Section.objects.get(s_id=compulsory_list[i])
-                    sec.checking.remove(application)
+                    compulsory_list[i].checking.remove(application)
         else:
             section.qualified.add(application)
         section.checking.remove(application)
