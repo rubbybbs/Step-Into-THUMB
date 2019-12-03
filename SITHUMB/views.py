@@ -275,7 +275,7 @@ class SectionListView(APIView):
         sections = Section.objects.filter(activity__id=id).order_by("s_id")
         sections_info = []
         for s in sections:
-            sections_info.append({"sectionID": s.s_id, "name": s.name})
+            sections_info.append({"sectionID": s.s_id, "compulsory": s.compulsory, "name": s.name})
         return Response({"sections": sections_info})
 
 
