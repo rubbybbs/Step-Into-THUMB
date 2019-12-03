@@ -540,8 +540,6 @@ class StatusView(APIView):
         section = Section.objects.get(activity__id=cur_activity_id, s_id=stage)
         response = {"status": "您的下一步是" + section.name + "请在113教室内等待"}
         return Response(response)
-
-
 # 考官相关接口
 
 
