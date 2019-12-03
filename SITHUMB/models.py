@@ -15,13 +15,30 @@ class Activity(models.Model):
     application_format = models.TextField(default="")
 
 
+class Candidate(models.Model):
+    name = models.CharField(max_length=100, default="")
+    student_id = models.CharField(max_length=100, default="")
+    wx_id = models.CharField(max_length=100, default="")
+
+
+class Application(models.Model):
+    admitted = models.BooleanField(default=False)
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='applications', null=True)
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='applications', null=True)
+    stage = models.IntegerField(default=0)
+    application_form = models.TextField(default="")
+    transcript = models.TextField(default="")
+
+
 class Section(models.Model):
     s_id = models.IntegerField(default=0)
     compulsory = models.BooleanField(default=True)
     name = models.CharField(max_length=100, default="")
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='sections', null=True)
     transcript_format = models.TextField(default="")
-    examinees = models.TextField(default="")
+    checking = models.ManyToManyField(Application, related_name="checking_sections")
+    unqualified = models.ManyToManyField(Application, related_name="unqualified_sections")
+    qualified = models.ManyToManyField(Application, related_name="qualified_sections")
 
 
 class Examiner(models.Model):
@@ -39,18 +56,3 @@ def handler_user_extension(sender, instance, created, **kwargs):
         Examiner.objects.create(username=instance.username, user=instance)
     else:
         instance.extension.save()
-
-
-class Candidate(models.Model):
-    name = models.CharField(max_length=100, default="")
-    student_id = models.CharField(max_length=100, default="")
-    wx_id = models.CharField(max_length=100, default="")
-
-
-class Application(models.Model):
-    admitted = models.BooleanField(default=False)
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='applications', null=True)
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='applications', null=True)
-    stage = models.IntegerField(default=0)
-    application_form = models.TextField(default="")
-    transcript = models.TextField(default="")

@@ -117,6 +117,9 @@ Page({
         else {
           console.log("no respones")
         }
+      },
+      fail: function(res){
+        console.log(res)
       }
     })
   }
