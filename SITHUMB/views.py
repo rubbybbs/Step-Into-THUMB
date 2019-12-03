@@ -283,13 +283,10 @@ class SectionView(APIView):
     def post(self, request, id):
         name = request.GET.get('name')
         activity = Activity.objects.get(id=id)
-        section = Section(s_id=activity.section_cnt, name=name)
+        section = Section(s_id=activity.section_cnt, name=name, activity=activity)
         section.save()
         activity.section_cnt += 1
         activity.save()
-        section.activity = activity
-        section.examinees = json.dumps({"examinees":[]})
-        section.save()
         response = {"status": 100, "msg": None}
         return Response(response)
 
@@ -467,16 +464,7 @@ class ApplyView(APIView):
             elif q["name"] == "学号":
                 candidate.student_id = q["answer"]
         candidate.save()
-        sections = Section.objects.filter(activity__id=cur_activity_id).order_by("s_id")
-        for sec in sections:
-            tmp = json.loads(sec.examinees)["examinees"]
-            tmp.append({
-                "name": candidate.name,
-                "wxID": wx_id,
-                "ID": candidate.student_id
-            })
-            sec.examinees = json.dumps({"examinees": tmp}, ensure_ascii=False)
-            sec.save()
+
         try:
             application = candidate.applications.get(activity__id=cur_activity_id)
         except:
@@ -510,9 +498,13 @@ class ApplyView(APIView):
             application = Application(candidate=candidate, application_form=application_form,
                                       activity=activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
             application.save()
+            sections = Section.objects.filter(activity__id=cur_activity_id)
+            for sec in sections:
+                sec.checking.add(application)
         else:
             application.application_form = application_form
             application.save()
+
         response = {"status": 100, "msg": None}
         return Response(response)
 
@@ -582,8 +574,13 @@ class CandidateListExaminerView(APIView):
             return Response({"status": 404, "code": 404})
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_id = request.GET.get('s_ID')
-        section = Section.objects.get(s_id=s_id)
-        response["data"] = json.loads(section.examinees)["examinees"]
+        checking_list = Section.objects.get(s_id=s_id).checking.all()
+        for e in checking_list:
+            response["data"].append({
+                "name": e.candidate.name,
+                "ID": e.candidate.student_id,
+                "wxID": e.candidate.wx_id
+            })
         response["count"] = len(response["data"])
         return Response(response)
 
@@ -655,8 +652,7 @@ class TranscriptView(APIView):
                             s["candidates"].append(json_obj)
                 break
         application.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
-        tmp = json.loads(section.examinees)["examinees"]
-        section.examinees = json.dumps({"examinees": [e for e in tmp if e["wxID"] != wx_id]}, ensure_ascii=False)
+        application.save()
         # 维护各个环节的通过/不通过字段
         # 若环节为必考且考生通过，通过字段中加入该考生，并将该考生移除出前一个必考环节的通过字段；
         # 若环节为必考且考生不通过，不通过字段中加入该考生
@@ -676,8 +672,8 @@ class TranscriptView(APIView):
                 section.unqualified.add(application)
         else:
             section.qualified.add(application)
+        section.checking.remove(application)
         section.save()
-        application.save()
         examiner.examinees = json.dumps({"sections": histroy_candidate_list}, ensure_ascii=False)
         examiner.save()
         return Response(response)

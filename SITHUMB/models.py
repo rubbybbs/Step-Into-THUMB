@@ -36,9 +36,9 @@ class Section(models.Model):
     name = models.CharField(max_length=100, default="")
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='sections', null=True)
     transcript_format = models.TextField(default="")
-    checking = models.ManyToManyField(Application, related_name="checking_sections")
-    unqualified = models.ManyToManyField(Application, related_name="unqualified_sections")
-    qualified = models.ManyToManyField(Application, related_name="qualified_sections")
+    checking = models.ManyToManyField(Application, related_name="checking_sections", blank=True)
+    unqualified = models.ManyToManyField(Application, related_name="unqualified_sections", blank=True)
+    qualified = models.ManyToManyField(Application, related_name="qualified_sections", blank=True)
 
 
 class Examiner(models.Model):
@@ -46,7 +46,7 @@ class Examiner(models.Model):
     username = models.CharField(max_length=100, default="")
     password = models.CharField(max_length=256, default="")
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='examiners', null=True)
-    sections = models.ManyToManyField(Section)
+    sections = models.ManyToManyField(Section, blank=True)
     examinees = models.TextField(default="")
 
 
