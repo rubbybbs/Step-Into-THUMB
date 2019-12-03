@@ -3,28 +3,19 @@ from django.shortcuts import render
 # Create your views here.
 
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import render
 from django.utils.dateparse import parse_date
-from django.contrib.auth.models import *
-from SITHUMB import models
 from .models import *
-from SITHUMB.token_module import get_token, out_token
+from SITHUMB.token_module import get_token
 from SITHUMB.authentication_module import TokenAuth2
 import requests
-
-import redis
 import json
-from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 
 cur_activity_id = -1
-
 
 def update_cur_activity():
     global cur_activity_id
@@ -208,9 +199,9 @@ class RegistrationFormView(APIView):
     def get(self, request, id):
         activity = Activity.objects.get(id=id)
         if activity.application_format == '':
-            return Response({'form': '{"question":[]}'})
+            return Response({'status': activity.status, 'form': '{"question":[]}'})
         else:
-            return Response({'form': activity.application_format})
+            return Response({'status': activity.status, 'form': activity.application_format})
 
 
 class ExaminerListView(APIView):
@@ -234,7 +225,7 @@ class ExaminerListView(APIView):
                 examiners_info.append({"username": e.username,
                                        "password": e.password,
                                        "sections": sections_info})
-            return Response({"code": 0, "msg": "", "count": examiners_count, "data": examiners_info})
+            return Response({'status': activity.status, "count": examiners_count, "data": examiners_info})
 
 
 class ExaminerView(APIView):
@@ -276,7 +267,7 @@ class SectionListView(APIView):
         sections_info = []
         for s in sections:
             sections_info.append({"sectionID": s.s_id, "compulsory": s.compulsory, "name": s.name})
-        return Response({"sections": sections_info})
+        return Response({'status': activity.status, "sections": sections_info})
 
 
 class SectionView(APIView):
@@ -344,12 +335,12 @@ class CandidateListForAdminView(APIView):
         if s_ID == -1:
             res_list = Application.objects.filter(activity__id=id)
         elif s_ID == -2:
-            sections = Section.objects.filter(compulsory=True).order_by("s_id")
+            sections = Section.objects.filter(activity__id=id, compulsory=True).order_by("s_id")
             res_list = sections[0].unqualified.all()
         elif s_ID == -3:
             res_list = Application.objects.filter(admitted=True)
         else:
-            section = Section.objects.get(s_id=s_ID)
+            section = Section.objects.get(activity__id=id, s_id=s_ID)
             res_list = section.qualified.all()
 
         for application in res_list:
@@ -388,49 +379,7 @@ class CommentForCandidateView(APIView):
         candidiate.save()
         return Response(response)
 
-
-# class GetActivityDetailView(APIView):
-#     def get(self, request):
-#         response = {"status": 100, "msg": None, "form": None, "sections": []}
-#         activity_id = request.GET.get('id')
-#         activity = Activity.objects.get(id=activity_id)
-#         if activity is None:
-#             res = Response()
-#             res.status_code = 404
-#             return res
-#         response["form"] = activity.application_format
-#         section_list = Section.objects.filter(a_id=activity_id)
-#         if len(section_list) > 0:
-#             for obj in section_list:
-#                 json_obj = {
-#                     "id": obj.s_id,
-#                     "name": obj.name,
-#                 }
-#                 response["sections"].append(json_obj)
-#         return Response(response)
-
-
-# class GetSectionView(APIView):
-#     def get(self, request):
-#         # response = {"status": 100, "msg": None, "form": None, "sections": []}
-#         activity_id = request.GET.get('activityID')
-#         section_id = request.GET.get('sectionID')
-#         section = Section.objects.get(a_id=activity_id, s_id=section_id)
-#
-#         if section is None:
-#             res = Response()
-#             res.status_code = 404
-#             return res
-#         else:
-#             name = section.name
-#             transcript_format = json.loads(section.transcript_format)
-#             return Response({"name": name, "form": transcript_format})
-#
-#         # return Response(response)
-
 # 考生相关接口
-
-
 class RegisterView(APIView):
     def post(self, request):
         code = request.data["code"]
@@ -584,7 +533,7 @@ class CandidateListExaminerView(APIView):
             return Response({"status": 404, "code": 404})
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_id = request.GET.get('s_ID')
-        checking_list = Section.objects.get(s_id=s_id).checking.all()
+        checking_list = Section.objects.get(activity__id=cur_activity_id, s_id=s_id).checking.all()
         for e in checking_list:
             response["data"].append({
                 "name": e.candidate.name,
@@ -630,8 +579,8 @@ class TranscriptView(APIView):
         wx_id = request.GET.get("wxID")
         s_id = int(request.GET.get("s_ID"))
         eligible = int(request.GET.get("eligible"))
-        sections = Section.objects.all().order_by("s_id")
-        section = Section.objects.get(s_id=s_id)
+        sections = Section.objects.filter(activity__id=cur_activity_id).order_by("s_id")
+        section = Section.objects.get(activity__id=cur_activity_id, s_id=s_id)
         username = request.GET.get("username")
         application = Application.objects.get(candidate__wx_id=wx_id, activity__id=cur_activity_id)
         transcript = json.loads(application.transcript)["sections"]
@@ -667,8 +616,7 @@ class TranscriptView(APIView):
         # 若环节为必考且考生通过，通过字段中加入该考生，并将该考生移除出前一个必考环节的通过字段；
         # 若环节为必考且考生不通过，不通过字段中加入该考生
         # 若环节为非必考，在通过字段中直接加入
-
-        compulsory_list = Section.objects.filter(compulsory=True).order_by("s_id")
+        compulsory_list = Section.objects.filter(activity__id=cur_activity_id, compulsory=True).order_by("s_id")
         compulsory_id_list = [sec.s_id for sec in compulsory_list]
         if section.compulsory:
             pos = compulsory_id_list.index(section.s_id)
