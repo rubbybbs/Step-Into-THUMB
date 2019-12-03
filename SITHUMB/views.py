@@ -350,6 +350,25 @@ class CandidateListForAdminView(APIView):
                 }
                 response["data"].append(json_obj)
                 response["count"] += 1
+        elif s_ID == -2:
+            sections = Section.objects.filter(compulsory=True).order_by("s_id")
+            section = sections[0]
+            unqualified_list = section.unqualified.all()
+            for application in unqualified_list:
+                response["data"].append({
+                    "name": application.candidate.name,
+                    "ID": application.candidate.student_id,
+                    "wxID": application.candidate.wx_id
+                })
+        else:
+            section = Section.objects.get(s_id=s_ID)
+            qualified_list = section.qualified.all()
+            for application in qualified_list:
+                response["data"].append({
+                    "name": application.candidate.name,
+                    "ID": application.candidate.student_id,
+                    "wxID": application.candidate.wx_id
+                })
         return Response(response)
 
 
