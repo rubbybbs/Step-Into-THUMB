@@ -679,7 +679,7 @@ class TranscriptView(APIView):
         # 若环节为必考且考生不通过，不通过字段中加入该考生
         # 若环节为非必考，在通过字段中直接加入
 
-        compulsory_list = Section.objects.filter(compulsory=True)
+        compulsory_list = Section.objects.filter(compulsory=True).order_by("s_id")
         compulsory_id_list = [sec.s_id for sec in compulsory_list]
         if section.compulsory:
             pos = compulsory_id_list.index(section.s_id)
