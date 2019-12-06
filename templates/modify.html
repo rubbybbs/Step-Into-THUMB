@@ -64,7 +64,7 @@
                   <div class="layui-card">
                       <div class="layui-card-body">
                           <div class="layui-form-item">
-                              <div class="layui-input-block">
+                              <div class="layui-input-block" id="checkToAdd">
                                 <button type="button" class="layui-btn" id="NewDataLine">添加新数据项</button>
                                 <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存</button>
                               </div>
@@ -95,6 +95,7 @@
   <script src="{% static "layui/layui.js" %}"></script>
   <script>
     var currentSegmentNum = 0;
+    var Astatus = 0;
     var Quz = {
           id:layui.data('LocalData').ActID,
           question:new Array(),
@@ -117,62 +118,111 @@
             dataType: 'json',
             success: function (data) {
                 var str=data.form;
+                Astatus = data.status;
                 var obj=JSON.parse(str);
-                    obj.question.map(function(value){
-                    if (value.type=='Blank'){
-                        Quz["question"].push({
-                            name: value.name,
-                            type: "Blank"
-                          });
-                        if (value.name != "姓名" && value.name != "学号") {
-                            $("#toAdd").append(
+                if (Astatus!=0){
+                    $("#checkToAdd").remove();
+                    obj.question.map(function (value) {
+                        if (value.type == 'Blank') {
+                            if (value.name != "姓名" && value.name != "学号") {
+                                $("#toAdd").append(
+                                    '<div class="layui-form-item"> \
+                                <label class="layui-form-label">' + value.name + '</label> \
+                                <div class="layui-input-block"> \
+                                  <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
+                                </div> \
+                            </div>'
+                                );
+                            } else {
+                                $("#toAdd").append(
+                                    '<div class="layui-form-item"> \
+                                <label class="layui-form-label">' + value.name + '</label> \
+                                <div class="layui-input-block"> \
+                                  <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
+                                </div> \
+                            </div>'
+                                );
+                            }
+                            form.render();
+                        } else if (value.type == 'Choice') {
+                            var modestr =
                                 '<div class="layui-form-item"> \
+                              <div class="layui-inline">\
+                                <label class="layui-form-label">' + value.name + '</label> \
+                                <div class="layui-input-inline" > \
+                                  <select name="example" lay-filter="show"> \
+                                    <option value=""></option> ';
+                            value.Choices.map(function (value, index, arr) {
+                                modestr += '<option value="' + index.toString() + '">' + value.Choice + '</option>';
+                            });
+                            modestr += '</select> \
+                                </div> \
+                              </div>\
+                            </div>';
+                            $("#toAdd").append(modestr);
+                            //alert(modestr);
+                            form.render();
+                        }
+
+                    });
+                } else {
+                    obj.question.map(function (value) {
+                        if (value.type == 'Blank') {
+                            Quz["question"].push({
+                                name: value.name,
+                                type: "Blank"
+                            });
+                            if (value.name != "姓名" && value.name != "学号") {
+                                $("#toAdd").append(
+                                    '<div class="layui-form-item"> \
                                 <label class="layui-form-label">' + value.name + '</label> \
                                 <div class="layui-input-block"> \
                                   <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
                                   <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
                                 </div> \
                             </div>'
-                            );
-                        } else {
-                            $("#toAdd").append(
-                                '<div class="layui-form-item"> \
+                                );
+                            } else {
+                                $("#toAdd").append(
+                                    '<div class="layui-form-item"> \
                                 <label class="layui-form-label">' + value.name + '</label> \
                                 <div class="layui-input-block"> \
                                   <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
                                 </div> \
                             </div>'
-                            );
-                        }
-                        form.render();
-                    } else if (value.type=='Choice'){
-                        Quz["question"].push({
-                            name: value.name,
-                            type: "Choice",
-                            Choices: value.Choices
-                          });
-                        var modestr =
-                            '<div class="layui-form-item"> \
+                                );
+                            }
+                            form.render();
+                        } else if (value.type == 'Choice') {
+                            Quz["question"].push({
+                                name: value.name,
+                                type: "Choice",
+                                Choices: value.Choices
+                            });
+                            var modestr =
+                                '<div class="layui-form-item"> \
                               <div class="layui-inline">\
                                 <label class="layui-form-label">' + value.name + '</label> \
                                 <div class="layui-input-inline" > \
                                   <select name="example" lay-filter="show"> \
                                     <option value=""></option> ';
-                                      value.Choices.map(function(value,index,arr){
-                                        modestr += '<option value="' + index.toString() + '">' + value.Choice + '</option>';
-                                      });
-                                      modestr += '</select> \
+                            value.Choices.map(function (value, index, arr) {
+                                modestr += '<option value="' + index.toString() + '">' + value.Choice + '</option>';
+                            });
+                            modestr += '</select> \
                                 </div> \
                               </div>\
                               <div class="layui-inline" > \
                                 <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
                               </div>\
                             </div>';
-                          $("#toAdd").append(modestr);
-                          //alert(modestr);
-                          form.render();
-                    }
-                });
+                            $("#toAdd").append(modestr);
+                            //alert(modestr);
+                            form.render();
+                        }
+
+                    });
+                }
             }
         });
       });

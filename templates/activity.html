@@ -100,7 +100,11 @@
                                     '</button>\n';
                       } else if (value.status==1){
                           activityStatus='活动已发布';
-                          buttonField='<button type="button" id="Deleteactivity_' + value.id + '" name="DeleteActivity"\n' +
+                          buttonField='<button type="button" id="Modifyactivity_' + value.id + '" name="ModifyActivity"\n' +
+                                    'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
+                                        '<i class="layui-icon">&#xe642;</i>\n' +
+                                    '</button>\n' +
+                                    '<button type="button" id="Deleteactivity_' + value.id + '" name="DeleteActivity"\n' +
                                         'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
                                         '<i class="layui-icon">&#xe640;</i>\n' +
                                     '</button>\n' +
@@ -110,7 +114,11 @@
                                     '</button>\n';
                       } else if (value.status==2){
                           activityStatus='报名结束';
-                          buttonField='<button type="button" id="Deleteactivity_' + value.id + '" name="DeleteActivity"\n' +
+                          buttonField='<button type="button" id="Modifyactivity_' + value.id + '" name="ModifyActivity"\n' +
+                                    'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
+                                        '<i class="layui-icon">&#xe642;</i>\n' +
+                                    '</button>\n' +
+                                    '<button type="button" id="Deleteactivity_' + value.id + '" name="DeleteActivity"\n' +
                                         'class="layui-btn layui-btn-primary layui-btn-xs" style="margin-bottom: 5px;">\n' +
                                         '<i class="layui-icon">&#xe640;</i>\n' +
                                     '</button>\n' +
@@ -200,7 +208,7 @@
           yes: function (index, layero) {
             layer.close(index);
             var Fdata = form.val('FormActivity');
-            alert(JSON.stringify(Fdata));
+
             $.ajax({
               url: '/Step-Into-THUMB/admin/create-activity?name=' + Fdata.name + '&from=' + Fdata
                 .from + '&to=' + Fdata.to,

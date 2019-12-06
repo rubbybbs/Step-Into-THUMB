@@ -225,7 +225,7 @@ class ExaminerListView(APIView):
                 examiners_info.append({"username": e.username,
                                        "password": e.password,
                                        "sections": sections_info})
-            return Response({'status': activity.status, "count": examiners_count, "data": examiners_info})
+            return Response({"code": 0, "status": activity.status, "count": examiners_count, "data": examiners_info})
 
 
 class ExaminerView(APIView):
@@ -264,6 +264,7 @@ class ExaminerView(APIView):
 class SectionListView(APIView):
     def get(self, request, id):
         sections = Section.objects.filter(activity__id=id).order_by("s_id")
+        activity = Activity.objects.get(id=id)
         sections_info = []
         for s in sections:
             sections_info.append({"sectionID": s.s_id, "compulsory": s.compulsory, "name": s.name})

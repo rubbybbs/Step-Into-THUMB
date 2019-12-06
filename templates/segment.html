@@ -66,7 +66,7 @@
 {#                              <li lay-id="1">复试</li>#}
                             </ul>
                             
-                            <div class="layui-form-item" style="margin-top: 15px;">
+                            <div class="layui-form-item" style="margin-top: 15px;" id="checkToEdit">
                               <button type="button" class="layui-btn" id="DeleteSegment">删除当前环节</button>
                               <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存当前环节</button>
                               <button type="button" class="layui-btn" id="NewSegment">添加新环节</button>
@@ -82,7 +82,7 @@
 
                   <div class="layui-card">
                       <div class="layui-card-body">
-                          <div class="layui-form-item">
+                          <div class="layui-form-item" id="checkToAdd">
                                 <button type="button" class="layui-btn" id="NewDataLine">添加新数据项</button>
                           </div>
                       </div>
@@ -112,7 +112,7 @@
   <script>
     var currentSegmentNum = 0;
     var Segments = new Array();
-
+    var Astatus = 0;
     layui.use(['form', 'layedit', 'laydate', 'jquery', 'layer', 'element'], function () {
       var form = layui.form,
         layer = layui.layer,
@@ -131,74 +131,135 @@
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
             success: function (data) {
-                data.sections.map(function(value){
-                    $.ajax({
-                        url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ value.sectionID +'/get-transcript-form',
-                        type: 'get',
-                        contentType: 'application/x-www-form-urlencoded',
-                        dataType: 'json',
-                        async: false,
-                        success: function(data){
-                            var Quz=new Array();
-                                    var htmls='';
-                                    var str=data.form;
-                                    var obj=JSON.parse(str);
-                                    obj.question.map(function(value){
-                                        if (value.type=='Blank'){
-                                            Quz.push({
-                                                name: value.name,
-                                                type: "Blank"
-                                              });
-                                            htmls+=
-                                                '<div class="layui-form-item"> \
+                Astatus = data.status;
+                if (Astatus!=0) {
+                    $("#checkToAdd").remove();
+                    $("#checkToEdit").remove();
+                    data.sections.map(function (value) {
+                        $.ajax({
+                            url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/section/' + value.sectionID + '/get-transcript-form',
+                            type: 'get',
+                            contentType: 'application/x-www-form-urlencoded',
+                            dataType: 'json',
+                            async: false,
+                            success: function (data) {
+                                var Quz = new Array();
+                                var htmls = '';
+                                var str = data.form;
+                                var obj = JSON.parse(str);
+                                obj.question.map(function (value) {
+                                    if (value.type == 'Blank') {
+                                        htmls +=
+                                            '<div class="layui-form-item"> \
                                                     <label class="layui-form-label">' + value.name + '</label> \
                                                     <div class="layui-input-block"> \
                                                       <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
-                                                      <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
                                                     </div> \
                                                 </div>';
-                                        } else if (value.type=='Choice'){
-                                            Quz.push({
-                                                name: value.name,
-                                                type: "Choice",
-                                                Choices: value.Choices
-                                              });
-                                            var modestr =
-                                                '<div class="layui-form-item"> \
+                                    } else if (value.type == 'Choice') {
+                                        var modestr =
+                                            '<div class="layui-form-item"> \
                                                   <div class="layui-inline">\
                                                     <label class="layui-form-label">' + value.name + '</label> \
                                                     <div class="layui-input-inline" > \
                                                       <select name="example" lay-filter="show"> \
                                                         <option value=""></option> ';
-                                                          value.Choices.map(function(value,index,arr){
-                                                            modestr += '<option value="' + index.toString() + '">' + value.Choice + '</option>';
-                                                          });
-                                                          modestr += '</select> \
+                                        value.Choices.map(function (value, index, arr) {
+                                            modestr += '<option value="' + index.toString() + '">' + value.Choice + '</option>';
+                                        });
+                                        modestr += '</select> \
+                                                    </div> \
+                                                  </div>\
+                                                </div>';
+                                        htmls += modestr;
+                                        //alert(modestr);
+                                    }
+                                });
+                                var compulsoryAppend = "";
+                                if (value.compulsory == "True") {
+                                    compulsoryAppend = "[必]";
+                                }
+                                element.tabAdd('activitySegment', {
+                                    title: value.name + compulsoryAppend
+                                    , content: htmls
+                                    , id: value.sectionID.toString()
+                                });
+                                element.tabChange('activitySegment', value.sectionID.toString());
+                                Segments.push({'sectionID': value.sectionID, 'question': Quz});
+                            }
+                        });
+                    });
+                }
+                else {
+                    data.sections.map(function(value){
+                        $.ajax({
+                            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ value.sectionID +'/get-transcript-form',
+                            type: 'get',
+                            contentType: 'application/x-www-form-urlencoded',
+                            dataType: 'json',
+                            async: false,
+                            success: function(data){
+                                var Quz=new Array();
+                                var htmls='';
+                                var str=data.form;
+                                var obj=JSON.parse(str);
+                                obj.question.map(function(value){
+                                    if (value.type=='Blank'){
+                                        Quz.push({
+                                            name: value.name,
+                                            type: "Blank"
+                                        });
+                                        htmls+=
+                                            '<div class="layui-form-item"> \
+                                                <label class="layui-form-label">' + value.name + '</label> \
+                                                    <div class="layui-input-block"> \
+                                                      <input type="text" autocomplete="off" class="layui-input" style="width:70%;display:inline;"> \
+                                                      <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
+                                                    </div> \
+                                                </div>';
+                                    } else if (value.type=='Choice'){
+                                        Quz.push({
+                                            name: value.name,
+                                            type: "Choice",
+                                            Choices: value.Choices
+                                        });
+                                        var modestr =
+                                            '<div class="layui-form-item"> \
+                                              <div class="layui-inline">\
+                                                <label class="layui-form-label">' + value.name + '</label> \
+                                                    <div class="layui-input-inline" > \
+                                                      <select name="example" lay-filter="show"> \
+                                                        <option value=""></option> ';
+                                        value.Choices.map(function(value,index,arr){
+                                            modestr += '<option value="' + index.toString() + '">' + value.Choice + '</option>';
+                                        });
+                                        modestr += '</select> \
                                                     </div> \
                                                   </div>\
                                                   <div class="layui-inline" > \
                                                     <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
                                                   </div>\
                                                 </div>';
-                                              htmls+=modestr;
-                                              //alert(modestr);
-                                        }
-                                    });
-                            var compulsoryAppend="";
-                            if (value.compulsory == "True"){
-                                compulsoryAppend="[必]";
+                                        htmls+=modestr;
+                                        //alert(modestr);
+                                    }
+                                });
+                                var compulsoryAppend="";
+                                if (value.compulsory == "True"){
+                                    compulsoryAppend="[必]";
+                                }
+                                element.tabAdd('activitySegment', {
+                                    title: value.name + compulsoryAppend
+                                    ,content: htmls
+                                    ,id: value.sectionID.toString()
+                                });
+                                element.tabChange('activitySegment', value.sectionID.toString());
+                                Segments.push({'sectionID': value.sectionID, 'question': Quz});
                             }
-                            element.tabAdd('activitySegment', {
-                              title: value.name + compulsoryAppend
-                              ,content: htmls
-                              ,id: value.sectionID.toString()
-                            });
-                            element.tabChange('activitySegment', value.sectionID.toString());
-                            Segments.push({'sectionID': value.sectionID, 'question': Quz});
-                        }
-                    });
+                        });
 
-                });
+                    });
+                }
                 form.render();
             }
         });
