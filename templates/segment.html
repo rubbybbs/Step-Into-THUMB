@@ -245,8 +245,8 @@
                                     }
                                 });
                                 var compulsoryAppend="";
-                                if (value.compulsory == "True"){
-                                    compulsoryAppend="[必]";
+                                if (value.compulsory == true){
+                                    compulsoryAppend=" [必]";
                                 }
                                 element.tabAdd('activitySegment', {
                                     title: value.name + compulsoryAppend
@@ -272,25 +272,32 @@
         var LocalData=layui.data('LocalData');
         var Fdata = form.val('FormDesign');
         currentSegmentNum = parseInt($(".layui-this").attr("lay-id"));
-        $.ajax({
-            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ currentSegmentNum +'/save-transcript-form',
-            type: 'post',
-            contentType: 'application/json',
-            dataType: 'json',
-            headers: {
-                'X-CSRFToken': Fdata.csrfmiddlewaretoken
-            },
-            data:JSON.stringify(Segments[currentSegmentNum]),
-            success: function (data) {
-                if (data.status == 100) {
-                    layer.msg('保存成功');
-                } else {
-                    layer.msg('保存失败请重试');
-                }
-
-            }
+        var Findex = -1;
+        Segments.map(function (value, index) {
+            if (value["sectionID"] == currentSegmentNum) Findex = index;
         });
+        if (Findex != -1) {
+            $.ajax({
+                url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/section/' + currentSegmentNum + '/save-transcript-form',
+                type: 'post',
+                contentType: 'application/json',
+                dataType: 'json',
+                headers: {
+                    'X-CSRFToken': Fdata.csrfmiddlewaretoken
+                },
+                data: JSON.stringify(Segments[Findex]),
+                success: function (data) {
+                    if (data.status == 100) {
+                        layer.msg('保存成功');
+                    } else {
+                        layer.msg('保存失败请重试');
+                    }
 
+                }
+            });
+        } else {
+            layer.msg('保存失败请重试');
+        }
         return false;
       });
 
@@ -337,10 +344,16 @@
             currentSegmentNum = parseInt($(".layui-this").attr("lay-id"));
 
             if (Fdata.LineType == "0") {
-              Segments[currentSegmentNum]["question"].push({
-                name: Fdata.Info,
-                type: "Blank"
-              });
+                var Findex = -1;
+                Segments.map(function (value, index) {
+                    if (value["sectionID"] == currentSegmentNum) Findex = index;
+                });
+                if (Findex != -1) {
+                    Segments[Findex]["question"].push({
+                        name: Fdata.Info,
+                        type: "Blank"
+                    });
+                }
               $(".layui-show").append(
                 '<div class="layui-form-item"> \
                     <label class="layui-form-label">' + Fdata.Info + '</label> \
@@ -358,12 +371,17 @@
               strs.map(function(value,index,arr){
                 ChoiceArr.push({Choice:value});
               });
-              Segments[currentSegmentNum]["question"].push({
-                name: Fdata.Info,
-                type: "Choice",
-                Choices: ChoiceArr
+              var Findex = -1;
+              Segments.map(function (value, index) {
+                  if (value["sectionID"] == currentSegmentNum) Findex = index;
               });
-              
+              if (Findex != -1) {
+                  Segments[Findex]["question"].push({
+                      name: Fdata.Info,
+                      type: "Choice",
+                      Choices: ChoiceArr
+                  });
+              }
               var modestr = 
                 '<div class="layui-form-item"> \
                   <div class="layui-inline">\
@@ -395,15 +413,20 @@
         var topic = mParent.firstElementChild.innerText;
         var deleteIndex=-1;
         currentSegmentNum = parseInt($(".layui-this").attr("lay-id"));
-        Segments[currentSegmentNum]['question'].map(function(value, index){
-          if (value.name == topic) {
-            deleteIndex=index;    
-          }
+        var Findex = -1;
+        Segments.map(function (value, index) {
+            if (value["sectionID"] == currentSegmentNum) Findex = index;
         });
-        if (deleteIndex!=-1){
-          Segments[currentSegmentNum]['question'].splice(deleteIndex, 1);
+        if (Findex != -1) {
+            Segments[Findex]['question'].map(function (value, index) {
+                if (value.name == topic) {
+                    deleteIndex = index;
+                }
+            });
+            if (deleteIndex != -1) {
+                Segments[Findex]['question'].splice(deleteIndex, 1);
+            }
         }
-        
         mParent.remove();
         form.render();
       });
@@ -425,7 +448,7 @@
                 </div>\
               </div>\
               <div class="layui-form-item">\
-                 <label class="layui-form-label">是否必须通过</label>\
+                 <label class="layui-form-label">是否必过</label>\
                  <div class="layui-input-block">\
                     <input type="radio" name="compulsory" value="True" title="是">\
                     <input type="radio" name="compulsory" value="False" title="否">\
