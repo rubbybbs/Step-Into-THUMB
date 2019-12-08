@@ -15,17 +15,13 @@ import requests
 import json
 from django.views.decorators.csrf import csrf_exempt
 
-cur_activity_id = -1
 
-def update_cur_activity():
-    global cur_activity_id
+def get_cur_activity():
     try:
-        cur_activity_id = Activity.objects.get(status=1).id
+        cur_activity = Activity.objects.get(status=1)
     except Exception:
-        cur_activity_id = -1
-
-
-update_cur_activity()
+        return -1, None
+    return cur_activity.id, cur_activity
 
 
 def index(request):
@@ -136,7 +132,6 @@ class ActivityView(APIView):
         activity_id = request.GET.get('activityID')
         Activity.objects.filter(id=activity_id).delete()
         response = {"status": 100, "a_id": activity_id}
-        update_cur_activity()
         return Response(response)
 
 
@@ -146,7 +141,6 @@ class ActivityStatusView(APIView):
         a = Activity.objects.get(id=activity_id)
         a.status = 1
         a.save()
-        update_cur_activity()
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
@@ -155,7 +149,6 @@ class ActivityStatusView(APIView):
         a = Activity.objects.get(id=activity_id)
         a.status = 2
         a.save()
-        update_cur_activity()
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
@@ -347,9 +340,6 @@ class CommentForCandidateView(APIView):
         response = {"msg": None}
         wxID = request.GET.get("wxID")
         candidiate = Application.objects.get(activity=id, candidate__wx_id=wxID)
-        print(request.data)
-        print(type(request.data))
-        print(request.data["comment"])
         tmp = json.loads(candidiate.transcript)
         tmp["comment"]  = request.data["comment"]
         candidiate.transcript = json.dumps(tmp, ensure_ascii=False)
@@ -378,20 +368,19 @@ class RegisterView(APIView):
         return Response({"session": trd_session})
 
     def get(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
             return Response({"status": 400})
-        a = Activity.objects.get(id=cur_activity_id)
-        return Response({"form": a.application_format})
+        return Response({"form": cur_activity.application_format})
 
 
 class ApplyView(APIView):
     def post(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
             return Response({"status": 400})
-
         session = request.GET.get('session')
         wx_id = session.split("-")[0]
-        activity = Activity.objects.get(id=cur_activity_id)
         candidate = Candidate.objects.get(wx_id=wx_id)
         application_form = str(request.data).replace('\'', '"')
         for q in request.data["question"]:
@@ -402,10 +391,10 @@ class ApplyView(APIView):
         candidate.save()
 
         try:
-            application = candidate.applications.get(activity__id=cur_activity_id)
+            application = candidate.applications.get(activity=cur_activity)
         except:
             # 创建评分表
-            sections = Section.objects.filter(activity__id=cur_activity_id)
+            sections = Section.objects.filter(activity=cur_activity)
             transcript_obj = {
                 "sections": [],
                 "comment": ""
@@ -432,9 +421,9 @@ class ApplyView(APIView):
                     transcript_obj["sections"].append(json_obj)
 
             application = Application(candidate=candidate, application_form=application_form,
-                                      activity=activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
+                                      activity=cur_activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
             application.save()
-            sections = Section.objects.filter(activity__id=cur_activity_id)
+            sections = Section.objects.filter(activity=cur_activity)
             for sec in sections:
                 sec.checking.add(application)
         else:
@@ -444,28 +433,17 @@ class ApplyView(APIView):
         response = {"status": 100, "msg": None}
         return Response(response)
 
-    # def get(self, request):
-    #     if cur_activity_id == -1:
-    #         return Response({"status": 400})
-    #
-    #     session = request.GET.get('session')
-    #     wx_id = session.split("-")[0]
-    #
-    #     candidate = Candidate.objects.get(wx_id=wx_id)
-    #     response = {"form": candidate.applications.get(a_id=cur_activity_id).application_form}
-    #     return Response(response)
-
 
 class StatusView(APIView):
     def get(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
             return Response({"status": 400})
-
         session = request.GET.get('session')
         wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
-        stage = candidate.applications.get(activity__id=cur_activity_id).stage
-        section = Section.objects.get(activity__id=cur_activity_id, s_id=stage)
+        stage = candidate.applications.get(activity=cur_activity).stage
+        section = Section.objects.get(activity=cur_activity, s_id=stage)
         response = {"status": "您的下一步是" + section.name + "请在113教室内等待"}
         return Response(response)
 # 考官相关接口
@@ -507,11 +485,12 @@ class SectionExaminerView(APIView):
 
 class CandidateListExaminerView(APIView):
     def get(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
             return Response({"status": 404, "code": 404})
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_id = request.GET.get('s_ID')
-        checking_list = Section.objects.get(activity__id=cur_activity_id, s_id=s_id).checking.all()
+        checking_list = Section.objects.get(activity=cur_activity, s_id=s_id).checking.all()
         for e in checking_list:
             response["data"].append({
                 "name": e.candidate.name,
@@ -550,17 +529,17 @@ class TranscriptView(APIView):
         return Response(response)
 
     def post(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
             return Response({"status": 400})
-
         response = {"status": 100, "msg": None}
         wx_id = request.GET.get("wxID")
         s_id = int(request.GET.get("s_ID"))
         eligible = int(request.GET.get("eligible"))
-        sections = Section.objects.filter(activity__id=cur_activity_id).order_by("s_id")
-        section = Section.objects.get(activity__id=cur_activity_id, s_id=s_id)
+        sections = Section.objects.filter(activity=cur_activity).order_by("s_id")
+        section = Section.objects.get(activity=cur_activity, s_id=s_id)
         username = request.GET.get("username")
-        application = Application.objects.get(candidate__wx_id=wx_id, activity__id=cur_activity_id)
+        application = Application.objects.get(candidate__wx_id=wx_id, activity=cur_activity)
         transcript = json.loads(application.transcript)["sections"]
         examiner = Examiner.objects.get(username=username)
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]
@@ -594,7 +573,7 @@ class TranscriptView(APIView):
         # 若环节为必考且考生通过，通过字段中加入该考生，并将该考生移除出前一个必考环节的通过字段；
         # 若环节为必考且考生不通过，不通过字段中加入该考生
         # 若环节为非必考，在通过字段中直接加入
-        compulsory_list = Section.objects.filter(activity__id=cur_activity_id, compulsory=True).order_by("s_id")
+        compulsory_list = Section.objects.filter(activity=cur_activity, compulsory=True).order_by("s_id")
         compulsory_id_list = [sec.s_id for sec in compulsory_list]
         if section.compulsory:
             pos = compulsory_id_list.index(section.s_id)
