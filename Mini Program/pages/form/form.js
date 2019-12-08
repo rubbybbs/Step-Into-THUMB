@@ -1,4 +1,8 @@
 // pages/form/form.js
+// 打开调试
+wx.setEnableDebug({
+  enableDebug: true
+})
 
 
 Page({
@@ -20,7 +24,7 @@ Page({
   onLoad: function (options) {
     let _this = this
     wx.request({
-      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-empty-form', 
+      url: 'http://154.8.172.135:3389/Step-Into-THUMB/candidate/get-empty-form', 
       header: {
         'content-type': 'application/json'
       },
@@ -41,21 +45,15 @@ Page({
             console.log(ques.Choices)
             
             _this[ques["changeFunc"]] = function(e) {
-              console.log(e)
-              console.log(ques.name, '发生选择改变，携带值为', e.detail.value);
+              
               let tmp = this.data.questions;
               tmp[x]["ChoiceIndex"] = e.detail.value;
               _this.setData({
                 questions: tmp
               })
-              // console.log(_this.data.questions[x].ChoicesArray)
-              /*
-              let tmp = "bindChange" + x
-              _this.setData({
-                [tmp]: e.detail.value
-              });*/
+              
             }
-            console.log("changeFunc", "bindChange" + x)
+            
           }
           
 
@@ -116,13 +114,6 @@ Page({
    */
   onShareAppMessage: function () {
 
-  },
-
-  bindChange0: function (e) {
-    console.log(e)
-    console.log('picker country 发生选择改变，携带值为', e.detail.value);
-    
-    
   },
 
   formSubmit: function (e) {
