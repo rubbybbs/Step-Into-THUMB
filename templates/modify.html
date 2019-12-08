@@ -64,7 +64,7 @@
                   <div class="layui-card">
                       <div class="layui-card-body">
                           <div class="layui-form-item">
-                              <div class="layui-input-block" id="checkToAdd">
+                              <div class="layui-input-block" id="checkToAdd" style="visibility: hidden;">
                                 <button type="button" class="layui-btn" id="NewDataLine">添加新数据项</button>
                                 <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存</button>
                               </div>
@@ -121,7 +121,6 @@
                 Astatus = data.status;
                 var obj=JSON.parse(str);
                 if (Astatus!=0){
-                    $("#checkToAdd").remove();
                     obj.question.map(function (value) {
                         if (value.type == 'Blank') {
                             if (value.name != "姓名" && value.name != "学号") {
@@ -166,6 +165,7 @@
 
                     });
                 } else {
+                    $("#checkToAdd").css("visibility","visible");
                     obj.question.map(function (value) {
                         if (value.type == 'Blank') {
                             Quz["question"].push({
