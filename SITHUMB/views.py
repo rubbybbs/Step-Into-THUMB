@@ -286,7 +286,6 @@ class SectionView(APIView):
     def delete(self, request, id, sectionID):
         Section.objects.filter(activity__id=id, s_id=sectionID).delete()
         activity = Activity.objects.get(id=id)
-        activity.section_cnt -= 1
         activity.save()
         response = {"status": 100, "msg": None}
         return Response(response)
