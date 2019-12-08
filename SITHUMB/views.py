@@ -22,7 +22,7 @@ def update_cur_activity():
     try:
         cur_activity_id = Activity.objects.get(status=1).id
     except Exception:
-        pass
+        cur_activity_id = -1
 
 
 update_cur_activity()
@@ -93,30 +93,6 @@ class LoginTestView(APIView):
         return Response(response)
 
 
-class GetFormTestView(APIView):
-    def get(self, request):
-        response = {"status": 100, "form": None}
-        response["form"] = {
-            "name": "清华军乐2019-2020春季学期招新报名表",
-            "date": "2020/03/03-2020/03/05",
-            "questions": [
-                {
-                    "name": "姓名",
-                    "type": "Blank"
-                },
-                {
-                    "name": "性别",
-                    "type": "Choice",
-                    "Choices": [
-                        {"choice": "男"},
-                        {"choice": "女"}
-                    ]
-                }
-            ]
-        }
-        return Response(response)
-
-
 class ActivityListView(APIView):
     def get(self, request):
         response = {"status": 100, "msg": None, "activities": []}
@@ -145,8 +121,8 @@ class ActivityView(APIView):
         from_date = parse_date(request.GET.get('from'))
         to_date = parse_date(request.GET.get('to'))
         if from_date == None or to_date == None:
-            from_date = parse_date("2000-01-01")
-            to_date = parse_date("2100-01-01")
+            from_date = parse_date("2020-01-01")
+            to_date = parse_date("2020-02-01")
 
         activity = Activity(name=name, from_date=from_date, to_date=to_date)
         activity.save()
@@ -160,6 +136,7 @@ class ActivityView(APIView):
         activity_id = request.GET.get('activityID')
         Activity.objects.filter(id=activity_id).delete()
         response = {"status": 100, "a_id": activity_id}
+        update_cur_activity()
         return Response(response)
 
 
@@ -500,6 +477,7 @@ class AuthExaminerLoginView(APIView):
         response = {"status": 100, "msg": None}
         username = request.GET.get('username')
         password = request.GET.get('password')
+
         user = authenticate(username=username, password=password)
         if user:
             token = get_token(username, 600)
