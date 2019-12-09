@@ -29,6 +29,7 @@ Page({
         'content-type': 'application/json'
       },
       success: function (res) {
+        console.log(res);
         let Form = JSON.parse(res.data["form"]);
         console.log(Form['question']);
         let gen = [];
@@ -55,14 +56,15 @@ Page({
             }
             
           }
-          
-
           gen.push(ques)
         }
         console.log("gen",gen)
         _this.setData({
           questions: gen
         })
+      },
+      fail: function() {
+        console.log("failed!!!!!!")
       }
     })
   },
@@ -138,7 +140,7 @@ Page({
     console.log(question)
     let session = wx.getStorageSync('key')
     wx.request({
-      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/submit-application?session='+session, 
+      url: 'http://154.8.172.135:3389/Step-Into-THUMB/candidate/submit-application?session='+session, 
       method: 'POST',
       data:{
         question
@@ -148,9 +150,15 @@ Page({
       },
       success: function (res) {
         console.log(res)
+        wx.showToast({
+          title: "提交成功"
+        });
+        setTimeout(function () {
+          wx.navigateBack({
+            url: '../index/index',
+          })
+        }, 500)
       }
     })
   },
-
-
 })
