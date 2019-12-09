@@ -66,7 +66,7 @@
 {#                              <li lay-id="1">复试</li>#}
                             </ul>
                             
-                            <div class="layui-form-item" style="margin-top: 15px;" id="checkToEdit">
+                            <div class="layui-form-item" style="margin-top: 15px; visibility: hidden;" id="checkToEdit">
                               <button type="button" class="layui-btn" id="DeleteSegment">删除当前环节</button>
                               <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm">保存当前环节</button>
                               <button type="button" class="layui-btn" id="NewSegment">添加新环节</button>
@@ -82,7 +82,7 @@
 
                   <div class="layui-card">
                       <div class="layui-card-body">
-                          <div class="layui-form-item" id="checkToAdd">
+                          <div class="layui-form-item" id="checkToAdd" style="visibility: hidden;">
                                 <button type="button" class="layui-btn" id="NewDataLine">添加新数据项</button>
                           </div>
                       </div>
@@ -133,8 +133,7 @@
             success: function (data) {
                 Astatus = data.status;
                 if (Astatus!=0) {
-                    $("#checkToAdd").remove();
-                    $("#checkToEdit").remove();
+
                     data.sections.map(function (value) {
                         $.ajax({
                             url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/section/' + value.sectionID + '/get-transcript-form',
@@ -191,6 +190,8 @@
                     });
                 }
                 else {
+                    $("#checkToAdd").css("visibility","visible");
+                    $("#checkToEdit").css("visibility","visible");
                     data.sections.map(function(value){
                         $.ajax({
                             url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ value.sectionID +'/get-transcript-form',
