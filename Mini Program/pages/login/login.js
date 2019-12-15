@@ -21,11 +21,11 @@ Page({
    */
   onLoad: function (options) {
     console.log("login")
-    /*if (app.globalData.flag==true) {
+    if (app.globalData.flag==true) {
       wx.reLaunch({
         url: '../index/index',
       })
-    }*/
+    }
   },
 
   /**
@@ -40,11 +40,11 @@ Page({
    */
   onShow: function () {
     console.log("login")
-    /*if (app.globalData.flag == true) {
+    if (app.globalData.flag == true) {
       wx.reLaunch({
         url: '../index/index',
       })
-    }*/
+    }
   },
 
   /**
@@ -100,16 +100,22 @@ Page({
               code: res.code
             },
             success: function (res) {
-              console.log("登录成功")
               console.log(res)
               if (res.data.session) {
                 console.log("登录成功")
+                wx.showToast({
+                  title: '登录成功',
+                  icon: 'success',
+                  duration: 500
+                });
                 wx.setStorageSync('key', res.data.session)
                 console.log("set true")
                 app.globalData.flag = true;
-                wx.navigateBack({
-                  url: '../index/index',
-                })
+                setTimeout(function () {
+                  wx.navigateBack({
+                    url: '../index/index',
+                  })
+                }, 500)
               }
               else {
                 console.log("登陆失败")
