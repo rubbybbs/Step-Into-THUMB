@@ -15,6 +15,9 @@ import requests
 import json
 from django.views.decorators.csrf import csrf_exempt
 
+appID = "wxc9568dc74b390136"
+appSecret = "1bdc626b0ea48761d84e4b1762c59641"
+
 
 def get_cur_activity():
     try:
@@ -346,14 +349,45 @@ class CommentForCandidateView(APIView):
         candidiate.save()
         return Response(response)
 
+
+class SendMessageView(APIView):
+    def post(self, request, id):
+        activity = Activity.objects.get(id=id)
+        activity.admission_letter = request.data["admission"]
+        activity.refusal_letter = request.data["refusal"]
+        activity.save()
+        url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential"
+        res = requests.get(url + "&appid=" + appID + "&secret=" + appSecret).content
+        access = json.loads(res)["access_token"]
+        url = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + access
+        data = {
+            "touser": "OPENID",
+            "template_id": "TEMPLATE_ID",
+            "page": "status",
+            "data": {
+                "character_string01": {
+                    "value": ""
+                },
+                "character_string02": {
+                    "value": "请点击名片查看详细信息"
+                },
+            }
+        }
+        applications = Application.objects.filter(activity=activity)
+        for a in applications:
+            a.stage = 2
+            data["touser"] = a.candidate.wx_id
+            if a.admitted:
+                data["data"]["character_string01"] = "通过"
+            else:
+                data["data"]["character_string01"] = "未通过"
+            res = requests.post(url, data=data)
+        return Response({"u": 0})
+
 # 考生相关接口
 class RegisterView(APIView):
     def post(self, request):
         code = request.data["code"]
-
-        print(code)
-        appID = "wxc9568dc74b390136"
-        appSecret = "1bdc626b0ea48761d84e4b1762c59641"
         url = "https://api.weixin.qq.com/sns/jscode2session"
         res = requests.get(
             url + "?appid=" + appID + "&secret=" + appSecret + "&js_code=" + code + "&grant_type=authorization_code")
@@ -442,9 +476,21 @@ class StatusView(APIView):
         session = request.GET.get('session')
         wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
-        stage = candidate.applications.get(activity=cur_activity).stage
-        section = Section.objects.get(activity=cur_activity, s_id=stage)
-        response = {"status": "您的下一步是" + section.name + "请在113教室内等待"}
+        try:
+            application = candidate.applications.get(activity=cur_activity)
+        except Exception:
+            stage = 0
+        else:
+            stage = application.stage # 0,1,2  ----出录取结果--->  3
+
+        if stage <= 2:
+            statuses = ["请填写报名表", "请到蒙民伟楼（西操西南角）113教室参加面试", "考试结束，请等待录取通知"]
+            response = {"stage": stage,  "status": statuses[:stage + 1]}
+        else:
+            if application.admitted:
+                response = {"stage": stage, "content": "亲爱的" + candidate.name + "同学你好！\n" + cur_activity.admission_letter}
+            else:
+                response = {"stage": stage, "content": "亲爱的" + candidate.name + "同学你好！\n" + cur_activity.refusal_letter}
         return Response(response)
 # 考官相关接口
 
@@ -536,7 +582,6 @@ class TranscriptView(APIView):
         wx_id = request.GET.get("wxID")
         s_id = int(request.GET.get("s_ID"))
         eligible = int(request.GET.get("eligible"))
-        sections = Section.objects.filter(activity=cur_activity).order_by("s_id")
         section = Section.objects.get(activity=cur_activity, s_id=s_id)
         username = request.GET.get("username")
         application = Application.objects.get(candidate__wx_id=wx_id, activity=cur_activity)
@@ -553,6 +598,7 @@ class TranscriptView(APIView):
                         sec["passed"] = "True"
                     elif eligible == 0:
                         sec["passed"] = "False"
+                        application.stage = 2
                 else:
                     sec["passed"] = "Pass"
                 # 在考官的历史列表中加入该考生
@@ -592,3 +638,5 @@ class TranscriptView(APIView):
         examiner.examinees = json.dumps({"sections": histroy_candidate_list}, ensure_ascii=False)
         examiner.save()
         return Response(response)
+
+
