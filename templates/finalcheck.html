@@ -39,7 +39,6 @@
               <div class="layui-card-header">活动报名人员终评</div>
               <div class="layui-card-body">
                 <form class="layui-form" action="" lay-filter="FormDesign"> {%  csrf_token %}                    
-                          
 
                   <div class="layui-card">
                     <div class="layui-card-body" id="toAdd">
@@ -50,11 +49,18 @@
                                 <li lay-id="101">最终录取</li>
                                 <li lay-id="102">参加考试</li>
                             </ul>
-                            
+
+                            <div class="layui-form-item" style="margin-top: 15px; margin-bottom: 0px;">
+                                搜索ID：
+                                <div class="layui-inline">
+                                    <input class="layui-input" name="searchID" id="tableReload" autocomplete="off">
+                                </div>
+                                <button class="layui-btn" id="search" data-type="reload">搜索</button>
+                            </div>
 
                             <div class="layui-tab-content" id="contentToAdd">
                                 <div class="layui-tab-item layui-show">
-                                    <table class="layui-table" lay-data="{height: 900, url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-1'}" lay-filter="accountTable" id="accountTable">
+                                    <table class="layui-table" lay-data="{id: 'AccountTable', url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-1', page: true}" lay-filter="accountTable" id="accountTable">
                                       <thead>
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
@@ -68,7 +74,7 @@
                                     </table>
                                 </div>
                                 <div class="layui-tab-item">
-                                    <table class="layui-table" lay-data="{height: 900, url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-3'}" lay-filter="FinalAdmit" id="FinalAdmit">
+                                    <table class="layui-table" lay-data="{id: 'FinalAdmitTable', url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-3', page: true}" lay-filter="FinalAdmit" id="FinalAdmit">
                                       <thead>
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
@@ -82,7 +88,7 @@
                                     </table>
                                 </div>
                                 <div class="layui-tab-item">
-                                    <table class="layui-table" lay-data="{height: 900, url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-2'}" lay-filter="examed" id="examed">
+                                    <table class="layui-table" lay-data="{id: 'examedTable', url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-2', page: true}" lay-filter="examed" id="examed">
                                       <thead>
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
@@ -97,6 +103,11 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="layui-form-item">
+                            <button class="layui-btn layui-btn-normal" id="sendMessage">以当前录取状态向所有参与者发送通知</button>
+                        </div>
+
                     </div>
                   </div>                                
      
@@ -172,6 +183,8 @@
                                   ,{field:'admitted', width:'20%', title: '录取状态'}
                                   ,{templet:'#bar', width:'20%', title: '编辑', style:'cursor: pointer;'}
                             ]]
+                            , id: "tableSection"+value.sectionID
+                            , page: true
                         });
                     });
                     form.render();
@@ -217,6 +230,92 @@
 
       table.on('edit()', function(obj){
         return false;
+      });
+
+
+      var active = {
+          reload: function () {
+              var Reload = $('#tableReload').val();
+              var tmp = $(".layui-show .layui-table-view").attr('lay-id');
+              //执行重载
+              if (Reload) table.reload(tmp, {
+                  where: {
+                      key: {
+                          ID: Reload
+                      }
+                  }
+                  ,page: {
+                    curr: 1 //重新从第 1 页开始
+                  }
+              });
+              else table.reload(tmp, '')
+          }
+      };
+
+      $("#search").on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+            return false;
+      });
+
+
+      $("#sendMessage").on('click', function(){
+          layer.open({
+              id: "NewMessageSet",
+              title: '定制消息发送',
+              shadeClose: true,
+              shade: 0.8,
+              area: ['1000px', '300px'],
+              content: '\
+                <form class="layui-form" action="" lay-filter="FormNewMessage">{%  csrf_token %}\
+                    <div class="layui-form-item">\
+                      <label class="layui-form-label">通过</label>\
+                      <div class="layui-input-block">\
+                        <label> 亲爱的XXX同学： </label>\
+                        <input type="text" name="admission" lay-verify="title" autocomplete="off" placeholder="请输入向最终通过者发送的通知" class="layui-input">\
+                      </div>\
+                    </div>\
+                    <div class="layui-form-item">\
+                      <label class="layui-form-label">未通过</label>\
+                      <div class="layui-input-block">\
+                        <label> 亲爱的XXX同学： </label>\
+                        <input type="text" name="refusal" lay-verify="title" autocomplete="off" placeholder="请输入向未通过者发送的信息" class="layui-input">\
+                      </div>\
+                    </div>\
+                </form>',
+              success: function (layero, index) {
+                form.render();
+              },
+              btn: ['确认', '取消'],
+              yes: function (index, layero) {
+                  var Fdata = form.val('FormNewMessage');
+                  var LocalData=layui.data('LocalData');
+                  layer.close(index);
+                  $.ajax({
+                      url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/send_message',
+                      type: 'post',
+                      contentType: 'application/json',
+                      dataType: 'json',
+                      headers: {
+                          'X-CSRFToken': Fdata.csrfmiddlewaretoken
+                      },
+                      data: JSON.stringify({
+                          "admission":Fdata.admission,
+                          "refusal":Fdata.refusal
+                      }),
+                      success: function (data) {
+                          if (data.status == 100) {
+                              layer.msg('发送成功');
+                          } else {
+                              layer.msg('发送失败，请重试！');
+                          }
+                      }
+                  });
+              },
+              btn2: function (index, layero) {
+              }
+            });
+            return false;
       });
     });
 
