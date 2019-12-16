@@ -25,7 +25,7 @@ Page({
     let _this = this
     let session = wx.getStorageSync('key')
     wx.request({
-      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-empty-form?session=' + session, 
+      url: 'http://154.8.172.135:3389/Step-Into-THUMB/candidate/get-empty-form?session=' + session, 
       header: {
         'content-type': 'application/json'
       },
@@ -141,7 +141,7 @@ Page({
     console.log(question)
     let session = wx.getStorageSync('key')
     wx.request({
-      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/submit-application?session='+session, 
+      url: 'http://154.8.172.135:3389/Step-Into-THUMB/candidate/submit-application?session='+session, 
       method: 'POST',
       data:{
         question

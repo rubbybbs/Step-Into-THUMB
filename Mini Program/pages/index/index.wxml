@@ -1,14 +1,29 @@
 <!--index.wxml-->
 <view>
+<!--<swiper vertical="true" style="height: 200rpx">
+  <view>
   <view class="userinfo">
       <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
       <text class="userinfo-nickname">{{userInfo.nickName}}</text>
   </view>
-  <!--<view class="usermotto">
-    <text class="user-motto">{{motto}}</text>
-  </view>-->
+  </view>
+  <view>
+  
   <view class='buttonBox'>
     <button type="primary" class="weui-btn button" style="margin:0;" bindtap="bindFillForm">我要报名</button>
     <button type="primary" class="weui-btn button" style="margin:0;" bindtap="bindStatus">查看状态</button>
   </view>
+  </view>
+</swiper>-->
+<swiper vertical="true" easing-function="linear" style="height: {{clientHeight?clientHeight+'px':'auto'}}" current="{{pageNumber}}">
+    <swiper-item class='pageOne'>
+      <view class='buttonBox'>
+        <button type="primary" class="weui-btn button" style="margin:0;" bindtap="bindFillForm">我要报名</button>
+        <button type="primary" class="weui-btn button" style="margin:0;" bindtap="bindStatus">查看状态</button>
+      </view>
+    </swiper-item>
+    <swiper-item style="background: green; width: 100%; height: 100%"></swiper-item>
+    <swiper-item style="background: blue; width: 100%; height: 100%"></swiper-item>
+    <swiper-item style="background: yellow; width: 100%; height: 100%"></swiper-item>
+</swiper>
 </view>

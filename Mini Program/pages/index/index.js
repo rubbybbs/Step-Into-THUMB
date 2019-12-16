@@ -10,10 +10,10 @@ wx.setEnableDebug({
 
 Page({
   data: {
-    motto: 'Hello World',
+    clientHeight: 0,
     userInfo: {},
     hasUserInfo: false,
-    
+    pageNumber: 0,
     canIUse: wx.canIUse('button.open-type.getUserInfo')
   },
   //事件处理函数
@@ -33,6 +33,15 @@ Page({
     })
   },
   onLoad: function () {
+    let _this = this;
+    wx.getSystemInfo({
+      success: function (res) {
+        _this.setData({
+          clientHeight: res.windowHeight
+        });
+      }
+    });
+    
     console.log(app.globalData.flag)
     if (app.globalData.flag==false) {
       wx.navigateTo({
@@ -103,5 +112,7 @@ Page({
       })
     }
   },
- 
+  onPullDownRefresh: function (res) {
+    console.log("!!!")
+  }
 })
