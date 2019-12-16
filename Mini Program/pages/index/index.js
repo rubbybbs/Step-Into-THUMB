@@ -23,6 +23,15 @@ Page({
     })
   },
   bindFillForm: function() {
+    wx.requestSubscribeMessage({
+      tmplIds: ['AdymfH-LXIsQlfV8VKJ7fnq5gAJjdayvD4Zo_58PfYw',],
+      success: function (res) {
+        console.log('success', res['AdymfH-LXIsQlfV8VKJ7fnq5gAJjdayvD4Zo_58PfYw'])
+      },
+      fail: function (res) {
+        console.log('fail', res.errMsg)
+      }
+    });
     wx.navigateTo({
       url: '../form/form',
     })

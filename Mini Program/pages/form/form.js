@@ -158,7 +158,7 @@ Page({
           wx.navigateBack({
             url: '../index/index',
           })
-        }, 500)
+        }, 500);
       }
     })
   },
