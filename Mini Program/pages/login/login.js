@@ -88,7 +88,7 @@ Page({
       success: function(res) {
         if (res.code) {
           wx.request({
-            url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/register',
+            url: 'https://154.8.172.135:3389/Step-Into-THUMB/candidate/register',
             method: 'POST',
             data: {
               code: res.code

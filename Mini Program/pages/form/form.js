@@ -1,5 +1,8 @@
 // pages/form/form.js
 
+wx.setEnableDebug({
+  enableDebug: true,
+})
 
 Page({
 
@@ -20,7 +23,7 @@ Page({
   onLoad: function (options) {
     let _this = this
     wx.request({
-      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-empty-form', 
+      url: 'http://154.8.172.135:3389/Step-Into-THUMB/candidate/get-empty-form', 
       header: {
         'content-type': 'application/json'
       },
