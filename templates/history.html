@@ -58,9 +58,29 @@
                     <div class="layui-card-body" id="toAdd">
                         <div class="layui-tab" lay-filter="activitySegment">
                             <ul class="layui-tab-title" id="titleToAdd">
+                                <li class="layui-this" lay-id="100">全部</li>
                             </ul>
-
+                            <div class="layui-form-item" style="margin-top: 15px; margin-bottom: 0px;">
+                                搜索ID：
+                                <div class="layui-inline">
+                                    <input class="layui-input" name="searchID" id="tableReload" autocomplete="off">
+                                </div>
+                                <button class="layui-btn" id="search" data-type="reload">搜索</button>
+                            </div>
                             <div class="layui-tab-content" id="contentToAdd">
+                                <div class="layui-tab-item layui-show">
+                                    <table class="layui-table" lay-data="{id: 'AccountTable', url:'Step-Into-THUMB/examiner/get-history-candidate-list?s_ID=-1&username=' + layui.data('LocalData').username, page: true}" lay-filter="accountTable" id="accountTable">
+                                      <thead>
+                                          <tr>
+                                            <th lay-data="{type:'numbers', width:'10%'}"></th>
+                                            <th lay-data="{field:'name', width:'20%'}">姓名</th>
+                                            <th lay-data="{field:'ID', width:'20%'}">学号</th>
+                                            <th lay-data="{field:'wxID', width:'30%'}">微信号</th>
+                                            <th lay-data="{templet:'#bar', width:'20%', style:'cursor: pointer;'}">编辑</th>
+                                          </tr>
+                                      </thead>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -162,6 +182,32 @@
             });
             location.assign("CandidateDetail.html");
         }
+      });
+
+
+      var active = {
+          reload: function () {
+              var Reload = $('#tableReload').val();
+              var tmp = $(".layui-show .layui-table-view").attr('lay-id');
+              //执行重载
+              if (Reload) table.reload(tmp, {
+                  where: {
+                      key: {
+                          ID: Reload
+                      }
+                  }
+                  ,page: {
+                    curr: 1 //重新从第 1 页开始
+                  }
+              });
+              else table.reload(tmp, '')
+          }
+      };
+
+      $("#search").on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+            return false;
       });
     });
 
