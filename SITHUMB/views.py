@@ -301,20 +301,29 @@ class CandidateListForAdminView(APIView):
     def get(self, request, id):
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_ID = int(request.GET.get("s_ID"))
-        # stage和s_ID的对应关系还需要进一步确定
+        page = int(request.GET.get("page"))
+        limit = int(request.GET.get("limit"))
+        key_ID = request.GET.get("key[ID]")
+
         # s_ID与显示的考生列表关系如下：
         # 1） 当section为必须通过时，其前置必须通过的section也必须全部通过，才显示
         # 2） 当section为非必须通过时，只要考过试，就显示。
-        if s_ID == -1:
-            res_list = Application.objects.filter(activity__id=id)
-        elif s_ID == -2:
-            sections = Section.objects.filter(activity__id=id, compulsory=True).order_by("s_id")
-            res_list = sections[0].unqualified.all()
-        elif s_ID == -3:
-            res_list = Application.objects.filter(admitted=True)
+        if key_ID is None:
+            if s_ID == -1:
+                res_list = Application.objects.filter(activity__id=id)
+            elif s_ID == -2:
+                sections = Section.objects.filter(activity__id=id, compulsory=True).order_by("s_id")
+                if len(sections) != 0:
+                    res_list = sections[0].unqualified.all()
+                else:
+                    res_list = []
+            elif s_ID == -3:
+                res_list = Application.objects.filter(admitted=True)
+            else:
+                section = Section.objects.get(activity__id=id, s_id=s_ID)
+                res_list = section.qualified.all()[limit * (page - 1): limit * page]
         else:
-            section = Section.objects.get(activity__id=id, s_id=s_ID)
-            res_list = section.qualified.all()
+            res_list = Application.objects.filter(activity__id=id, candidate__student_id=key_ID)
 
         for application in res_list:
             response["data"].append({
@@ -382,7 +391,8 @@ class SendMessageView(APIView):
             else:
                 data["data"]["character_string01"] = "未通过"
             res = requests.post(url, data=data)
-        return Response({"u": 0})
+            print(res.content)
+        return Response({"status": 100})
 
 # 考生相关接口
 class RegisterView(APIView):
@@ -504,13 +514,19 @@ class AuthExaminerLoginView(APIView):
 
         user = authenticate(username=username, password=password)
         if user:
-            token = get_token(username, 600)
-            # cache.set(username, token, 600)
-            response["msg"] = "登录成功"
-            response["token"] = token
-            response["username"] = username
+            _, cur_activity = get_cur_activity()
+            examiner = Examiner.objects.get(username=username)
+            if examiner.activity != cur_activity:
+                response["msg"] = "活动未开始"
+            else:
+                token = get_token(username, 600)
+                # cache.set(username, token, 600)
+                response["msg"] = "登录成功"
+                response["token"] = token
+                response["username"] = username
         else:
             response["msg"] = "用户名或密码错误"
+
         return Response(response)
 
 
@@ -535,8 +551,14 @@ class CandidateListExaminerView(APIView):
         if cur_activity_id == -1:
             return Response({"status": 404, "code": 404})
         response = {"code": 0, "msg": None, "count": 0, "data": []}
+
         s_id = request.GET.get('s_ID')
+        page = int(request.GET.get("page"))
+        limit = int(request.GET.get("limit"))
+
         checking_list = Section.objects.get(activity=cur_activity, s_id=s_id).checking.all()
+        checking_list = checking_list[limit * (page - 1): limit * page]
+
         for e in checking_list:
             response["data"].append({
                 "name": e.candidate.name,
@@ -552,14 +574,18 @@ class HistoryCandidateListExaminerView(APIView):
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         username = request.GET.get('username')
         s_id = int(request.GET.get('s_ID'))
+        page = int(request.GET.get("page"))
+        limit = int(request.GET.get("limit"))
         examiner = Examiner.objects.get(username=username)
         sections = json.loads(examiner.examinees)["sections"]
         # 后评分的先显示
         for sec in sections:
             if s_id == int(sec["s_ID"]):
-                response["count"] = len(sec["candidates"])
                 for i in range(len(sec["candidates"])):
                     response["data"].append(sec["candidates"].pop())
+                break
+        response["data"] = response["data"][limit * (page - 1): limit * page]
+        response["count"] = len(response["data"])
         return Response(response)
 
 
