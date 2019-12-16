@@ -407,13 +407,14 @@ class ExportExcelView(APIView):
             title_list.append(sec.name)
         excel.append(title_list)
         # 添加Excel表项
+        excel.append([])
         for appliction in applications:
             answer = []
             for asw in json.loads(appliction.application_form)["question"]:
                 answer.append(asw["answer"])
             for sec in json.loads(appliction.transcript)["sections"]:
                 answer.append(sec["passed"])
-            excel.append(answer)
+            excel[1].append(answer)
         return Response({"status": 100, "excel": excel})
 
 # 考生相关接口
