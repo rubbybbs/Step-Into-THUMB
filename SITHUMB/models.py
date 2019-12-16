@@ -13,6 +13,8 @@ class Activity(models.Model):
     from_date = models.DateField(default=None)
     to_date = models.DateField(default=None)
     application_format = models.TextField(default="")
+    admission_letter = models.TextField(default="")
+    refusal_letter = models.TextField(default="")
 
 
 class Candidate(models.Model):
@@ -25,7 +27,7 @@ class Application(models.Model):
     admitted = models.BooleanField(default=False)
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='applications', null=True)
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='applications', null=True)
-    stage = models.IntegerField(default=0)
+    stage = models.IntegerField(default=1)
     application_form = models.TextField(default="")
     transcript = models.TextField(default="")
 

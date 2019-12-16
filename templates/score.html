@@ -60,6 +60,14 @@
                             <ul class="layui-tab-title" id="titleToAdd">
                             </ul>
 
+                            <div class="layui-form-item" style="margin-top: 15px; margin-bottom: 0px;">
+                                搜索ID：
+                                <div class="layui-inline">
+                                    <input class="layui-input" name="searchID" id="tableReload" autocomplete="off">
+                                </div>
+                                <button class="layui-btn" id="search" data-type="reload">搜索</button>
+                            </div>
+
                             <div class="layui-tab-content" id="contentToAdd">
                             </div>
                         </div>
@@ -127,6 +135,7 @@
                         }
                         table.render({
                             elem: '#section' + value.s_ID
+                            , id: 'SectionScore' + value.s_ID
                             , url: 'Step-Into-THUMB/examiner/get-candidate-list?s_ID='+ value.s_ID
                             , cellMinWidth: 80
                             , cols: [[
@@ -136,6 +145,7 @@
                                   ,{field:'wxID', width:'30%', title: '微信号'}
                                   ,{templet:'#bar', width:'20%', title: '编辑', style:'cursor: pointer;'}
                             ]]
+                            , page: true
                             , initSort: {
                                 field: 'ID'
                                 ,type: 'desc'
@@ -165,6 +175,32 @@
             });
             location.assign("CandidateDetail.html");
         }
+      });
+
+
+      var active = {
+          reload: function () {
+              var Reload = $('#tableReload').val();
+              var tmp = $(".layui-show .layui-table-view").attr('lay-id');
+              //执行重载
+              if (Reload) table.reload(tmp, {
+                  where: {
+                      key: {
+                          ID: Reload
+                      }
+                  }
+                  ,page: {
+                    curr: 1 //重新从第 1 页开始
+                  }
+              });
+              else table.reload(tmp, '')
+          }
+      };
+
+      $("#search").on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+            return false;
       });
     });
 

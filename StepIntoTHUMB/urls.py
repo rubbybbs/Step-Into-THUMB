@@ -83,6 +83,8 @@ urlpatterns = [
     # 类型 GET  参数 wx_ID
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/admission/refuse$', views.AdmissionView.as_view()),
     # 类型 POST 参数 wx_ID
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/send_message$', views.SendMessageView.as_view()),
+    # 类型 POST {"admission":..., "refusal":...}
 
     # url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/application$', views.GetActivityDetailView.as_view()),
 
@@ -104,9 +106,8 @@ urlpatterns = [
     # GET
     url(r'^Step-Into-THUMB/candidate/submit-application$', views.ApplyView.as_view()),
     # POST 参数:session  正文：报名表json 每个问题项相较空表加一个"answer"的字段
-    # url(r'^Step-Into-THUMB/candidate/get-application$', views.ApplyView.as_view()),
-    # # GET 参数：session
     url(r'^Step-Into-THUMB/candidate/get-status$', views.StatusView.as_view()),
     # GET 参数：session
+
 
 ]

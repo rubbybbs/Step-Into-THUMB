@@ -2,6 +2,12 @@
 //获取应用实例
 const app = getApp()
 
+// 打开调试
+wx.setEnableDebug({
+  enableDebug: true
+})
+
+
 Page({
   data: {
     motto: 'Hello World',

@@ -1,8 +1,9 @@
 // pages/form/form.js
-
+// 打开调试
 wx.setEnableDebug({
-  enableDebug: true,
+  enableDebug: true
 })
+
 
 Page({
 
@@ -22,12 +23,14 @@ Page({
    */
   onLoad: function (options) {
     let _this = this
+    let session = wx.getStorageSync('key')
     wx.request({
-      url: 'http://154.8.172.135:3389/Step-Into-THUMB/candidate/get-empty-form', 
+      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-empty-form?session=' + session, 
       header: {
         'content-type': 'application/json'
       },
       success: function (res) {
+        console.log(res);
         let Form = JSON.parse(res.data["form"]);
         console.log(Form['question']);
         let gen = [];
@@ -44,30 +47,25 @@ Page({
             console.log(ques.Choices)
             
             _this[ques["changeFunc"]] = function(e) {
-              console.log(e)
-              console.log(ques.name, '发生选择改变，携带值为', e.detail.value);
+              
               let tmp = this.data.questions;
               tmp[x]["ChoiceIndex"] = e.detail.value;
               _this.setData({
                 questions: tmp
               })
-              // console.log(_this.data.questions[x].ChoicesArray)
-              /*
-              let tmp = "bindChange" + x
-              _this.setData({
-                [tmp]: e.detail.value
-              });*/
+              
             }
-            console.log("changeFunc", "bindChange" + x)
+            
           }
-          
-
           gen.push(ques)
         }
         console.log("gen",gen)
         _this.setData({
           questions: gen
         })
+      },
+      fail: function() {
+        console.log("failed!!!!!!")
       }
     })
   },
@@ -121,13 +119,6 @@ Page({
 
   },
 
-  bindChange0: function (e) {
-    console.log(e)
-    console.log('picker country 发生选择改变，携带值为', e.detail.value);
-    
-    
-  },
-
   formSubmit: function (e) {
     let question = []
     for (let x in this.data.questions) {
@@ -160,9 +151,15 @@ Page({
       },
       success: function (res) {
         console.log(res)
+        wx.showToast({
+          title: "提交成功"
+        });
+        setTimeout(function () {
+          wx.navigateBack({
+            url: '../index/index',
+          })
+        }, 500)
       }
     })
   },
-
-
 })

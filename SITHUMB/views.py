@@ -15,17 +15,16 @@ import requests
 import json
 from django.views.decorators.csrf import csrf_exempt
 
-cur_activity_id = -1
+appID = "wxc9568dc74b390136"
+appSecret = "1bdc626b0ea48761d84e4b1762c59641"
 
-def update_cur_activity():
-    global cur_activity_id
+
+def get_cur_activity():
     try:
-        cur_activity_id = Activity.objects.get(status=1).id
+        cur_activity = Activity.objects.get(status=1)
     except Exception:
-        pass
-
-
-update_cur_activity()
+        return -1, None
+    return cur_activity.id, cur_activity
 
 
 def index(request):
@@ -93,30 +92,6 @@ class LoginTestView(APIView):
         return Response(response)
 
 
-class GetFormTestView(APIView):
-    def get(self, request):
-        response = {"status": 100, "form": None}
-        response["form"] = {
-            "name": "清华军乐2019-2020春季学期招新报名表",
-            "date": "2020/03/03-2020/03/05",
-            "questions": [
-                {
-                    "name": "姓名",
-                    "type": "Blank"
-                },
-                {
-                    "name": "性别",
-                    "type": "Choice",
-                    "Choices": [
-                        {"choice": "男"},
-                        {"choice": "女"}
-                    ]
-                }
-            ]
-        }
-        return Response(response)
-
-
 class ActivityListView(APIView):
     def get(self, request):
         response = {"status": 100, "msg": None, "activities": []}
@@ -145,8 +120,8 @@ class ActivityView(APIView):
         from_date = parse_date(request.GET.get('from'))
         to_date = parse_date(request.GET.get('to'))
         if from_date == None or to_date == None:
-            from_date = parse_date("2000-01-01")
-            to_date = parse_date("2100-01-01")
+            from_date = parse_date("2020-01-01")
+            to_date = parse_date("2020-02-01")
 
         activity = Activity(name=name, from_date=from_date, to_date=to_date)
         activity.save()
@@ -169,7 +144,6 @@ class ActivityStatusView(APIView):
         a = Activity.objects.get(id=activity_id)
         a.status = 1
         a.save()
-        update_cur_activity()
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
@@ -178,7 +152,6 @@ class ActivityStatusView(APIView):
         a = Activity.objects.get(id=activity_id)
         a.status = 2
         a.save()
-        update_cur_activity()
         response = {"status": 100, "a_id": activity_id}
         return Response(response)
 
@@ -286,7 +259,6 @@ class SectionView(APIView):
     def delete(self, request, id, sectionID):
         Section.objects.filter(activity__id=id, s_id=sectionID).delete()
         activity = Activity.objects.get(id=id)
-        activity.section_cnt -= 1
         activity.save()
         response = {"status": 100, "msg": None}
         return Response(response)
@@ -329,20 +301,29 @@ class CandidateListForAdminView(APIView):
     def get(self, request, id):
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_ID = int(request.GET.get("s_ID"))
-        # stage和s_ID的对应关系还需要进一步确定
+        page = int(request.GET.get("page"))
+        limit = int(request.GET.get("limit"))
+        key_ID = request.GET.get("key[ID]")
+
         # s_ID与显示的考生列表关系如下：
         # 1） 当section为必须通过时，其前置必须通过的section也必须全部通过，才显示
         # 2） 当section为非必须通过时，只要考过试，就显示。
-        if s_ID == -1:
-            res_list = Application.objects.filter(activity__id=id)
-        elif s_ID == -2:
-            sections = Section.objects.filter(activity__id=id, compulsory=True).order_by("s_id")
-            res_list = sections[0].unqualified.all()
-        elif s_ID == -3:
-            res_list = Application.objects.filter(admitted=True)
+        if key_ID is None:
+            if s_ID == -1:
+                res_list = Application.objects.filter(activity__id=id)
+            elif s_ID == -2:
+                sections = Section.objects.filter(activity__id=id, compulsory=True).order_by("s_id")
+                if len(sections) != 0:
+                    res_list = sections[0].unqualified.all()
+                else:
+                    res_list = []
+            elif s_ID == -3:
+                res_list = Application.objects.filter(admitted=True)
+            else:
+                section = Section.objects.get(activity__id=id, s_id=s_ID)
+                res_list = section.qualified.all()[limit * (page - 1): limit * page]
         else:
-            section = Section.objects.get(activity__id=id, s_id=s_ID)
-            res_list = section.qualified.all()
+            res_list = Application.objects.filter(activity__id=id, candidate__student_id=key_ID)
 
         for application in res_list:
             response["data"].append({
@@ -371,23 +352,52 @@ class CommentForCandidateView(APIView):
         response = {"msg": None}
         wxID = request.GET.get("wxID")
         candidiate = Application.objects.get(activity=id, candidate__wx_id=wxID)
-        print(request.data)
-        print(type(request.data))
-        print(request.data["comment"])
         tmp = json.loads(candidiate.transcript)
         tmp["comment"]  = request.data["comment"]
         candidiate.transcript = json.dumps(tmp, ensure_ascii=False)
         candidiate.save()
         return Response(response)
 
+
+class SendMessageView(APIView):
+    def post(self, request, id):
+        activity = Activity.objects.get(id=id)
+        activity.admission_letter = request.data["admission"]
+        activity.refusal_letter = request.data["refusal"]
+        activity.save()
+        url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential"
+        res = requests.get(url + "&appid=" + appID + "&secret=" + appSecret).content
+        access = json.loads(res)["access_token"]
+        url = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + access
+        data = {
+            "touser": "OPENID",
+            "template_id": "TEMPLATE_ID",
+            "page": "status",
+            "data": {
+                "character_string01": {
+                    "value": ""
+                },
+                "character_string02": {
+                    "value": "请点击名片查看详细信息"
+                },
+            }
+        }
+        applications = Application.objects.filter(activity=activity)
+        for a in applications:
+            a.stage = 2
+            data["touser"] = a.candidate.wx_id
+            if a.admitted:
+                data["data"]["character_string01"] = "通过"
+            else:
+                data["data"]["character_string01"] = "未通过"
+            res = requests.post(url, data=data)
+            print(res.content)
+        return Response({"status": 100})
+
 # 考生相关接口
 class RegisterView(APIView):
     def post(self, request):
         code = request.data["code"]
-
-        print(code)
-        appID = "wxc9568dc74b390136"
-        appSecret = "1bdc626b0ea48761d84e4b1762c59641"
         url = "https://api.weixin.qq.com/sns/jscode2session"
         res = requests.get(
             url + "?appid=" + appID + "&secret=" + appSecret + "&js_code=" + code + "&grant_type=authorization_code")
@@ -402,95 +412,98 @@ class RegisterView(APIView):
         return Response({"session": trd_session})
 
     def get(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
-            return Response({"status": 400})
-        a = Activity.objects.get(id=cur_activity_id)
-        return Response({"form": a.application_format})
+            return Response({"status": 400, "msg":"当前没有进行中的招新活动。"})
+        session = request.GET.get('session')
+        wx_id = session.split("-")[0]
+        try:
+            Application.objects.get(candidate__wx_id=wx_id, activity=cur_activity)
+        except:
+            return Response({"form": cur_activity.application_format})
+        else:
+            return Response({"status":400, "msg":"您已经报名。"})
 
 
 class ApplyView(APIView):
     def post(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
             return Response({"status": 400})
-
         session = request.GET.get('session')
         wx_id = session.split("-")[0]
-        activity = Activity.objects.get(id=cur_activity_id)
         candidate = Candidate.objects.get(wx_id=wx_id)
         application_form = str(request.data).replace('\'', '"')
+
+
         for q in request.data["question"]:
             if q["name"] == "姓名":
-                candidate.name = q["answer"]
+                 candidate.name = q["answer"]
             elif q["name"] == "学号":
-                candidate.student_id = q["answer"]
+                 candidate.student_id = q["answer"]
         candidate.save()
+        # 创建评分表
+        sections = Section.objects.filter(activity=cur_activity)
+        transcript_obj = {
+            "sections": [],
+            "comment": ""
+        }
+        for sec in sections:
+            if sec.transcript_format != "":
+                json_obj = {
+                    "sectionID": sec.s_id,
+                    "compulsory": str(sec.compulsory),
+                    "passed": "undecided",
+                    "name": sec.name,
+                    "question": json.loads(sec.transcript_format)["question"],
+                    "examiner": "null"
+                }
+                transcript_obj["sections"].append(json_obj)
+            else:
+                # 实际上线时不会出现。
+                json_obj = {
+                    "sectionID": sec.s_id,
+                    "compulsory": str(sec.compulsory),
+                    "passed": "undecided",
+                    "name": sec.name,
+                    "examiner": "null"
+                }
+                transcript_obj["sections"].append(json_obj)
 
-        try:
-            application = candidate.applications.get(activity__id=cur_activity_id)
-        except:
-            # 创建评分表
-            sections = Section.objects.filter(activity__id=cur_activity_id)
-            transcript_obj = {
-                "sections": [],
-                "comment": ""
-            }
-            for sec in sections:
-                if sec.transcript_format != "":
-                    json_obj = {
-                        "sectionID": sec.s_id,
-                        "compulsory": str(sec.compulsory),
-                        "passed": "undecided",
-                        "name": sec.name,
-                        "question": json.loads(sec.transcript_format)["question"],
-                        "examiner": "null"
-                    }
-                    transcript_obj["sections"].append(json_obj)
-                else:
-                    # 实际上线时不会出现。
-                    json_obj = {
-                        "sectionID": sec.s_id,
-                        "name": sec.name,
-                        "question": [],
-                        "examiner": "null"
-                    }
-                    transcript_obj["sections"].append(json_obj)
-
-            application = Application(candidate=candidate, application_form=application_form,
-                                      activity=activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
-            application.save()
-            sections = Section.objects.filter(activity__id=cur_activity_id)
-            for sec in sections:
-                sec.checking.add(application)
-        else:
-            application.application_form = application_form
-            application.save()
+        application = Application(candidate=candidate, application_form=application_form,
+                                activity=cur_activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
+        application.save()
+        sections = Section.objects.filter(activity=cur_activity)
+        for sec in sections:
+            sec.checking.add(application)
 
         response = {"status": 100, "msg": None}
         return Response(response)
 
-    # def get(self, request):
-    #     if cur_activity_id == -1:
-    #         return Response({"status": 400})
-    #
-    #     session = request.GET.get('session')
-    #     wx_id = session.split("-")[0]
-    #
-    #     candidate = Candidate.objects.get(wx_id=wx_id)
-    #     response = {"form": candidate.applications.get(a_id=cur_activity_id).application_form}
-    #     return Response(response)
-
 
 class StatusView(APIView):
     def get(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
             return Response({"status": 400})
-
         session = request.GET.get('session')
         wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
-        stage = candidate.applications.get(activity__id=cur_activity_id).stage
-        section = Section.objects.get(activity__id=cur_activity_id, s_id=stage)
-        response = {"status": "您的下一步是" + section.name + "请在113教室内等待"}
+        try:
+            application = candidate.applications.get(activity=cur_activity)
+        except Exception:
+            stage = 0
+        else:
+            stage = application.stage # 0,1,2  ----出录取结果--->  3
+
+        if stage <= 2:
+            statuses = ["请填写报名表", "请到蒙民伟楼（西操西南角）113教室参加面试", "考试结束，请等待录取通知"]
+            response = {"stage": stage,  "status": statuses[:stage + 1]}
+        else:
+            if application.admitted:
+                response = {"stage": stage, "content": "亲爱的" + candidate.name + "同学你好！\n" + cur_activity.admission_letter}
+            else:
+                response = {"stage": stage, "content": "亲爱的" + candidate.name + "同学你好！\n" + cur_activity.refusal_letter}
         return Response(response)
 # 考官相关接口
 
@@ -501,15 +514,22 @@ class AuthExaminerLoginView(APIView):
         response = {"status": 100, "msg": None}
         username = request.GET.get('username')
         password = request.GET.get('password')
+
         user = authenticate(username=username, password=password)
         if user:
-            token = get_token(username, 600)
-            # cache.set(username, token, 600)
-            response["msg"] = "登录成功"
-            response["token"] = token
-            response["username"] = username
+            _, cur_activity = get_cur_activity()
+            examiner = Examiner.objects.get(username=username)
+            if examiner.activity != cur_activity:
+                response["msg"] = "活动未开始"
+            else:
+                token = get_token(username, 600)
+                # cache.set(username, token, 600)
+                response["msg"] = "登录成功"
+                response["token"] = token
+                response["username"] = username
         else:
             response["msg"] = "用户名或密码错误"
+
         return Response(response)
 
 
@@ -530,11 +550,22 @@ class SectionExaminerView(APIView):
 
 class CandidateListExaminerView(APIView):
     def get(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
             return Response({"status": 404, "code": 404})
         response = {"code": 0, "msg": None, "count": 0, "data": []}
+
         s_id = request.GET.get('s_ID')
-        checking_list = Section.objects.get(activity__id=cur_activity_id, s_id=s_id).checking.all()
+        page = int(request.GET.get("page"))
+        limit = int(request.GET.get("limit"))
+        key_id = request.GET.get("key[ID]")
+
+        checking_list = Section.objects.get(activity=cur_activity, s_id=s_id).checking.all()
+        if key_id is None:
+            checking_list = checking_list[limit * (page - 1): limit * page]
+        else:
+            checking_list = checking_list.filter(candidate__student_id=key_id)
+
         for e in checking_list:
             response["data"].append({
                 "name": e.candidate.name,
@@ -550,14 +581,18 @@ class HistoryCandidateListExaminerView(APIView):
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         username = request.GET.get('username')
         s_id = int(request.GET.get('s_ID'))
+        page = int(request.GET.get("page"))
+        limit = int(request.GET.get("limit"))
         examiner = Examiner.objects.get(username=username)
         sections = json.loads(examiner.examinees)["sections"]
         # 后评分的先显示
         for sec in sections:
             if s_id == int(sec["s_ID"]):
-                response["count"] = len(sec["candidates"])
                 for i in range(len(sec["candidates"])):
                     response["data"].append(sec["candidates"].pop())
+                break
+        response["data"] = response["data"][limit * (page - 1): limit * page]
+        response["count"] = len(response["data"])
         return Response(response)
 
 
@@ -573,17 +608,16 @@ class TranscriptView(APIView):
         return Response(response)
 
     def post(self, request):
+        cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
             return Response({"status": 400})
-
         response = {"status": 100, "msg": None}
         wx_id = request.GET.get("wxID")
         s_id = int(request.GET.get("s_ID"))
         eligible = int(request.GET.get("eligible"))
-        sections = Section.objects.filter(activity__id=cur_activity_id).order_by("s_id")
-        section = Section.objects.get(activity__id=cur_activity_id, s_id=s_id)
+        section = Section.objects.get(activity=cur_activity, s_id=s_id)
         username = request.GET.get("username")
-        application = Application.objects.get(candidate__wx_id=wx_id, activity__id=cur_activity_id)
+        application = Application.objects.get(candidate__wx_id=wx_id, activity=cur_activity)
         transcript = json.loads(application.transcript)["sections"]
         examiner = Examiner.objects.get(username=username)
         histroy_candidate_list = json.loads(examiner.examinees)["sections"]
@@ -597,6 +631,7 @@ class TranscriptView(APIView):
                         sec["passed"] = "True"
                     elif eligible == 0:
                         sec["passed"] = "False"
+                        application.stage = 2
                 else:
                     sec["passed"] = "Pass"
                 # 在考官的历史列表中加入该考生
@@ -617,7 +652,7 @@ class TranscriptView(APIView):
         # 若环节为必考且考生通过，通过字段中加入该考生，并将该考生移除出前一个必考环节的通过字段；
         # 若环节为必考且考生不通过，不通过字段中加入该考生
         # 若环节为非必考，在通过字段中直接加入
-        compulsory_list = Section.objects.filter(activity__id=cur_activity_id, compulsory=True).order_by("s_id")
+        compulsory_list = Section.objects.filter(activity=cur_activity, compulsory=True).order_by("s_id")
         compulsory_id_list = [sec.s_id for sec in compulsory_list]
         if section.compulsory:
             pos = compulsory_id_list.index(section.s_id)
@@ -636,3 +671,5 @@ class TranscriptView(APIView):
         examiner.examinees = json.dumps({"sections": histroy_candidate_list}, ensure_ascii=False)
         examiner.save()
         return Response(response)
+
+
