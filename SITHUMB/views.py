@@ -394,6 +394,28 @@ class SendMessageView(APIView):
             print(res.content)
         return Response({"status": 100})
 
+class ExportExcelView(APIView):
+    def post(self, request, id):
+        activity = Activity.objects.get(id=id)
+        applications = Application.objects.filter(activity=activity)
+        excel = []
+        title_list = []
+        # 添加Excel表头
+        for question in activity.application_format["question"]:
+            title_list.append(question["name"])
+        sections = Section.objects.filter(activity=activity).order_by("s_id")
+        for sec in sections:
+            title_list.append(sec.name)
+        # 添加Excel表项
+        for appliction in applications:
+            answer = []
+            for asw in appliction.application_form["question"]:
+                answer.append(asw["answer"])
+            for sec in appliction.transcript["sections"]:
+                answer.append(sec["passed"])
+            excel.append(answer)
+        return Response({"status": 100, "excel": excel})
+
 # 考生相关接口
 class RegisterView(APIView):
     def post(self, request):
@@ -443,7 +465,7 @@ class ApplyView(APIView):
                  candidate.student_id = q["answer"]
         candidate.save()
         # 创建评分表
-        sections = Section.objects.filter(activity=cur_activity)
+        sections = Section.objects.filter(activity=cur_activity).order_by("s_id")
         transcript_obj = {
             "sections": [],
             "comment": ""
