@@ -608,12 +608,20 @@ class HistoryCandidateListExaminerView(APIView):
         limit = int(request.GET.get("limit"))
         examiner = Examiner.objects.get(username=username)
         sections = json.loads(examiner.examinees)["sections"]
-        # 后评分的先显示
-        for sec in sections:
-            if s_id == int(sec["s_ID"]):
+        # 若s_id为-1，则请求所有该考官所有历史考生
+        if s_id == -1:
+            for sec in sections:
                 for i in range(len(sec["candidates"])):
-                    response["data"].append(sec["candidates"].pop())
-                break
+                    candidate = sec["candidates"].pop()
+                    if candidate not in response["data"]:
+                        response["data"].append(candidate)
+        else:
+            # 后评分的先显示
+            for sec in sections:
+                if s_id == int(sec["s_ID"]):
+                    for i in range(len(sec["candidates"])):
+                        response["data"].append(sec["candidates"].pop())
+                    break
         response["data"] = response["data"][limit * (page - 1): limit * page]
         response["count"] = len(response["data"])
         return Response(response)
