@@ -85,6 +85,7 @@ urlpatterns = [
     # 类型 POST 参数 wx_ID
     url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/send_message$', views.SendMessageView.as_view()),
     # 类型 POST {"admission":..., "refusal":...}
+    url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/get-excel-data$', views.ExportExcelView.as_view()),
 
     # url(r'^Step-Into-THUMB/admin/activity/(?P<id>[0-9]+)/application$', views.GetActivityDetailView.as_view()),
 

@@ -73,7 +73,7 @@ class AuthAdminLoginView(APIView):
         password = request.GET.get('password')
         user = authenticate(username=username, password=password)
         if user:
-            token = get_token(username, 600)
+            token = get_token(username, 60000)
             # cache.set(username, token, 600)
             response["msg"] = "登录成功"
             response["token"] = token
@@ -87,8 +87,7 @@ class LoginTestView(APIView):
     authentication_classes = [TokenAuth2]
 
     def get(self, request):
-        response = {"status": 100, "msg": None}
-        response["msg"] = "已经登录了"
+        response = {"status": 100, "msg": "已经登录了"}
         return Response(response)
 
 
@@ -395,23 +394,24 @@ class SendMessageView(APIView):
         return Response({"status": 100})
 
 class ExportExcelView(APIView):
-    def post(self, request, id):
+    def get(self, request, id):
         activity = Activity.objects.get(id=id)
         applications = Application.objects.filter(activity=activity)
         excel = []
         title_list = []
         # 添加Excel表头
-        for question in activity.application_format["question"]:
+        for question in json.loads(activity.application_format)["question"]:
             title_list.append(question["name"])
         sections = Section.objects.filter(activity=activity).order_by("s_id")
         for sec in sections:
             title_list.append(sec.name)
+        excel.append(title_list)
         # 添加Excel表项
         for appliction in applications:
             answer = []
-            for asw in appliction.application_form["question"]:
+            for asw in json.loads(appliction.application_form)["question"]:
                 answer.append(asw["answer"])
-            for sec in appliction.transcript["sections"]:
+            for sec in json.loads(appliction.transcript)["sections"]:
                 answer.append(sec["passed"])
             excel.append(answer)
         return Response({"status": 100, "excel": excel})
