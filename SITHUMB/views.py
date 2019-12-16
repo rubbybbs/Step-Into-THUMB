@@ -414,8 +414,15 @@ class RegisterView(APIView):
     def get(self, request):
         cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
-            return Response({"status": 400})
-        return Response({"form": cur_activity.application_format})
+            return Response({"status": 400, "msg":"当前没有进行中的招新活动。"})
+        session = request.GET.get('session')
+        wx_id = session.split("-")[0]
+        try:
+            Application.objects.get(candidate__wx_id=wx_id, activity=cur_activity)
+        except:
+            return Response({"form": cur_activity.application_format})
+        else:
+            return Response({"status":400, "msg":"您已经报名。"})
 
 
 class ApplyView(APIView):
@@ -427,52 +434,48 @@ class ApplyView(APIView):
         wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
         application_form = str(request.data).replace('\'', '"')
+
+
         for q in request.data["question"]:
             if q["name"] == "姓名":
-                candidate.name = q["answer"]
+                 candidate.name = q["answer"]
             elif q["name"] == "学号":
-                candidate.student_id = q["answer"]
+                 candidate.student_id = q["answer"]
         candidate.save()
+        # 创建评分表
+        sections = Section.objects.filter(activity=cur_activity)
+        transcript_obj = {
+            "sections": [],
+            "comment": ""
+        }
+        for sec in sections:
+            if sec.transcript_format != "":
+                json_obj = {
+                    "sectionID": sec.s_id,
+                    "compulsory": str(sec.compulsory),
+                    "passed": "undecided",
+                    "name": sec.name,
+                    "question": json.loads(sec.transcript_format)["question"],
+                    "examiner": "null"
+                }
+                transcript_obj["sections"].append(json_obj)
+            else:
+                # 实际上线时不会出现。
+                json_obj = {
+                    "sectionID": sec.s_id,
+                    "compulsory": str(sec.compulsory),
+                    "passed": "undecided",
+                    "name": sec.name,
+                    "examiner": "null"
+                }
+                transcript_obj["sections"].append(json_obj)
 
-        try:
-            application = candidate.applications.get(activity=cur_activity)
-        except:
-            # 创建评分表
-            sections = Section.objects.filter(activity=cur_activity)
-            transcript_obj = {
-                "sections": [],
-                "comment": ""
-            }
-            for sec in sections:
-                if sec.transcript_format != "":
-                    json_obj = {
-                        "sectionID": sec.s_id,
-                        "compulsory": str(sec.compulsory),
-                        "passed": "undecided",
-                        "name": sec.name,
-                        "question": json.loads(sec.transcript_format)["question"],
-                        "examiner": "null"
-                    }
-                    transcript_obj["sections"].append(json_obj)
-                else:
-                    # 实际上线时不会出现。
-                    json_obj = {
-                        "sectionID": sec.s_id,
-                        "name": sec.name,
-                        "question": [],
-                        "examiner": "null"
-                    }
-                    transcript_obj["sections"].append(json_obj)
-
-            application = Application(candidate=candidate, application_form=application_form,
-                                      activity=cur_activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
-            application.save()
-            sections = Section.objects.filter(activity=cur_activity)
-            for sec in sections:
-                sec.checking.add(application)
-        else:
-            application.application_form = application_form
-            application.save()
+        application = Application(candidate=candidate, application_form=application_form,
+                                activity=cur_activity, transcript=json.dumps(transcript_obj, ensure_ascii=False))
+        application.save()
+        sections = Section.objects.filter(activity=cur_activity)
+        for sec in sections:
+            sec.checking.add(application)
 
         response = {"status": 100, "msg": None}
         return Response(response)
@@ -555,9 +558,13 @@ class CandidateListExaminerView(APIView):
         s_id = request.GET.get('s_ID')
         page = int(request.GET.get("page"))
         limit = int(request.GET.get("limit"))
+        key_id = request.GET.get("key[ID]")
 
         checking_list = Section.objects.get(activity=cur_activity, s_id=s_id).checking.all()
-        checking_list = checking_list[limit * (page - 1): limit * page]
+        if key_id is None:
+            checking_list = checking_list[limit * (page - 1): limit * page]
+        else:
+            checking_list = checking_list.filter(candidate__student_id=key_id)
 
         for e in checking_list:
             response["data"].append({
