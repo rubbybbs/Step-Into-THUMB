@@ -106,6 +106,7 @@
 
                         <div class="layui-form-item">
                             <button class="layui-btn layui-btn-normal" id="sendMessage">以当前录取状态向所有考生发送通知</button>
+                            <button class="layui-btn layui-btn-normal" id="exportExcel">以当前录取状态导出考生信息</button>
                         </div>
 
                     </div>
@@ -258,6 +259,23 @@
             return false;
       });
 
+      $("#exportExcel").on('click', function(){
+            var LocalData=layui.data('LocalData');
+            $.ajax({
+                url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/get-excel-data',
+                type: 'get',
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == 100) {
+                        table.exportFile(data.excel, 'csv');
+                    } else {
+                        layer.msg('获取失败，请重试！');
+                    }
+                }
+            });
+            return false;
+      });
 
       $("#sendMessage").on('click', function(){
           layer.open({
