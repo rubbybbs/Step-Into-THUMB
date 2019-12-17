@@ -13,6 +13,7 @@ from SITHUMB.token_module import get_token
 from SITHUMB.authentication_module import TokenAuth2
 import requests
 import json
+import time
 from django.views.decorators.csrf import csrf_exempt
 
 appID = "wxc9568dc74b390136"
@@ -370,26 +371,32 @@ class SendMessageView(APIView):
         url = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + access
         data = {
             "touser": "OPENID",
-            "template_id": "TEMPLATE_ID",
+            "template_id": "AdymfH-LXIsQlfV8VKJ7fnq5gAJjdayvD4Zo_58PfYw",
             "page": "status",
             "data": {
-                "character_string01": {
-                    "value": ""
+                "thing1":{
+                    "value":"军乐队面试结果通知"
                 },
-                "character_string02": {
-                    "value": "请点击名片查看详细信息"
+                "thing2":{
+                    "value":"请点击名片查看面试结果"
                 },
+                "date3":{
+                    "value":time.strftime("%d/%m/%Y")
+                },
+                "thing4":{
+                    "value":"请点击名片查看面试结果"
+                }
             }
         }
         applications = Application.objects.filter(activity=activity)
         for a in applications:
             a.stage = 2
             data["touser"] = a.candidate.wx_id
-            if a.admitted:
-                data["data"]["character_string01"] = "通过"
-            else:
-                data["data"]["character_string01"] = "未通过"
-            res = requests.post(url, data=data)
+            # if a.admitted:
+            #     data["data"]["character_string01"] = "通过"
+            # else:
+            #     data["data"]["character_string01"] = "未通过"
+            res = requests.post(url, data=str(data))
             print(res.content)
         return Response({"status": 100})
 

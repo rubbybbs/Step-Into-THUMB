@@ -13,8 +13,9 @@ Page({
    */
   onLoad: function (options) {
     let _this = this
+    let session = wx.getStorageSync('key')
     wx.request({
-      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-status',
+      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-status?session=' + session,
       method: "GET",
       header: {
         'content-type': 'application/json'
