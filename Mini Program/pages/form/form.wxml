@@ -27,7 +27,7 @@
       <h2 class="weui-form__title">清华大学艺术团军乐队报名表</h2>
     </view>
   <!--渲染报名表-->
-<form bindsubmit="formSubmit" bindreset="formReset">
+<form bindsubmit="formSubmit" bindreset="formReset" report-submit='true'>
   <view class="page__bd">
       <view class="weui-cells__group weui-cells__group_form">
         <!-- <view class="weui-cells__title">表单组标题</view> -->

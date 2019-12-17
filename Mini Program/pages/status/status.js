@@ -1,4 +1,6 @@
 // pages/status/status.js
+const app = getApp()
+
 Page({
 
   /**
@@ -14,7 +16,7 @@ Page({
   onLoad: function (options) {
     let _this = this
     wx.request({
-      url: 'http://127.0.0.1:8000/Step-Into-THUMB/candidate/get-status',
+      url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-status',
       method: "GET",
       header: {
         'content-type': 'application/json'

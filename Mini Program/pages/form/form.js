@@ -1,8 +1,11 @@
 // pages/form/form.js
+const app = getApp()
+
 // 打开调试
 wx.setEnableDebug({
   enableDebug: true
 })
+
 
 
 Page({
@@ -22,10 +25,15 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    if (app.globalData.flag == false) {
+      wx.navigateTo({
+        url: '../login/login',
+      })
+    }
     let _this = this
     let session = wx.getStorageSync('key')
     wx.request({
-      url: 'http://154.8.172.135:3389/Step-Into-THUMB/candidate/get-empty-form?session=' + session, 
+      url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-empty-form?session=' + session, 
       header: {
         'content-type': 'application/json'
       },
@@ -81,7 +89,11 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-
+    if (app.globalData.flag == false) {
+      wx.navigateTo({
+        url: '../login/login',
+      })
+    }
   },
 
   /**
@@ -120,6 +132,7 @@ Page({
   },
 
   formSubmit: function (e) {
+    console.log('formId', e.detail.formId);
     let question = []
     for (let x in this.data.questions) {
       let q = this.data.questions[x]
@@ -141,7 +154,7 @@ Page({
     console.log(question)
     let session = wx.getStorageSync('key')
     wx.request({
-      url: 'http://154.8.172.135:3389/Step-Into-THUMB/candidate/submit-application?session='+session, 
+      url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/submit-application?session='+session, 
       method: 'POST',
       data:{
         question

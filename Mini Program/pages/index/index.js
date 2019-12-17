@@ -13,6 +13,7 @@ Page({
     clientHeight: 0,
     userInfo: {},
     hasUserInfo: false,
+    attentionAnim: '',
     pageNumber: 0,
     canIUse: wx.canIUse('button.open-type.getUserInfo')
   },
@@ -23,7 +24,7 @@ Page({
     })
   },
   bindFillForm: function() {
-    wx.requestSubscribeMessage({
+    /*wx.requestSubscribeMessage({
       tmplIds: ['AdymfH-LXIsQlfV8VKJ7fnq5gAJjdayvD4Zo_58PfYw',],
       success: function (res) {
         console.log('success', res['AdymfH-LXIsQlfV8VKJ7fnq5gAJjdayvD4Zo_58PfYw'])
@@ -31,7 +32,7 @@ Page({
       fail: function (res) {
         console.log('fail', res.errMsg)
       }
-    });
+    });*/
     wx.navigateTo({
       url: '../form/form',
     })
@@ -40,6 +41,30 @@ Page({
     wx.navigateTo({
       url: '../status/status',
     })
+  },
+  onReady: function() {
+    var attentionAnim = wx.createAnimation({
+      duration: 400,
+      timingFunction: 'ease',
+      delay: 0
+    })
+    //设置循环动画
+    this.attentionAnim = attentionAnim
+    var next = true;
+    setInterval(function () {
+      if (next) {
+        //根据需求实现相应的动画
+        this.attentionAnim.translate(0,4).step()
+        next = !next;
+      } else {
+        this.attentionAnim.translate(0,-4).step()
+        next = !next;
+      }
+      this.setData({
+        //导出动画到指定控件animation属性
+        attentionAnim: attentionAnim.export()
+      })
+    }.bind(this), 400)
   },
   onLoad: function () {
     let _this = this;
@@ -51,12 +76,12 @@ Page({
       }
     });
     
-    console.log(app.globalData.flag)
+    /*console.log(app.globalData.flag)
     if (app.globalData.flag==false) {
       wx.navigateTo({
         url: '../login/login',
       })
-    }
+    }*/
     
     /*console.log("login")
       let value = wx.getStorageSync('key')
@@ -114,12 +139,7 @@ Page({
       }*/
   },
   onShow: function () {
-    console.log(app.globalData.flag)
-    if (app.globalData.flag == false) {
-      wx.navigateTo({
-        url: '../login/login',
-      })
-    }
+    
   },
   onPullDownRefresh: function (res) {
     console.log("!!!")
