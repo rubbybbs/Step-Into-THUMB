@@ -7,14 +7,14 @@ Page({
    * 页面的初始数据
    */
   data: {
-
+    status: ''
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    let _this = this
+    /*let _this = this
     let session = wx.getStorageSync('key')
     if (session) {
       wx.request({
@@ -33,7 +33,7 @@ Page({
       wx.navigateTo({
         url: '../login/login',
       })
-    }
+    }*/
   },
 
   /**
@@ -47,6 +47,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
+    let _this = this
     let session = wx.getStorageSync('key')
     if (session) {
       wx.request({
@@ -57,6 +58,9 @@ Page({
         },
         success: function (res) {
           console.log(res);
+          _this.setData({
+            status: res.data.status
+          })
         }
       })
     }
