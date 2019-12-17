@@ -15,8 +15,9 @@ Page({
    */
   onLoad: function (options) {
     let _this = this
+    let session = wx.getStorageSync('key')
     wx.request({
-      url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-status',
+      url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-status?session=' + session,
       method: "GET",
       header: {
         'content-type': 'application/json'
