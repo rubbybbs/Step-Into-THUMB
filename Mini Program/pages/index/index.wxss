@@ -45,7 +45,12 @@
 
 .arrow {
   position: fixed;
-  bottom: 30rpx;
+  bottom: 15rpx;
   left: 50%;  
   margin-left: -32rpx;
+}
+
+.arrow_img {
+  height: 60rpx;
+  width: 60rpx;
 }

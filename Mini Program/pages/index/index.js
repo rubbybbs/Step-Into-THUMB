@@ -141,7 +141,11 @@ Page({
   onShow: function () {
     
   },
-  onPullDownRefresh: function (res) {
-    console.log("!!!")
+  bindArrow: function () {
+    console.log("!!!");
+    let cur = this.data.pageNumber + 1;
+    this.setData({
+      pageNumber: cur
+    })
   }
 })
