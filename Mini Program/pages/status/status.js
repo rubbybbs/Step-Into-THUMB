@@ -34,6 +34,7 @@ Page({
         url: '../login/login',
       })
     }*/
+    
   },
 
   /**
@@ -51,14 +52,17 @@ Page({
     wx.checkSession({
       success: function () {
         console.log("success")
+        app.globalData.flag = true;
       },
       fail: function () {
         app.globalData.flag = false;
-        wx.navigateTo({
-          url: '../login/login',
-        })
       }
     })
+    if (!app.globalData.flag) {
+      wx.navigateTo({
+        url: '../login/login',
+      })
+    }
     let session = wx.getStorageSync('key')
     if (session) {
       wx.request({
@@ -73,12 +77,6 @@ Page({
             status: res.data.status
           })
         }
-      })
-    }
-    else {
-      app.globalData.flag = false;
-      wx.navigateTo({
-        url: '../login/login',
       })
     }
   },

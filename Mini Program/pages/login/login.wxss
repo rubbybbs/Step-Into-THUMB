@@ -15,6 +15,7 @@
   color: #666;
 }
 .button {
+  position: fixed;
+  bottom: 50rpx;
   width: 90%;
-  margin: 40rpx;
 }

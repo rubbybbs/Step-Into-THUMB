@@ -25,17 +25,6 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    wx.checkSession({
-      success: function () {
-        console.log("success")
-      },
-      fail: function () {
-        app.globalData.flag = false;
-        wx.navigateTo({
-          url: '../login/login',
-        })
-      }
-    })
     let _this = this
     let session = wx.getStorageSync('key')
     wx.request({
@@ -95,7 +84,16 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-    if (app.globalData.flag == false) {
+    wx.checkSession({
+      success: function () {
+        console.log("success")
+        app.globalData.flag = true;
+      },
+      fail: function () {
+        app.globalData.flag = false;
+      }
+    })
+    if (!app.globalData.flag) {
       wx.navigateTo({
         url: '../login/login',
       })
