@@ -25,11 +25,17 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    if (app.globalData.flag == false) {
-      wx.navigateTo({
-        url: '../login/login',
-      })
-    }
+    wx.checkSession({
+      success: function () {
+        console.log("success")
+      },
+      fail: function () {
+        app.globalData.flag = false;
+        wx.navigateTo({
+          url: '../login/login',
+        })
+      }
+    })
     let _this = this
     let session = wx.getStorageSync('key')
     wx.request({
@@ -73,7 +79,7 @@ Page({
         })
       },
       fail: function() {
-        console.log("failed!!!!!!")
+        console.log("failed get-empty-form")
       }
     })
   },

@@ -48,6 +48,17 @@ Page({
    */
   onShow: function () {
     let _this = this
+    wx.checkSession({
+      success: function () {
+        console.log("success")
+      },
+      fail: function () {
+        app.globalData.flag = false;
+        wx.navigateTo({
+          url: '../login/login',
+        })
+      }
+    })
     let session = wx.getStorageSync('key')
     if (session) {
       wx.request({
