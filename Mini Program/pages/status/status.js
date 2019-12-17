@@ -16,17 +16,24 @@ Page({
   onLoad: function (options) {
     let _this = this
     let session = wx.getStorageSync('key')
-    wx.request({
-      url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-status?session=' + session,
-      method: "GET",
-      header: {
-        'content-type': 'application/json'
-      },
-      success: function (res) {
+    if (session) {
+      wx.request({
+        url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-status?session=' + session,
+        method: "GET",
+        header: {
+          'content-type': 'application/json'
+        },
+        success: function (res) {
           console.log(res);
-          
         }
-    })
+      })
+    }
+    else {
+      app.globalData.flag = false;
+      wx.navigateTo({
+        url: '../login/login',
+      })
+    }
   },
 
   /**
@@ -40,7 +47,25 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-
+    let session = wx.getStorageSync('key')
+    if (session) {
+      wx.request({
+        url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-status?session=' + session,
+        method: "GET",
+        header: {
+          'content-type': 'application/json'
+        },
+        success: function (res) {
+          console.log(res);
+        }
+      })
+    }
+    else {
+      app.globalData.flag = false;
+      wx.navigateTo({
+        url: '../login/login',
+      })
+    }
   },
 
   /**
