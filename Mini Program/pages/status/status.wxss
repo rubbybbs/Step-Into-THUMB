@@ -1,1 +1,71 @@
 /* pages/status/status.wxss */
+.steps{
+  display:flex;
+  flex-direction: column;
+  flex-flow: warp;
+  margin-top: 10%;
+  margin-left: 90rpx;
+  margin-right: 50rpx
+  /* justify-content:space-around */
+}
+ 
+.step{
+   display:flex;
+   flex-direction: row;
+ /* border: 1rpx solid black; */
+   flex-flow: nowrap
+}
+ 
+.stepText{
+  align-items: center;
+  justify-content:space-around;
+  font-family: 'HiraginoSansGB-W3';
+  font-size: 30rpx;
+  margin-top: 25rpx;
+  margin-left: 23rpx
+}
+
+._stepText{
+  align-items: center;
+  justify-content:space-around;
+  font-family: 'HiraginoSansGB-W3';
+  font-size: 30rpx;
+  margin-top: 25rpx;
+  margin-left: 23rpx;
+  opacity: 0.3
+}
+
+.step .img{
+  width: 90rpx;
+  height: 90rpx;
+}
+
+.step ._img{
+  width: 90rpx;
+  height: 90rpx;
+  opacity: 0.3;
+}
+
+.step .img_line{
+  width: 90rpx;
+  height: 200rpx;
+}
+
+.step ._img_line{
+  width: 90rpx;
+  height: 200rpx;
+  opacity: 0.3;
+}
+
+.step .stepContent{
+  margin-top: 28rpx;
+  margin-left: 40rpx;
+  width: 70%
+}
+
+.step ._stepContent{
+  margin-top: 28rpx;
+  margin-left: 40rpx;
+  width: 70%;
+  opacity: 0.3;
+}

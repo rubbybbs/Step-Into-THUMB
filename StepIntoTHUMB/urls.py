@@ -103,6 +103,8 @@ urlpatterns = [
 
     url(r'^Step-Into-THUMB/candidate/register$', views.RegisterView.as_view()),
     # POST 参数：code  返回 {"3rdsession":  }
+    url(r'^Step-Into-THUMB/candidate/register-test$', views.RegisterTestView.as_view()),
+    # POST 参数：session   [wx_id]-[...]
     url(r'^Step-Into-THUMB/candidate/get-empty-form$', views.RegisterView.as_view()),
     # GET
     url(r'^Step-Into-THUMB/candidate/submit-application$', views.ApplyView.as_view()),
