@@ -48,22 +48,10 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
+    console.log('navigateto status')
     let _this = this
-    wx.checkSession({
-      success: function () {
-        console.log("success")
-        app.globalData.flag = true;
-      },
-      fail: function () {
-        app.globalData.flag = false;
-      }
-    })
-    if (!app.globalData.flag) {
-      wx.navigateTo({
-        url: '../login/login',
-      })
-    }
     let session = wx.getStorageSync('key')
+    console.log('session=', session)
     if (session) {
       wx.request({
         url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-status?session=' + session,

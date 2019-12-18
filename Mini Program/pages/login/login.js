@@ -13,14 +13,19 @@ Page({
    * 页面的初始数据
    */
   data: {
-
+    next: 'index'
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    
+    console.log(options)
+    this.data.next = options.next
+    console.log('login next', this.data.next)
+    if (!this.data.next) {
+      this.data.next = 'index';
+    }
   },
 
   /**
@@ -34,10 +39,30 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-    console.log("login")
-    if (app.globalData.flag == true) {
-      wx.navigateBack();
-    }
+    console.log("navigateto login")
+    app.globalData.flag = false;
+    /*wx.checkSession({
+      success: function () {
+        console.log("login success")
+        wx.request({
+          url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/register',
+          method: 'POST',
+          data: {
+            code: res.code
+          },
+          success: function (res) {
+            wx.setStorageSync('key', res.data.session)
+            app.globalData.flag = true;
+          }
+        })
+        app.globalData.flag = true;
+      },
+      fail: function () {
+        console.log("login fail")
+        app.globalData.flag = false;
+      }
+    })*/
+    console.log('../' + this.data.next + '/' + this.data.next)
   },
 
   /**
@@ -83,9 +108,11 @@ Page({
         url: '../index/index',
       })
     }*/
+    let _this = this;
     wx.login({
       success: function(res) {
         if (res.code) {
+          wx.setStorageSync('code', res.code)
           wx.request({
             url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/register',
             method: 'POST',
@@ -102,10 +129,12 @@ Page({
                   duration: 500
                 });
                 wx.setStorageSync('key', res.data.session)
-                console.log("set true")
+                console.log("set true", '../' + _this.data.next + '/' + _this.data.next)
                 app.globalData.flag = true;
                 setTimeout(function () {
-                  wx.navigateBack();
+                  wx.redirectTo({
+                    url: '../' + _this.data.next + '/' + _this.data.next
+                  })
                 }, 500)
               }
               else {
