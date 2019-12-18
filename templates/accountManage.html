@@ -209,7 +209,6 @@
                     layer.close(index);
                     var LocalData=layui.data('LocalData');
                     var Sdata = form.val('FormDesign');
-                    alert(JSON.stringify(Fdata));
 
                     $.ajax({
                       url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-examiner?username='+Fdata.username+'&password='+Fdata.password,
