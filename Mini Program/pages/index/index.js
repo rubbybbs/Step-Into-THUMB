@@ -15,7 +15,10 @@ Page({
     hasUserInfo: false,
     attentionAnim: '',
     pageNumber: 0,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
+    pageNum: 4,
+    canIUse: wx.canIUse('button.open-type.getUserInfo'),
+    touchS: [0,0],
+    touchE: [0,0]
   },
   //事件处理函数
   bindViewTap: function() {
@@ -143,8 +146,37 @@ Page({
   },
   bindArrow: function () {
     let cur = this.data.pageNumber + 1;
+    if (cur >= this.data.pageNum) cur = this.data.pageNum - 1;
     this.setData({
       pageNumber: cur
     })
-  }
+  },
+  catchTouchMove: function (res) {
+    return false;
+  },
+  touchStart(e) {
+    console.log(e)
+    this.data.touchS = [e.changedTouches[0].pageX, e.changedTouches[0].pageY]
+  },
+  touchEnd(e) {
+    console.log(e)
+    this.data.touchE = [e.changedTouches[0].pageX, e.changedTouches[0].pageY]
+    if (this.data.touchE[1]-this.data.touchS[1] < -100) {
+      //next page
+      let cur = this.data.pageNumber + 1;
+      if (cur >= this.data.pageNum) cur = this.data.pageNum - 1;
+      this.setData({
+        pageNumber: cur
+      })
+    }
+    else if (this.data.touchE[1] - this.data.touchS[1] > 100) {
+      //last page
+      let cur = this.data.pageNumber - 1;
+      if (cur <= 0) cur = 0;
+      this.setData({
+        pageNumber: cur
+      })
+    }
+  },
+
 })
