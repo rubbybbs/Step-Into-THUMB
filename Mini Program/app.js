@@ -36,6 +36,6 @@ App({
   globalData: { //用户信息
     userInfo: null,
     flag: false,
-    serveraddr: 'http://154.8.172.135:3389'
+    serveraddr: 'http://127.0.0.1:8000'
   }
 })

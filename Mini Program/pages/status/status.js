@@ -63,6 +63,7 @@ Page({
         },
         success: function (res) {
           console.log(res);
+          console.log(res.data.status)
           _this.setData({
             activeNum: res.data.stage
           })
