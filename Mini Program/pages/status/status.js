@@ -7,7 +7,9 @@ Page({
    * 页面的初始数据
    */
   data: {
-    status: ''
+    status: '',
+    activeNum: 0,
+    steps: [{ 'stepName': '报名表填写', 'stepCont': '请填写报名表' }, { 'stepName': '面试中', 'stepCont': '' }, { 'stepName': '面试结束', 'stepCont': '' }, { 'stepName': '面试结果', 'stepCont': ''}]
   },
 
   /**
@@ -61,6 +63,16 @@ Page({
         },
         success: function (res) {
           console.log(res);
+          _this.setData({
+            activeNum: res.data.stage
+          })
+          let newsteps = _this.data.steps;
+          for (let i=0; i<=_this.data.activeNum; i++) {
+            newsteps[i].stepCont = res.data.status[i]
+          }
+          _this.setData({
+            steps: newsteps
+          })
           _this.setData({
             status: res.data.status
           })

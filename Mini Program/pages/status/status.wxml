@@ -1,3 +1,14 @@
 <!--pages/status/status.wxml-->
-<text>{{status}}</text>
-<text>here</text>
+
+<view class="steps">
+      <block wx:for="{{steps}}" wx:for-index="index" wx:for-item="item">
+        <view class="step">
+          <image class="{{(index+1)<=activeNum?'img':'_img'}}" src="../../images/{{(index+1)<=activeNum?'':''}}icon{{(index+1)}}.png"></image>
+          <view class="{{(index+1)<=activeNum?'stepText':'_stepText'}}">{{item.stepName}}</view>
+        </view>
+        <view class="step">
+          <image wx-if="{{(index+1)!=steps.length}}" class="{{(index+1)<=activeNum?'img_line':'_img_line'}}" src="../../images/{{(index+1)<=activeNum?'line.png':'line.png'}}"></image>
+          <view class="{{(index+1)<=activeNum?'stepContent':'_stepContent'}}">{{item.stepCont}}</view>
+        </view>
+      </block>
+</view>

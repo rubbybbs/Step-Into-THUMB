@@ -15,7 +15,7 @@ Page({
     hasUserInfo: false,
     attentionAnim: '',
     pageNumber: 0,
-    pageNum: 4,
+    pageNum: 2,
     canIUse: wx.canIUse('button.open-type.getUserInfo'),
     touchS: [0,0],
     touchE: [0,0]
