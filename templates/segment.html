@@ -123,7 +123,6 @@
 
       layer.ready(function(){
         var LocalData=layui.data('LocalData');
-        layer.msg('初始化列表'+LocalData.ActID.toString());
 
         $.ajax({
             url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
