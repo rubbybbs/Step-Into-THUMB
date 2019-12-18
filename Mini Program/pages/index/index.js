@@ -155,11 +155,11 @@ Page({
     return false;
   },
   touchStart(e) {
-    console.log(e)
+    //console.log(e)
     this.data.touchS = [e.changedTouches[0].pageX, e.changedTouches[0].pageY]
   },
   touchEnd(e) {
-    console.log(e)
+    //console.log(e)
     this.data.touchE = [e.changedTouches[0].pageX, e.changedTouches[0].pageY]
     if (this.data.touchE[1]-this.data.touchS[1] < -100) {
       //next page
