@@ -25,52 +25,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    let _this = this
-    let session = wx.getStorageSync('key')
-    wx.request({
-      url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-empty-form?session=' + session, 
-      header: {
-        'content-type': 'application/json'
-      },
-      success: function (res) {
-        console.log(res);
-        let Form = JSON.parse(res.data["form"]);
-        console.log(Form['question']);
-        let gen = [];
-        for (let x in Form['question']) {
-          console.log(Form['question'][x])
-          let ques = Form['question'][x];
-          if (ques.type=="Choice") {
-            ques["changeFunc"] = "bindChange" + x;
-            ques["ChoiceIndex"] = 0;
-            ques["ChoicesArray"] = [];
-            for (let item in ques.Choices) {
-              ques.ChoicesArray.push(ques.Choices[item].Choice);
-            }
-            console.log(ques.Choices)
-            
-            _this[ques["changeFunc"]] = function(e) {
-              
-              let tmp = this.data.questions;
-              tmp[x]["ChoiceIndex"] = e.detail.value;
-              _this.setData({
-                questions: tmp
-              })
-              
-            }
-            
-          }
-          gen.push(ques)
-        }
-        console.log("gen",gen)
-        _this.setData({
-          questions: gen
-        })
-      },
-      fail: function() {
-        console.log("failed get-empty-form")
-      }
-    })
+    
   },
 
   /**
@@ -84,20 +39,63 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-    wx.checkSession({
-      success: function () {
-        console.log("success")
-        app.globalData.flag = true;
+    console.log('nvigateto form')
+    let _this = this
+    let session = wx.getStorageSync('key')
+    wx.request({
+      url: app.globalData.serveraddr + '/Step-Into-THUMB/candidate/get-empty-form?session=' + session,
+      header: {
+        'content-type': 'application/json'
+      },
+      success: function (res) {
+        console.log(res);
+        if (!res.data["form"]) {
+          wx.showToast({
+            title: res.data.msg
+          });
+          setTimeout(function () {
+            wx.navigateBack({
+              url: '../index/index',
+            })
+          }, 500);
+        }
+        let Form = JSON.parse(res.data["form"]);
+        console.log(Form['question']);
+        let gen = [];
+        for (let x in Form['question']) {
+          console.log(Form['question'][x])
+          let ques = Form['question'][x];
+          if (ques.type == "Choice") {
+            ques["changeFunc"] = "bindChange" + x;
+            ques["ChoiceIndex"] = 0;
+            ques["ChoicesArray"] = [];
+            for (let item in ques.Choices) {
+              ques.ChoicesArray.push(ques.Choices[item].Choice);
+            }
+            console.log(ques.Choices)
+
+            _this[ques["changeFunc"]] = function (e) {
+
+              let tmp = this.data.questions;
+              tmp[x]["ChoiceIndex"] = e.detail.value;
+              _this.setData({
+                questions: tmp
+              })
+
+            }
+
+          }
+          gen.push(ques)
+        }
+        console.log("gen", gen)
+        _this.setData({
+          questions: gen
+        })
       },
       fail: function () {
-        app.globalData.flag = false;
+        console.log("failed get-empty-form")
       }
     })
-    if (!app.globalData.flag) {
-      wx.navigateTo({
-        url: '../login/login',
-      })
-    }
   },
 
   /**

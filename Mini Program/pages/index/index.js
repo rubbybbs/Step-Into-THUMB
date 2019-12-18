@@ -36,14 +36,69 @@ Page({
         console.log('fail', res.errMsg)
       }
     });*/
-    wx.navigateTo({
-      url: '../form/form',
-    })
+    let code = wx.getStorageSync('code')
+    if (!code) {
+      console.log("form check session fail")
+      app.globalData.flag = false;
+      console.log('false', app.globalData.flag)
+      wx.navigateTo({
+        url: '../login/login?next=' + 'form',
+      });
+    }
+    else {
+      wx.checkSession({
+        success: function () {
+          console.log("form check session success")
+          
+              app.globalData.flag = true;
+              wx.navigateTo({
+                url: '../form/form',
+              })
+
+        },
+        fail: function () {
+          console.log("form login fail")
+          app.globalData.flag = false;
+          console.log('false', app.globalData.flag)
+          wx.navigateTo({
+            url: '../login/login?next=' + 'form',
+          });
+        }
+      })
+    }
   },
   bindStatus: function() {
-    wx.navigateTo({
-      url: '../status/status',
-    })
+    let code = wx.getStorageSync('code')
+    if (!code) {
+      console.log("status check session fail")
+      app.globalData.flag = false;
+      console.log('false', app.globalData.flag)
+      wx.navigateTo({
+        url: '../login/login?next=' + 'status',
+      });
+    }
+    else {
+      wx.checkSession({
+        success: function () {
+          console.log("status check session success")
+          console.log('session=', code)
+          
+              app.globalData.flag = true;
+              wx.navigateTo({
+                url: '../status/status',
+              })
+
+        },
+        fail: function () {
+          console.log("status check session fail")
+          app.globalData.flag = false;
+          console.log('false', app.globalData.flag)
+          wx.navigateTo({
+            url: '../login/login?next=' + 'status',
+          });
+        }
+      })
+    }
   },
   onReady: function() {
     var attentionAnim = wx.createAnimation({
@@ -155,11 +210,11 @@ Page({
     return false;
   },
   touchStart(e) {
-    console.log(e)
+    //console.log(e)
     this.data.touchS = [e.changedTouches[0].pageX, e.changedTouches[0].pageY]
   },
   touchEnd(e) {
-    console.log(e)
+    //console.log(e)
     this.data.touchE = [e.changedTouches[0].pageX, e.changedTouches[0].pageY]
     if (this.data.touchE[1]-this.data.touchS[1] < -100) {
       //next page
