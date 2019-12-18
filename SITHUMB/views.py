@@ -378,19 +378,19 @@ class SendMessageView(APIView):
                     "value":"军乐队面试结果通知"
                 },
                 "thing2":{
-                    "value":"请点击名片查看面试结果"
+                    "value":"请进入微信小程序查看面试结果"
                 },
                 "date3":{
                     "value":time.strftime("%d/%m/%Y")
                 },
                 "thing4":{
-                    "value":"请点击名片查看面试结果"
+                    "value":"请进入微信小程序查看面试结果"
                 }
             }
         }
         applications = Application.objects.filter(activity=activity)
         for a in applications:
-            a.stage = 2
+            a.stage = 3
             data["touser"] = a.candidate.wx_id
             # if a.admitted:
             #     data["data"]["character_string01"] = "通过"
@@ -453,6 +453,16 @@ class RegisterView(APIView):
             return Response({"form": cur_activity.application_format})
         else:
             return Response({"status":400, "msg":"您已经报名。"})
+
+class RegisterTestView(APIView):
+    def post(self, request):
+        session = request.GET.get("session")
+        openID = session.split("-")[0]
+        candidates = Candidate.objects.filter(wx_id=openID)
+        if len(candidates) == 0:
+            # 创建考生对象
+            Candidate.objects.create(wx_id=openID)
+        return Response({"status": 100})
 
 
 class ApplyView(APIView):
@@ -697,6 +707,15 @@ class TranscriptView(APIView):
                         if json_obj not in s["candidates"]:
                             s["candidates"].append(json_obj)
                 break
+
+        end = True
+        for sec in transcript:
+            if sec["passed"] == "undecided":
+                end = False
+                break
+        if end:
+            application.stage = 2
+
         application.transcript = '{"sections": ' + str(transcript).replace('\'', '\"') + '}'
         application.save()
         # 维护各个环节的通过/不通过字段

@@ -1,3 +1,2 @@
 <!--pages/status/status.wxml-->
 <text>{{status}}</text>
-<text>here</text>
