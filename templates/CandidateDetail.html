@@ -22,7 +22,7 @@
       <div style="padding: 20px; background-color: #F2F2F2;">
           <form class="layui-form" action="" lay-filter="SegmentList" id="isPass"> {%  csrf_token %}
             <div style="display:none;">
-                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm" id="FinishScore">提交</button>
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submitForm" id="FinishScoreX">提交</button>
             </div>
           </form>
             <div class="layui-row layui-col-space15">
@@ -49,13 +49,14 @@
   <script src="{% static "layui/layui.js" %}"></script>
   <script>
     var scoreForm = new Object();
-    layui.use(['form', 'layedit', 'laydate', 'jquery','element', 'layer'], function () {
+    layui.use(['form', 'layedit', 'laydate', 'jquery','element', 'upload', 'layer'], function () {
       var form = layui.form,
         layer = layui.layer,
         $ = layui.jquery,
         layedit = layui.layedit,
         laydate = layui.laydate,
-        element = layui.element;;
+        element = layui.element,
+        upload = layui.upload;
 
       layer.ready(function(){
         var LocalData=layui.data('LocalData');
@@ -82,6 +83,14 @@
                                 <input type="text" autocomplete="on" value="' + value.answer + '" class="layui-input" readonly="true"> \
                                 </div> \
                             </div>';
+                        else if (value.PictureURL)
+                            htmls+=
+                                '<div class="layui-form-item"> \
+                                    <label class="layui-form-label">' + value.name + '</label> \
+                                    <div class="layui-inline"> \
+                                        <img width="160" height="120" src="' + value.PictureURL + '"> \
+                                    </div> \
+                                </div>';
                         else
                           htmls+=
                             '<div class="layui-form-item"> \
@@ -98,14 +107,15 @@
                             });
                     form.render();
                 var str = data.transcript;
+                var PicArray = [];
                 obj=JSON.parse(str);
                     obj.sections.map(function(value){
                         if (value.sectionID == currentSegment){
-                            console.log(value);
+
                             scoreForm = value.question;
                             htmls = '<form  class="layui-form" action="" lay-filter="FormSubmit">';
                             value.question.map(function(value){
-                                if (value.type=='Blank'){
+                                        if (value.type=='Blank'){
                                             if (value.answer){
                                                 htmls+=
                                                 '<div class="layui-form-item"> \
@@ -148,6 +158,24 @@
                                                   </div>\
                                                 </div>';
                                               htmls+=modestr;
+                                        } else if (value.type == 'Picture') {
+                                            htmls +=
+                                                '<div class="layui-form-item"> \
+                                                    <div class="layui-inline">\
+                                                        <label class="layui-form-label">' + value.name + '</label> \
+                                                        <div class="layui-inline" id="' + value.name + 'Add"> \
+                                                            <button type="button" class="layui-btn" name="uploadPicture" id="' + value.name + 'Up">\
+                                                              <i class="layui-icon">&#xe67c;</i>上传图片\
+                                                            </button>\
+                                                            <button type="button" class="layui-btn layui-btn-primary" name="deletePicture" id="' + value.name + 'Del">\
+                                                              删除已上传图片\
+                                                            </button>\
+                                                            <div class="layui-inline" name="' + value.name + '"> \
+                                                            </div>\
+                                                        </div> \
+                                                    </div>\
+                                                </div>';
+                                            PicArray.push(value.name);
                                         }
                             });
                             htmls+=
@@ -197,6 +225,30 @@
                     });
                     element.tabChange('activitySegment', currentSegment.toString());
                     form.render();
+                    var Fdata = form.val('SegmentList');
+                    PicArray.map(function(value){
+                        var Sname = value;
+                        upload.render({
+                          elem: "#" + Sname + "Up"//绑定元素
+                          ,url: 'Step-Into-THUMB/examiner/transcript/photo?Uname=' + LocalData.username + '&token=' + LocalData.token //上传接口
+                          ,headers: {
+                            'X-CSRFToken': Fdata.csrfmiddlewaretoken
+                          }
+                          ,done: function(res){
+                              scoreForm.map(function(value){
+                                  if (value['name']==Sname) value['PictureURL'] = res.url;
+                              });
+                              $('#' + Sname + 'Add').append(
+                                '<a> <img  width="160" height="120" src="' + res.url + '"></a>');
+
+                              layer.msg("上传成功！");
+                          }
+                          ,error: function(){
+                              layer.msg("上传失败请重试！");
+                          }
+                      });
+                    });
+
 
                 if (currentSegment==-2){
                     var Commentcontent="";
@@ -305,8 +357,18 @@
           });
           return false;
       });
-    });
 
+      $("#toAddAddition").on("click", "[name='uploadPicture']",function(){
+          var str = this.id;
+          var LocalData=layui.data('LocalData');
+          var Sname = str.substring(0, str.length - 2);
+
+      });
+
+      $("#toAddAddition").on("click", "[name='deletePicture']",function(){
+
+      });
+    });
   </script>
 </body>
 

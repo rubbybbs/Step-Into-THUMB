@@ -301,7 +301,7 @@
         var Fdata = form.val('ActivityList');
 
         $.ajax({
-              url: 'Step-Into-THUMB/admin/start-activity?activityID=' + parseInt(id[1]),
+              url: 'Step-Into-THUMB/admin/start-activity?activityID=' + id[1]+'&token=' + layui.data('LocalData').token+'&Uname=' + layui.data('LocalData').username,
               type: 'get',
               contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',
@@ -331,7 +331,7 @@
         var Fdata = form.val('ActivityList');
 
         $.ajax({
-              url: 'Step-Into-THUMB/admin/stop-activity?activityID=' + parseInt(id[1]),
+              url: 'Step-Into-THUMB/admin/stop-activity?activityID=' + id[1] +'&token=' + layui.data('LocalData').token+'&Uname=' + layui.data('LocalData').username,
               type: 'post',
               contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',

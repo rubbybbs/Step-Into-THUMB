@@ -171,6 +171,19 @@
                                                 </div>';
                                         htmls += modestr;
                                         //alert(modestr);
+                                    } else if (value.type == 'Picture') {
+                                        htmls +=
+                                            '<div class="layui-form-item"> \
+                                                    <label class="layui-form-label">' + value.name + '</label> \
+                                                    <div class="layui-inline" > \
+                                                        <button type="button" class="layui-btn">\
+                                                          <i class="layui-icon">&#xe67c;</i>上传图片\
+                                                        </button>\
+                                                        <button type="button" class="layui-btn layui-btn-primary">\
+                                                          删除已上传图片\
+                                                        </button>\
+                                                    </div> \
+                                                </div>';
                                     }
                                 });
                                 var compulsoryAppend = "";
@@ -242,6 +255,27 @@
                                                 </div>';
                                         htmls+=modestr;
                                         //alert(modestr);
+                                    } else if (value.type == 'Picture') {
+                                        Quz.push({
+                                            name: value.name,
+                                            type: "Picture",
+                                            PictureURL: ""
+                                        });
+                                        htmls +=
+                                            '<div class="layui-form-item"> \
+                                                    <label class="layui-form-label">' + value.name + '</label> \
+                                                    <div class="layui-inline" > \
+                                                        <button type="button" class="layui-btn">\
+                                                          <i class="layui-icon">&#xe67c;</i>上传图片\
+                                                        </button>\
+                                                        <button type="button" class="layui-btn layui-btn-primary">\
+                                                          删除已上传图片\
+                                                        </button>\
+                                                    </div> \
+                                                    <div class="layui-inline" > \
+                                                        <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
+                                                    </div>\
+                                                </div>';
                                     }
                                 });
                                 var compulsoryAppend="";
@@ -339,6 +373,7 @@
                     <select name="LineType" lay-filter="LineType"> \
                       <option value="0">填空</option>\
                       <option value="1">选择</option>\
+                      <option value="2">图片</option>\
                     </select> \
                   </div> \
                 </div>\
@@ -402,6 +437,39 @@
                             modestr += '<option value="' + index.toString() + '">' + value + '</option>';
                           });               
                           modestr += '</select> \
+                    </div> \
+                  </div>\
+                  <div class="layui-inline" > \
+                    <button type="button" class="layui-btn" name="DeleteLine">删除</button>\
+                  </div>\
+                </div>';
+              $(".layui-show").append(modestr);
+              //alert(modestr);
+              form.render();
+            } else if (Fdata.LineType == "2"){
+
+              var Findex = -1;
+              Segments.map(function (value, index) {
+                  if (value["sectionID"] == currentSegmentNum) Findex = index;
+              });
+              if (Findex != -1) {
+                  Segments[Findex]["question"].push({
+                      name: Fdata.Info,
+                      type: "Picture",
+                      PictureURL: ""
+                  });
+              }
+              var modestr =
+                '<div class="layui-form-item"> \
+                  <div class="layui-inline">\
+                    <label class="layui-form-label">' + Fdata.Info + '</label> \
+                    <div class="layui-inline" > \
+                        <button type="button" class="layui-btn">\
+                          <i class="layui-icon">&#xe67c;</i>上传图片\
+                        </button>\
+                        <button type="button" class="layui-btn layui-btn-primary">\
+                          删除已上传图片\
+                        </button>\
                     </div> \
                   </div>\
                   <div class="layui-inline" > \
