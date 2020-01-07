@@ -163,14 +163,14 @@
                                                 '<div class="layui-form-item"> \
                                                     <div class="layui-inline">\
                                                         <label class="layui-form-label">' + value.name + '</label> \
-                                                        <div class="layui-inline" id="' + value.name + 'Add"> \
+                                                        <div class="layui-inline" > \
                                                             <button type="button" class="layui-btn" name="uploadPicture" id="' + value.name + 'Up">\
                                                               <i class="layui-icon">&#xe67c;</i>上传图片\
                                                             </button>\
                                                             <button type="button" class="layui-btn layui-btn-primary" name="deletePicture" id="' + value.name + 'Del">\
                                                               删除已上传图片\
                                                             </button>\
-                                                            <div class="layui-inline" name="' + value.name + '"> \
+                                                            <div class="layui-inline" id="' + value.name + 'Add"> \
                                                             </div>\
                                                         </div> \
                                                     </div>\
@@ -206,6 +206,14 @@
                                         <input type="text" autocomplete="on" value="' + value.answer + '" class="layui-input" readonly="true"> \
                                         </div> \
                                     </div>';
+                                else if (value.PictureURL)
+                                    htmls+=
+                                        '<div class="layui-form-item"> \
+                                            <label class="layui-form-label">' + value.name + '</label> \
+                                            <div class="layui-inline"> \
+                                                <img width="160" height="120" src="' + value.PictureURL + '"> \
+                                            </div> \
+                                        </div>';
                                 else
                                   htmls+=
                                     '<div class="layui-form-item"> \
@@ -358,15 +366,12 @@
           return false;
       });
 
-      $("#toAddAddition").on("click", "[name='uploadPicture']",function(){
+      $("#toAddAddition").on("click", "[name='deletePicture']",function(){
           var str = this.id;
           var LocalData=layui.data('LocalData');
-          var Sname = str.substring(0, str.length - 2);
+          var Sname = str.substring(0, str.length - 3);
 
-      });
-
-      $("#toAddAddition").on("click", "[name='deletePicture']",function(){
-
+          $("#"+Sname+"Add").empty();
       });
     });
   </script>
