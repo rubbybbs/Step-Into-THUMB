@@ -14,6 +14,7 @@ from SITHUMB.authentication_module import TokenAuth2
 import requests
 import json
 import time
+from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 
 appID = "wxc9568dc74b390136"
@@ -22,7 +23,7 @@ appSecret = "1bdc626b0ea48761d84e4b1762c59641"
 
 def get_cur_activity():
     try:
-        cur_activity = Activity.objects.get(id=3)
+        cur_activity = Activity.objects.get(status=1)
     except Exception:
         try:
             cur_activity = Activity.objects.get(status=2)
@@ -294,12 +295,15 @@ class TranscriptFormView(APIView):
 
 class TranscriptPhotoView(APIView):
     def post(self, request):
-        img = request.FILES.get('file')
+        img = request.FILES.get('file', None)
         if not img:
             return Response({"status": 400})
-        photo = Photo(photo=img)
-        photo.save()
-        return Response({"status": 100, "url": photo.photo.url})
+        fname = time.strftime('%Y%m%d', time.localtime(1530170000)) + img.name
+        furl = '%s/%s' % (settings.MEDIA_ROOT, fname)
+        with open(furl, 'wb') as pic:
+            for c in img.chunks():
+                pic.write(c)
+        return Response({"status": 100, "url": '/media/' + fname})
 
 
 class AdmissionView(APIView):

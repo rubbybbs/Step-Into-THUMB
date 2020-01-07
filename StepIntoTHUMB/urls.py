@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf.urls import url
-from django.urls import path, include
+from django.urls import path
 from SITHUMB import views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -97,11 +97,9 @@ urlpatterns = [
     url(r'^Step-Into-THUMB/examiner/get-history-candidate-list$', views.HistoryCandidateListExaminerView.as_view()),
     url(r'^Step-Into-THUMB/examiner/transcript$', views.TranscriptView.as_view()),
     url(r'^Step-Into-THUMB/examiner/transcript/photo$', views.TranscriptPhotoView.as_view()),
-    
+
     # get  {"sections":[{"sectionID":.., "question":[{"name":,"type":,"answer":},...]}]}
     # post 参数：s_id:, eligible：0(不通过)/1(通过), username  正文：{}
-
-
 
     url(r'^Step-Into-THUMB/candidate/register$', views.RegisterView.as_view()),
     # POST 参数：code  返回 {"3rdsession":  }
@@ -113,9 +111,4 @@ urlpatterns = [
     # POST 参数:session  正文：报名表json 每个问题项相较空表加一个"answer"的字段
     url(r'^Step-Into-THUMB/candidate/get-status$', views.StatusView.as_view()),
     # GET 参数：session
-
-    url(r'^files/', include('filer.urls')),
-
-]
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEIDA_ROOT)
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

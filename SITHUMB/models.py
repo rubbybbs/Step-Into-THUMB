@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from filer.fields.image import FilerImageField
 
 
 class Activity(models.Model):
@@ -30,10 +29,6 @@ class Application(models.Model):
     stage = models.IntegerField(default=1)
     application_form = models.TextField(default="")
     transcript = models.TextField(default="")
-
-
-class Photo(models.Model):
-    image = FilerImageField(null=True, on_delete=models.CASCADE)
 
 
 class Section(models.Model):
