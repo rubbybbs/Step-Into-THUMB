@@ -125,7 +125,7 @@
         var LocalData=layui.data('LocalData');
 
         $.ajax({
-            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
+            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
@@ -135,7 +135,7 @@
 
                     data.sections.map(function (value) {
                         $.ajax({
-                            url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/section/' + value.sectionID + '/get-transcript-form',
+                            url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/section/' + value.sectionID + '/get-transcript-form'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
                             type: 'get',
                             contentType: 'application/x-www-form-urlencoded',
                             dataType: 'json',
@@ -193,7 +193,7 @@
                     $("#checkToEdit").css("visibility","visible");
                     data.sections.map(function(value){
                         $.ajax({
-                            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ value.sectionID +'/get-transcript-form',
+                            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ value.sectionID +'/get-transcript-form'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
                             type: 'get',
                             contentType: 'application/x-www-form-urlencoded',
                             dataType: 'json',
@@ -255,13 +255,19 @@
                                 });
                                 element.tabChange('activitySegment', value.sectionID.toString());
                                 Segments.push({'sectionID': value.sectionID, 'question': Quz});
-                            }
+                            },
+                              error: function(http){
+                                  if (http.status==403) location.assign("index.html");
+                              }
                         });
 
                     });
                 }
                 form.render();
-            }
+            },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
+              }
         });
 
 
@@ -278,7 +284,7 @@
         });
         if (Findex != -1) {
             $.ajax({
-                url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/section/' + currentSegmentNum + '/save-transcript-form',
+                url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/section/' + currentSegmentNum + '/save-transcript-form'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
                 type: 'post',
                 contentType: 'application/json',
                 dataType: 'json',
@@ -293,7 +299,10 @@
                         layer.msg('保存失败请重试');
                     }
 
-                }
+                },
+                  error: function(http){
+                      if (http.status==403) location.assign("index.html");
+                  }
             });
         } else {
             layer.msg('保存失败请重试');
@@ -465,7 +474,7 @@
             var LocalData=layui.data('LocalData');
             layer.close(index);
             $.ajax({
-              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-section?name='+ Sdata.name +'&compulsory=' + Sdata.compulsory,
+              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-section?name='+ Sdata.name +'&compulsory=' + Sdata.compulsory+'&token=' + LocalData.token+'&Uname=' + LocalData.username,
               type: 'post',
               contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',
@@ -479,6 +488,9 @@
                 } else {
                   layer.msg('环节创建失败，请重试！');
                 }
+              },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
               }
             });
           },
@@ -493,7 +505,7 @@
         var LocalData=layui.data('LocalData');
 
         $.ajax({
-              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ uid +'/delete-section',
+              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section/'+ uid +'/delete-section'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
               type: 'delete',
               contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',
@@ -507,6 +519,9 @@
                 } else {
                   layer.msg('删除失败，请重试！');
                 }
+              },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
               }
             });
 
