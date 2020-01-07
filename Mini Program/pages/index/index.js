@@ -15,7 +15,7 @@ Page({
     hasUserInfo: false,
     attentionAnim: '',
     pageNumber: 0,
-    pageNum: 2,
+    pageNum: 3,
     canIUse: wx.canIUse('button.open-type.getUserInfo'),
     touchS: [0,0],
     touchE: [0,0]
@@ -27,17 +27,9 @@ Page({
     })
   },
   bindFillForm: function() {
-    /*wx.requestSubscribeMessage({
-      tmplIds: ['AdymfH-LXIsQlfV8VKJ7fnq5gAJjdayvD4Zo_58PfYw',],
-      success: function (res) {
-        console.log('success', res['AdymfH-LXIsQlfV8VKJ7fnq5gAJjdayvD4Zo_58PfYw'])
-      },
-      fail: function (res) {
-        console.log('fail', res.errMsg)
-      }
-    });*/
     let code = wx.getStorageSync('code')
     if (!code) {
+    //if (true) {
       console.log("form check session fail")
       app.globalData.flag = false;
       console.log('false', app.globalData.flag)
@@ -70,6 +62,7 @@ Page({
   bindStatus: function() {
     let code = wx.getStorageSync('code')
     if (!code) {
+    //if (true) {
       console.log("status check session fail")
       app.globalData.flag = false;
       console.log('false', app.globalData.flag)

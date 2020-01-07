@@ -91,9 +91,28 @@ Page({
         _this.setData({
           questions: gen
         })
+        //请求允许发送服务通知
+        wx.requestSubscribeMessage({
+          tmplIds: ['AdymfH-LXIsQlfV8VKJ7fnq5gAJjdayvD4Zo_58PfYw',],
+          success: function (res) {
+            console.log('success', res['AdymfH-LXIsQlfV8VKJ7fnq5gAJjdayvD4Zo_58PfYw'])
+          },
+          fail: function (res) {
+            console.log('fail', res.errMsg)
+          }
+        });
       },
       fail: function () {
         console.log("failed get-empty-form")
+        wx.showToast({
+          icon: "none",
+          title: "当前无法报名"
+        });
+        setTimeout(function () {
+          wx.navigateBack({
+            url: '../index/index',
+          })
+        }, 500);
       }
     })
   },

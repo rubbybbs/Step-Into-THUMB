@@ -44,7 +44,14 @@
 }
 
 .pageTwo {
-  background-image: url('https://i.postimg.cc/GmNzqjvx/bg0s.jpg'); 
+  background-image: url('https://i.postimg.cc/2jZtgq36/07c4fa76cd61932877837284a59d589.jpg'); 
+  background-size: cover;
+  width: 100%; 
+  height: 100%;
+}
+
+.page3 {
+  background-image: url('https://i.postimg.cc/BbjJGJL3/7d7a099ec39b73cece77eb825abff61.jpg'); 
   background-size: cover;
   width: 100%; 
   height: 100%;

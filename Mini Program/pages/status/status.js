@@ -69,7 +69,12 @@ Page({
           })
           let newsteps = _this.data.steps;
           for (let i=0; i<=_this.data.activeNum; i++) {
-            newsteps[i].stepCont = res.data.status[i]
+            if (i<=2) {
+              newsteps[i].stepCont = res.data.status[i];
+            }
+            else {
+              newsteps[i].stepCont = res.data.content;
+            }
           }
           _this.setData({
             steps: newsteps
@@ -77,6 +82,9 @@ Page({
           _this.setData({
             status: res.data.status
           })
+        },
+        fail: function (res) {
+          console.log('get status fail')
         }
       })
     }

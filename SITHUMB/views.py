@@ -22,7 +22,7 @@ appSecret = "1bdc626b0ea48761d84e4b1762c59641"
 
 def get_cur_activity():
     try:
-        cur_activity = Activity.objects.get(status=1)
+        cur_activity = Activity.objects.get(id=3)
     except Exception:
         return -1, None
     return cur_activity.id, cur_activity
