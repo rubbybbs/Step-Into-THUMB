@@ -71,7 +71,7 @@
         layer.msg('初始化列表');
         var Fdata = form.val('ActivityList');
         $.ajax({
-              url: '/Step-Into-THUMB/admin/activity-list',
+              url: '/Step-Into-THUMB/admin/activity-list'+'?token=' + layui.data('LocalData').token+'&Uname=' + layui.data('LocalData').username,
               type: 'get',
               contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',
@@ -163,6 +163,9 @@
                 } else {
                   layer.msg('表单保存失败，请重试！');
                 }
+              },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
               }
             });
       });
@@ -211,7 +214,7 @@
 
             $.ajax({
               url: '/Step-Into-THUMB/admin/create-activity?name=' + Fdata.name + '&from=' + Fdata
-                .from + '&to=' + Fdata.to,
+                .from + '&to=' + Fdata.to+'&token=' + layui.data('LocalData').token + '&Uname=' + layui.data('LocalData').username,
               type: 'post',
               contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',
@@ -225,6 +228,9 @@
                 } else {
                   layer.msg('表单保存失败，请重试！');
                 }
+              },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
               }
             });
 
@@ -253,7 +259,7 @@
         var Fdata = form.val('ActivityList');
 
         $.ajax({
-              url: 'Step-Into-THUMB/admin/delete-activity?activityID=' + parseInt(id[1]),
+              url: 'Step-Into-THUMB/admin/delete-activity?activityID=' + id[1] +'&token=' + layui.data('LocalData').token+'&Uname=' + layui.data('LocalData').username,
               type: 'delete',
               contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',
@@ -267,6 +273,9 @@
                 } else {
                   layer.msg('删除失败，请重试！');
                 }
+              },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
               }
             });
 
@@ -307,6 +316,9 @@
                 } else {
                   layer.msg('发布失败，请重试！');
                 }
+              },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
               }
             });
 
@@ -334,6 +346,9 @@
                 } else {
                   layer.msg('操作失败，请重试！');
                 }
+              },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
               }
             });
 

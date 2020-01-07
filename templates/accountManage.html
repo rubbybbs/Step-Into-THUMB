@@ -61,7 +61,7 @@
                       </div>
 
                       <!--  展示区  -->
-                      <table class="layui-table" lay-data="{height: 800, url:'Step-Into-THUMB/admin/activity/' + layui.data('LocalData').ActID + '/examiner-list'}" lay-filter="accountTable" id="accountTable">
+                      <table class="layui-table" lay-data="{height: 800, url:'Step-Into-THUMB/admin/activity/' + layui.data('LocalData').ActID + '/examiner-list'+'?token=' + layui.data('LocalData').token + '&Uname=' + layui.data('LocalData').username}" lay-filter="accountTable" id="accountTable">
                         <thead>
                             <tr>
                               <th lay-data="{type:'numbers', width:'10%'}"></th>
@@ -136,7 +136,7 @@
         var LocalData=layui.data('LocalData');
         if (obj.event === 'del'){
             $.ajax({
-              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/delete-examiner?username='+ data.username,
+              url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/delete-examiner?username='+ data.username +'&token=' + LocalData.token+'&Uname=' + LocalData.username,
               type: 'delete',
               contentType: 'application/x-www-form-urlencoded',
               dataType: 'json',
@@ -150,6 +150,9 @@
                 } else {
                   layer.msg('删除失败，请重试！');
                 }
+              },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
               }
             });
         }
@@ -161,7 +164,7 @@
                   <label class="layui-form-label">选择环节</label> \
                   <div class="layui-input-block">';
          $.ajax({
-            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
+            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list' +'?token=' + LocalData.token+'&Uname=' + LocalData.username,
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
@@ -210,7 +213,7 @@
                     var Sdata = form.val('FormDesign');
 
                     $.ajax({
-                      url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-examiner?username='+Fdata.username+'&password='+Fdata.password,
+                      url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/create-examiner?username='+Fdata.username+'&password='+Fdata.password+'&token=' + LocalData.token+'&Uname=' + LocalData.username,
                       type: 'post',
                       contentType: 'application/json',
                       dataType: 'json',
@@ -227,12 +230,18 @@
                         } else {
                           layer.msg('表单保存失败，请重试！');
                         }
+                      },
+                      error: function(http){
+                          if (http.status==403) location.assign("index.html");
                       }
                     });
                   },
                   btn2: function (index, layero) {}
                 });
-            }
+            },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
+              }
         });
 
         return false;

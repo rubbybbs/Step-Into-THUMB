@@ -60,7 +60,7 @@
 
                             <div class="layui-tab-content" id="contentToAdd">
                                 <div class="layui-tab-item layui-show">
-                                    <table class="layui-table" lay-data="{id: 'AccountTable', url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-1', page: true}" lay-filter="accountTable" id="accountTable">
+                                    <table class="layui-table" lay-data="{id: 'AccountTable', url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-1'+'&token=' + layui.data('LocalData').token+'&Uname=' + layui.data('LocalData').username, page: true}" lay-filter="accountTable" id="accountTable">
                                       <thead>
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
@@ -74,7 +74,7 @@
                                     </table>
                                 </div>
                                 <div class="layui-tab-item">
-                                    <table class="layui-table" lay-data="{id: 'FinalAdmitTable', url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-3', page: true}" lay-filter="FinalAdmit" id="FinalAdmit">
+                                    <table class="layui-table" lay-data="{id: 'FinalAdmitTable', url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-3'+'&token=' + layui.data('LocalData').token+'&Uname=' + layui.data('LocalData').username, page: true}" lay-filter="FinalAdmit" id="FinalAdmit">
                                       <thead>
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
@@ -88,7 +88,7 @@
                                     </table>
                                 </div>
                                 <div class="layui-tab-item">
-                                    <table class="layui-table" lay-data="{id: 'examedTable', url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-2', page: true}" lay-filter="examed" id="examed">
+                                    <table class="layui-table" lay-data="{id: 'examedTable', url:'Step-Into-THUMB/admin/activity/'+layui.data('LocalData').ActID+'/get-candidate-list?s_ID=-2'+'&token=' + layui.data('LocalData').token+'&Uname=' + layui.data('LocalData').username, page: true}" lay-filter="examed" id="examed">
                                       <thead>
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
@@ -159,7 +159,7 @@
         var LocalData=layui.data('LocalData');
 
        $.ajax({
-            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list',
+            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/section-list'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
@@ -173,7 +173,7 @@
                         });
                         table.render({
                             elem: '#section' + value.sectionID
-                            , url: 'Step-Into-THUMB/admin/activity/'+LocalData.ActID+'/get-candidate-list?s_ID='+ value.sectionID
+                            , url: 'Step-Into-THUMB/admin/activity/'+LocalData.ActID+'/get-candidate-list?s_ID='+ value.sectionID+'&token=' + LocalData.token+'&Uname=' + LocalData.username
                             , cellMinWidth: 80
                             , cols: [[
                                 {type:'numbers', width:'10%'}
@@ -188,7 +188,10 @@
                         });
                     });
                     form.render();
-            }
+            },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
+              }
         });
 
 
@@ -211,7 +214,7 @@
             window.open("CandidateDetail.html", "_blank");
         } else if (obj.event === 'refuse'){
             $.ajax({
-                url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/admission/refuse?wx_id=' + data.wxID,
+                url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/admission/refuse?wx_id=' + data.wxID+'&token=' + LocalData.token+'&Uname=' + LocalData.username,
                 type: 'post',
                 contentType: 'application/x-www-form-urlencoded',
                 dataType: 'json',
@@ -220,7 +223,10 @@
                 },
                 success: function (data) {
                     location.reload();
-                }
+                },
+                  error: function(http){
+                      if (http.status==403) location.assign("index.html");
+                  }
             });
 
         }
@@ -261,7 +267,7 @@
       $("#exportExcel").on('click', function(){
             var LocalData=layui.data('LocalData');
             $.ajax({
-                url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/get-excel-data',
+                url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/get-excel-data'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
                 type: 'get',
                 contentType: 'application/json',
                 dataType: 'json',
@@ -271,7 +277,10 @@
                     } else {
                         layer.msg('获取失败，请重试！');
                     }
-                }
+                },
+                  error: function(http){
+                      if (http.status==403) location.assign("index.html");
+                  }
             });
             return false;
       });
@@ -309,7 +318,7 @@
                   var LocalData=layui.data('LocalData');
                   layer.close(index);
                   $.ajax({
-                      url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/send_message',
+                      url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/send_message'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
                       type: 'post',
                       contentType: 'application/json',
                       dataType: 'json',
@@ -326,6 +335,9 @@
                           } else {
                               layer.msg('发送失败，请重试！');
                           }
+                      },
+                      error: function(http){
+                          if (http.status==403) location.assign("index.html");
                       }
                   });
               },
