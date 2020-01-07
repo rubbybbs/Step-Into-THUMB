@@ -24,10 +24,13 @@ def get_cur_activity():
     try:
         cur_activity = Activity.objects.get(status=1)
     except Exception:
-        return -1, None
+        try:
+            cur_activity = Activity.objects.get(status=2)
+        except Exception:
+            return -1, None
     return cur_activity.id, cur_activity
 
-
+    
 def index(request):
     return render(request, "index.html")
 
