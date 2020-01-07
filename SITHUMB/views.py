@@ -86,13 +86,13 @@ class AuthAdminLoginView(APIView):
 
 class LoginTestView(APIView):
     authentication_classes = [TokenAuth2]
-
     def get(self, request):
         response = {"status": 100, "msg": "已经登录了"}
         return Response(response)
 
 
 class ActivityListView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request):
         response = {"status": 100, "msg": None, "activities": []}
         num = Activity.objects.count()
@@ -115,6 +115,7 @@ class ActivityListView(APIView):
 
 
 class ActivityView(APIView):
+    authentication_classes = [TokenAuth2]
     def post(self, request):
         name = request.GET.get('name')
         from_date = parse_date(request.GET.get('from'))
@@ -139,6 +140,7 @@ class ActivityView(APIView):
 
 
 class ActivityStatusView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request):
         activity_id = request.GET.get("activityID")
         a = Activity.objects.get(id=activity_id)
@@ -157,6 +159,7 @@ class ActivityStatusView(APIView):
 
 
 class RegistrationFormView(APIView):
+    authentication_classes = [TokenAuth2]
     def post(self, request, id):
         application_format = str(request.data).replace('\'', '"')
 
@@ -178,6 +181,7 @@ class RegistrationFormView(APIView):
 
 
 class ExaminerListView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request, id):
         activity = Activity.objects.get(id=id)
 
@@ -202,6 +206,7 @@ class ExaminerListView(APIView):
 
 
 class ExaminerView(APIView):
+    authentication_classes = [TokenAuth2]
     def post(self, request, id):
         username = request.GET.get('username')
         password = request.GET.get('password')
@@ -235,6 +240,7 @@ class ExaminerView(APIView):
 
 
 class SectionListView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request, id):
         sections = Section.objects.filter(activity__id=id).order_by("s_id")
         activity = Activity.objects.get(id=id)
@@ -245,6 +251,7 @@ class SectionListView(APIView):
 
 
 class SectionView(APIView):
+    authentication_classes = [TokenAuth2]
     def post(self, request, id):
         name = request.GET.get('name')
         compulsory = request.GET.get("compulsory")
@@ -265,6 +272,7 @@ class SectionView(APIView):
 
 
 class TranscriptFormView(APIView):
+    authentication_classes = [TokenAuth2]
     def post(self, request, id, sectionID):
         transcript_format = str(request.data).replace('\'', '"')
         section = Section.objects.get(s_id=sectionID, activity__id=id)
@@ -282,6 +290,7 @@ class TranscriptFormView(APIView):
 
 
 class AdmissionView(APIView):
+    authentication_classes = [TokenAuth2]
     def post(self, request, id):
         wx_id = request.GET.get("wx_id")
         a = Application.objects.get(activity__id=id, candidate__wx_id=wx_id)
@@ -298,6 +307,7 @@ class AdmissionView(APIView):
 
 
 class CandidateListForAdminView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request, id):
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         s_ID = int(request.GET.get("s_ID"))
@@ -337,6 +347,7 @@ class CandidateListForAdminView(APIView):
 
 
 class CandidateDetailForAdminView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request, id):
         response = {"msg": None,  "application": None, "transcript": None}
         wxID = request.GET.get("wxID")
@@ -348,6 +359,7 @@ class CandidateDetailForAdminView(APIView):
 
 
 class CommentForCandidateView(APIView):
+    authentication_classes = [TokenAuth2]
     def post(self, request, id):
         response = {"msg": None}
         wxID = request.GET.get("wxID")
@@ -360,6 +372,7 @@ class CommentForCandidateView(APIView):
 
 
 class SendMessageView(APIView):
+    authentication_classes = [TokenAuth2]
     def post(self, request, id):
         activity = Activity.objects.get(id=id)
         activity.admission_letter = request.data["admission"]
@@ -401,6 +414,7 @@ class SendMessageView(APIView):
         return Response({"status": 100})
 
 class ExportExcelView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request, id):
         activity = Activity.objects.get(id=id)
         applications = Application.objects.filter(activity=activity)
@@ -574,6 +588,7 @@ class AuthExaminerLoginView(APIView):
 
 
 class SectionExaminerView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request):
         response = {"status": 100, "msg": None, "sections": []}
         username = request.GET.get('username')
@@ -589,6 +604,7 @@ class SectionExaminerView(APIView):
 
 
 class CandidateListExaminerView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request):
         cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
@@ -617,6 +633,7 @@ class CandidateListExaminerView(APIView):
 
 
 class HistoryCandidateListExaminerView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request):
         response = {"code": 0, "msg": None, "count": 0, "data": []}
         username = request.GET.get('username')
@@ -658,6 +675,7 @@ class HistoryCandidateListExaminerView(APIView):
 
 
 class TranscriptView(APIView):
+    authentication_classes = [TokenAuth2]
     def get(self, request):
         response = {"status": 100, "msg": None, "application": None, "transcript": None}
         wxID = request.GET.get("wxID")

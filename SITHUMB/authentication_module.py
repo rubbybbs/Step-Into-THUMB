@@ -2,7 +2,7 @@ from rest_framework.authentication import BaseAuthentication
 from SITHUMB import models
 from rest_framework.exceptions import NotAuthenticated
 from SITHUMB.token_module import get_token, out_token
-
+from django.shortcuts import redirect
 
 class TokenAuth2(BaseAuthentication):
     def authenticate(self, request):
