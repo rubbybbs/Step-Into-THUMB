@@ -69,7 +69,7 @@
                             </div>
                             <div class="layui-tab-content" id="contentToAdd">
                                 <div class="layui-tab-item layui-show">
-                                    <table class="layui-table" lay-data="{id: 'AccountTable', url:'Step-Into-THUMB/examiner/get-history-candidate-list?s_ID=-1&username=' + layui.data('LocalData').username, page: true}" lay-filter="accountTable" id="accountTable">
+                                    <table class="layui-table" lay-data="{id: 'AccountTable', url:'Step-Into-THUMB/examiner/get-history-candidate-list?s_ID=-1&username=' + layui.data('LocalData').username+'&token=' + layui.data('LocalData').token+'&Uname=' + layui.data('LocalData').username, page: true}" lay-filter="accountTable" id="accountTable">
                                       <thead>
                                           <tr>
                                             <th lay-data="{type:'numbers', width:'10%'}"></th>
@@ -127,7 +127,7 @@
         var currentSection='';
 
         $.ajax({
-            url: 'Step-Into-THUMB/examiner/get-section?username='+LocalData.username,
+            url: 'Step-Into-THUMB/examiner/get-section?username='+LocalData.username+'&token=' + LocalData.token+'&Uname=' + LocalData.username,
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
@@ -147,7 +147,7 @@
                         }
                         table.render({
                             elem: '#section' + value.s_ID
-                            , url: 'Step-Into-THUMB/examiner/get-history-candidate-list?s_ID='+ value.s_ID + '&username=' + LocalData.username
+                            , url: 'Step-Into-THUMB/examiner/get-history-candidate-list?s_ID='+ value.s_ID + '&username=' + LocalData.username+'&token=' + LocalData.token+'&Uname=' + LocalData.username
                             , cellMinWidth: 80
                             , cols: [[
                                 {type:'numbers', width:'10%'}
@@ -161,7 +161,10 @@
                     });
                     form.render();
                 }
-            }
+            },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
+              }
         });
 
 

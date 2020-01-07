@@ -112,7 +112,7 @@
         var LocalData=layui.data('LocalData');
 
         $.ajax({
-            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/get-registration-form',
+            url: 'Step-Into-THUMB/admin/activity/'+ LocalData.ActID +'/get-registration-form'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             dataType: 'json',
@@ -223,7 +223,10 @@
 
                     });
                 }
-            }
+            },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
+              }
         });
       });
 
@@ -233,7 +236,7 @@
         var LocalData=layui.data('LocalData');
         //#TODO 通过ajax获取数据并解析
         $.ajax({
-            url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/save-registration-form',
+            url: 'Step-Into-THUMB/admin/activity/' + LocalData.ActID + '/save-registration-form'+'?token=' + LocalData.token+'&Uname=' + LocalData.username,
             type: 'post',
             contentType: 'application/json',
             dataType: 'json',
@@ -248,7 +251,10 @@
                     layer.msg('获取失败请重试');
                 }
 
-            }
+            },
+              error: function(http){
+                  if (http.status==403) location.assign("index.html");
+              }
         });
 
         return false;
