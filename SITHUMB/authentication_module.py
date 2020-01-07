@@ -8,7 +8,7 @@ from django.shortcuts import redirect
 class TokenAuth2(BaseAuthentication):
     def authenticate(self, request):
         token = request.GET.get("token")
-        name = request.GET.get("uname")
+        name = request.GET.get("Uname")
         token_obj = out_token(name, token)
         if token_obj:
             return
