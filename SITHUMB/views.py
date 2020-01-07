@@ -30,7 +30,7 @@ def get_cur_activity():
             return -1, None
     return cur_activity.id, cur_activity
 
-    
+
 def index(request):
     return render(request, "index.html")
 
@@ -282,6 +282,16 @@ class TranscriptFormView(APIView):
             return Response({'form': '{"question":[]}'})
         else:
             return Response({'form': transcript_format})
+
+
+class TranscriptPhotoView(APIView):
+    def post(self, request):
+        img = request.FILES.get('file')
+        if not img:
+            return Response({"status": 400})
+        photo = Photo(photo=img)
+        photo.save()
+        return Response({"status": 100, "url": photo.photo.url})
 
 
 class AdmissionView(APIView):

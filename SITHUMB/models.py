@@ -1,8 +1,8 @@
-import django
 from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from filer.fields.image import FilerImageField
 
 
 class Activity(models.Model):
@@ -32,6 +32,10 @@ class Application(models.Model):
     transcript = models.TextField(default="")
 
 
+class Photo(models.Model):
+    image = FilerImageField(null=True, on_delete=models.CASCADE)
+
+
 class Section(models.Model):
     s_id = models.IntegerField(default=0)
     compulsory = models.BooleanField(default=True)
@@ -58,3 +62,4 @@ def handler_user_extension(sender, instance, created, **kwargs):
         Examiner.objects.create(username=instance.username, user=instance)
     else:
         instance.extension.save()
+
