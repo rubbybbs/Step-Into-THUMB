@@ -25,11 +25,16 @@ def get_cur_activity():
     try:
         cur_activity = Activity.objects.get(status=1)
     except Exception:
-        try:
-            cur_activity = Activity.objects.filter(status=2)[-1]
-        except Exception:
-            return -1, None
+        return -1, None
     return cur_activity.id, cur_activity
+
+
+def get_last_activity():
+    try:
+        last_activity = Activity.objects.all().last()
+    except Exception as e:
+        return -1, None
+    return last_activity.id, last_activity
 
 
 def index(request):
@@ -421,14 +426,17 @@ class SendMessageView(APIView):
         applications = Application.objects.filter(activity=activity)
         for a in applications:
             a.stage = 3
+            a.save()
             data["touser"] = a.candidate.wx_id
             # if a.admitted:
             #     data["data"]["character_string01"] = "通过"
             # else:
             #     data["data"]["character_string01"] = "未通过"
-            res = requests.post(url, data=str(data))
+
+            res = requests.post(url, data=str(data).encode("utf-8"))
             print(res.content)
         return Response({"status": 100})
+
 
 class ExportExcelView(APIView):
     authentication_classes = [TokenAuth2]
@@ -556,7 +564,9 @@ class StatusView(APIView):
     def get(self, request):
         cur_activity_id, cur_activity = get_cur_activity()
         if cur_activity_id == -1:
-            return Response({"status": 400})
+            cur_activity_id, cur_activity = get_last_activity()
+            if cur_activity_id == -1:
+                return Response({"status": 400})
         session = request.GET.get('session')
         wx_id = session.split("-")[0]
         candidate = Candidate.objects.get(wx_id=wx_id)
@@ -588,7 +598,11 @@ class AuthExaminerLoginView(APIView):
 
         user = authenticate(username=username, password=password)
         if user:
-            _, cur_activity = get_cur_activity()
+            cur_activity_id, cur_activity = get_cur_activity()
+            if cur_activity_id == -1:
+                cur_activity_id, cur_activity = get_last_activity()
+                if cur_activity_id == -1:
+                    return Response({"msg": "活动未开始"})
             examiner = Examiner.objects.get(username=username)
             if examiner.activity != cur_activity:
                 response["msg"] = "活动未开始"

@@ -35,7 +35,7 @@ CACHES = {
 SECRET_KEY = '!-2dc)c#&laydhvfruehsog5nre!nnr@08d^ew#)9&980*&-^6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
